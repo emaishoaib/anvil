@@ -4,3 +4,4 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 Anvil.xcodeproj/
+Config/Release.xcconfig
