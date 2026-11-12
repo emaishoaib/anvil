@@ -22,6 +22,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #if !DEBUG
         LoginItem.addOnFirstLaunch()
         #endif
+        CGRequestScreenCaptureAccess()
+        Task { await Accessibility.waitUntilTrusted() }
     }
 }
 
