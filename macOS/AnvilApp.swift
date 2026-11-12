@@ -6,5 +6,14 @@ struct AnvilApp: App {
         MenuBarExtra("Anvil", image: .menuBarIcon) {
             AnvilMenu()
         }
+        Window("Anvil", id: WindowID.settings) {
+            SettingsView()
+        }
+        .defaultSize(width: 680, height: 460)
+        .defaultLaunchBehavior(.suppressed)
     }
+}
+
+enum WindowID {
+    static let settings = "settings"
 }
