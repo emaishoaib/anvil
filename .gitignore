@@ -5,3 +5,5 @@ xcuserdata/
 *.xcuserstate
 Anvil.xcodeproj/
 Config/Release.xcconfig
+releases/
+.wrangler/
