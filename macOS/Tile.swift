@@ -1,0 +1,89 @@
+import AppKit
+
+final class Tile: NSView {
+    private static let thumbnailAspectRatio: CGFloat = 0.625
+    private static let fadeDuration = 0.15
+
+    let windowID: CGWindowID
+    let thumbnailWidth: CGFloat
+    let thumbnail = NSImageView()
+    var onClick: (@MainActor () -> Void)?
+    var onClose: (@MainActor () -> Void)?
+    var onQuit: (@MainActor () -> Void)?
+
+    init(_ window: Window, width: CGFloat) {
+        windowID = window.id
+        thumbnailWidth = width
+        super.init(frame: .zero)
+        wantsLayer = true
+
+        let appIcon = NSRunningApplication(processIdentifier: window.pid)?.icon
+        thumbnail.image = appIcon
+        thumbnail.imageScaling = .scaleProportionallyUpOrDown
+
+        let icon = NSImageView()
+        icon.image = appIcon
+        icon.imageScaling = .scaleProportionallyUpOrDown
+        let title = NSTextField(labelWithString: window.label)
+        title.lineBreakMode = .byTruncatingTail
+        title.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let label = NSStackView(views: [icon, title])
+        label.spacing = 4
+
+        let column = NSStackView(views: [thumbnail, label])
+        column.orientation = .vertical
+        column.spacing = 6
+        column.edgeInsets = NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        column.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(column)
+
+        let buttons = NSStackView(views: [
+            CornerButton("power.circle.fill", "Quit app", target: self, action: #selector(quitPressed)),
+            CornerButton("xmark.circle.fill", "Close window", target: self, action: #selector(closePressed)),
+        ])
+        buttons.spacing = 4
+        buttons.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(buttons)
+
+        NSLayoutConstraint.activate([
+            buttons.topAnchor.constraint(equalTo: thumbnail.topAnchor, constant: 4),
+            buttons.trailingAnchor.constraint(equalTo: thumbnail.trailingAnchor, constant: -4),
+            column.leadingAnchor.constraint(equalTo: leadingAnchor),
+            column.trailingAnchor.constraint(equalTo: trailingAnchor),
+            column.topAnchor.constraint(equalTo: topAnchor),
+            column.bottomAnchor.constraint(equalTo: bottomAnchor),
+            widthAnchor.constraint(equalToConstant: width + column.edgeInsets.left + column.edgeInsets.right),
+            thumbnail.widthAnchor.constraint(equalToConstant: width),
+            thumbnail.heightAnchor.constraint(equalToConstant: width * Self.thumbnailAspectRatio),
+            icon.widthAnchor.constraint(equalToConstant: 16),
+            icon.heightAnchor.constraint(equalToConstant: 16),
+            label.widthAnchor.constraint(lessThanOrEqualToConstant: width),
+        ])
+    }
+
+    func fadeIn(_ image: NSImage) {
+        if !PanelAnimation.isReduced, let layer = thumbnail.layer {
+            let fade = CATransition()
+            fade.type = .fade
+            fade.duration = Self.fadeDuration
+            layer.add(fade, forKey: "fade")
+        }
+        thumbnail.image = image
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        onClick?()
+    }
+
+    @objc private func closePressed() {
+        onClose?()
+    }
+
+    @objc private func quitPressed() {
+        onQuit?()
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+}

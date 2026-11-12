@@ -8,7 +8,7 @@ struct AnvilApp: App {
         MenuBarExtra("Anvil", image: .menuBarIcon) {
             AnvilMenu()
         }
-        Window("Anvil", id: WindowID.settings) {
+        SwiftUI.Window("Anvil", id: WindowID.settings) {
             SettingsView()
         }
         .defaultSize(width: 680, height: 460)
@@ -23,7 +23,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         LoginItem.addOnFirstLaunch()
         #endif
         CGRequestScreenCaptureAccess()
-        Task { await Accessibility.waitUntilTrusted() }
+        Task {
+            await Accessibility.waitUntilTrusted()
+            Hotkeys.shared.start()
+            Recents.shared.start()
+            KnownWindows.shared.start()
+            Watcher.shared.start()
+        }
     }
 }
 
