@@ -9,6 +9,10 @@ struct AnvilMenu: View {
             NSApplication.shared.activate()
         }
         .keyboardShortcut(",")
+        Button("Check for Updates…") {
+            AppUpdater.shared.check()
+        }
+        .disabled(!AppUpdater.shared.canCheck)
         Divider()
         Button("Quit Anvil") {
             NSApplication.shared.terminate(nil)

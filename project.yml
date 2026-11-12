@@ -24,6 +24,11 @@ settings:
     STRING_CATALOG_GENERATE_SYMBOLS: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.1
+
 targets:
   Anvil-macOS:
     type: application
@@ -31,6 +36,16 @@ targets:
     sources:
       - macOS
       - Icon/AppIcon.icon
+    dependencies:
+      - package: Sparkle
+    info:
+      path: macOS/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        SUFeedURL: https://$(ANVIL_UPDATES_HOST)/anvil/appcast.xml
+        SUPublicEDKey: $(ANVIL_SPARKLE_PUBLIC_KEY)
+        SUEnableAutomaticChecks: true
     settings:
       base:
         PRODUCT_NAME: Anvil
