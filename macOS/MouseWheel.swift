@@ -35,10 +35,10 @@ nonisolated final class MouseWheel: @unchecked Sendable {
         guard Tool.mouse.isOn, event.isFromMouseWheel else { return false }
         if ScrollingSettings.reversesWheel { event.reverseVertically() }
         if ScrollingSettings.reversesThumbWheel { event.reverseHorizontally() }
-        guard let ticks = event.verticalTicks, let axis = event.scrollAxis else { return false }
+        guard let ticks = event.verticalTicks, let effect = event.wheelEffect else { return false }
         let gain = event.flags.contains(.maskCommand) ? ScrollingSettings.commandScrollSpeed.gain : 1
         let seconds = CACurrentMediaTime()
-        DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, along: axis, gain: gain, atSeconds: seconds) }
+        DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, for: effect, gain: gain, atSeconds: seconds) }
         return true
     }
 }
@@ -51,10 +51,11 @@ private nonisolated extension CGEvent {
             && getIntegerValueField(.eventSourceUserData) != KeySender.marker
     }
 
-    var scrollAxis: ScrollAxis? {
+    var wheelEffect: WheelEffect? {
         switch flags.intersection(Self.modifiers) {
-        case [], .maskCommand: .vertical
-        case .maskShift: .horizontal
+        case [], .maskCommand: .scrollVertically
+        case .maskShift: .scrollHorizontally
+        case .maskControl: .zoom
         default: nil
         }
     }

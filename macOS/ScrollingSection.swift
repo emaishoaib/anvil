@@ -68,6 +68,7 @@ struct ScrollingSection: View {
         .onChange(of: durationFrames) { brakeFrame = min(brakeFrame, durationFrames) }
         Section("While Holding a Key") {
             LabeledContent("Shift", value: "Scrolls sideways")
+            LabeledContent("Control", value: "Zooms in and out")
             Picker("Command", selection: $commandScrollSpeed) {
                 ForEach(CommandScrollSpeed.allCases) { speed in
                     Text("\(speed.name) the speed").tag(speed)
