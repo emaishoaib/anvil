@@ -35,22 +35,29 @@ nonisolated final class MouseWheel: @unchecked Sendable {
         guard Tool.mouse.isOn, event.isFromMouseWheel else { return false }
         if ScrollingSettings.reversesWheel { event.reverseVertically() }
         if ScrollingSettings.reversesThumbWheel { event.reverseHorizontally() }
-        guard !event.hasModifiersLeftToTheSystem, let ticks = event.verticalTicks else { return false }
+        guard let ticks = event.verticalTicks, let axis = event.scrollAxis else { return false }
+        let gain = event.flags.contains(.maskCommand) ? ScrollingSettings.commandScrollSpeed.gain : 1
         let seconds = CACurrentMediaTime()
-        DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, atSeconds: seconds) }
+        DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, along: axis, gain: gain, atSeconds: seconds) }
         return true
     }
 }
 
 private nonisolated extension CGEvent {
-    static let modifiersLeftToTheSystem: CGEventFlags = [.maskShift, .maskControl, .maskAlternate, .maskCommand]
+    static let modifiers: CGEventFlags = [.maskShift, .maskControl, .maskAlternate, .maskCommand]
 
     var isFromMouseWheel: Bool {
         getIntegerValueField(.scrollWheelEventIsContinuous) == 0
             && getIntegerValueField(.eventSourceUserData) != KeySender.marker
     }
 
-    var hasModifiersLeftToTheSystem: Bool { !flags.intersection(Self.modifiersLeftToTheSystem).isEmpty }
+    var scrollAxis: ScrollAxis? {
+        switch flags.intersection(Self.modifiers) {
+        case [], .maskCommand: .vertical
+        case .maskShift: .horizontal
+        default: nil
+        }
+    }
 
     var verticalTicks: Int? {
         let delta = getIntegerValueField(.scrollWheelEventDeltaAxis1)

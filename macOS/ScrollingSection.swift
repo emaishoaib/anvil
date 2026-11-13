@@ -8,6 +8,7 @@ nonisolated enum ScrollingSettings {
     static let brakeFrameKey = "mouse.scrollBrakeFrame"
     static let pointsPerTickKey = "mouse.scrollPointsPerTick"
     static let accelerationKey = "mouse.scrollAcceleration"
+    static let commandScrollSpeedKey = "mouse.commandScrollSpeed"
     static let durationFramesRange = 2.0...60
     static let pointsPerTickRange = 10.0...300
     static let accelerationRange = 0.0...1
@@ -15,6 +16,10 @@ nonisolated enum ScrollingSettings {
 
     static var reversesWheel: Bool { UserDefaults.standard.object(forKey: reversesWheelKey) as? Bool ?? true }
     static var reversesThumbWheel: Bool { UserDefaults.standard.object(forKey: reversesThumbWheelKey) as? Bool ?? true }
+
+    static var commandScrollSpeed: CommandScrollSpeed {
+        UserDefaults.standard.string(forKey: commandScrollSpeedKey).flatMap(CommandScrollSpeed.init(rawValue:)) ?? .tenth
+    }
 
     static var current: ScrollSettings {
         ScrollSettings(
@@ -41,6 +46,7 @@ struct ScrollingSection: View {
     @AppStorage(ScrollingSettings.brakeFrameKey) private var brakeFrame = Double(ScrollingSettings.defaults.brakeFrame)
     @AppStorage(ScrollingSettings.pointsPerTickKey) private var pointsPerTick = ScrollingSettings.defaults.pointsPerTick
     @AppStorage(ScrollingSettings.accelerationKey) private var acceleration = ScrollingSettings.defaults.acceleration
+    @AppStorage(ScrollingSettings.commandScrollSpeedKey) private var commandScrollSpeed = CommandScrollSpeed.tenth
 
     var body: some View {
         Section("Scrolling") {
@@ -60,6 +66,14 @@ struct ScrollingSection: View {
             }
         }
         .onChange(of: durationFrames) { brakeFrame = min(brakeFrame, durationFrames) }
+        Section("While Holding a Key") {
+            LabeledContent("Shift", value: "Scrolls sideways")
+            Picker("Command", selection: $commandScrollSpeed) {
+                ForEach(CommandScrollSpeed.allCases) { speed in
+                    Text("\(speed.name) the speed").tag(speed)
+                }
+            }
+        }
     }
 }
 

@@ -16,14 +16,14 @@ public struct SmoothScroll: Sendable {
 
     public var isScrolling: Bool { !impulses.isEmpty }
 
-    public mutating func add(ticks: Int, atSeconds time: Double) {
+    public mutating func add(ticks: Int, atSeconds time: Double, gain: Double = 1) {
         guard ticks != 0 else { return }
         let direction = ticks.signum()
         let sameDirection = lastTick?.direction == direction
         if !sameDirection { stop() }
         let interval = sameDirection ? lastTick.map { time - $0.seconds } : nil
         lastTick = Tick(seconds: time, direction: direction)
-        let points = Double(ticks) * settings.pointsPerTick * settings.boost(afterSeconds: interval)
+        let points = Double(ticks) * settings.pointsPerTick * gain * settings.boost(afterSeconds: interval)
         impulses.append(ScrollImpulse(
             startSeconds: time,
             points: points,

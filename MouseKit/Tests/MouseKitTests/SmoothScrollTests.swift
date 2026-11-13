@@ -43,6 +43,15 @@ struct SmoothScrollTests {
         #expect(framePoints(&scroll, framesPerSecond: 60, frames: 1...60).reduce(0, +) == 270)
     }
 
+    @Test func aGainScalesHowFarATickScrolls() {
+        var slow = SmoothScroll(settings: settings)
+        var fast = SmoothScroll(settings: settings)
+        slow.add(ticks: 1, atSeconds: 0, gain: 0.1)
+        fast.add(ticks: 1, atSeconds: 0, gain: 4)
+        #expect(framePoints(&slow, framesPerSecond: 60, frames: 1...60).reduce(0, +) == 9)
+        #expect(framePoints(&fast, framesPerSecond: 60, frames: 1...60).reduce(0, +) == 360)
+    }
+
     @Test func aTickTheOtherWayStopsTheScrollStillRunning() {
         var scroll = SmoothScroll(settings: settings)
         scroll.add(ticks: 1, atSeconds: 0)
