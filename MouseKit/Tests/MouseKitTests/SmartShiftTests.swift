@@ -1,0 +1,38 @@
+import Testing
+@testable import MouseKit
+
+struct SmartShiftTests {
+    let enhanced = SmartShiftFeature(index: 0x0F, version: .enhanced)
+    let original = SmartShiftFeature(index: 0x0F, version: .original)
+
+    @Test func askingTheEnhancedFeatureUsesFunctionOne() {
+        let report = HIDPPRequest.smartShift(of: 0xFF, feature: enhanced).report
+        #expect(Array(report.prefix(4)) == [0x11, 0xFF, 0x0F, 0x1B])
+        #expect(report.dropFirst(4).allSatisfy { $0 == 0 })
+    }
+
+    @Test func askingTheOriginalFeatureUsesFunctionZero() {
+        let report = HIDPPRequest.smartShift(of: 0xFF, feature: original).report
+        #expect(Array(report.prefix(4)) == [0x11, 0xFF, 0x0F, 0x0B])
+    }
+
+    @Test func keepingTheWheelClickingSendsRatchetAndNeverLetsGo() {
+        let report = HIDPPRequest.setSmartShift(.alwaysClicking, of: 0xFF, feature: enhanced).report
+        #expect(Array(report.prefix(7)) == [0x11, 0xFF, 0x0F, 0x2B, 0x02, 0xFF, 0x00])
+    }
+
+    @Test func theOriginalFeatureIsSetWithFunctionOne() {
+        let report = HIDPPRequest.setSmartShift(.alwaysClicking, of: 0xFF, feature: original).report
+        #expect(report[3] == 0x1B)
+    }
+
+    @Test func aReplyIsReadAsTheSpinAndTheLetGoSpeed() {
+        #expect(SmartShift(parameters: [0x02, 0x0A, 0x0A]) == SmartShift(spin: .ratchet, letGoSpeed: 10))
+        #expect(SmartShift(parameters: [0x01, 0x0A, 0x0A]) == SmartShift(spin: .free, letGoSpeed: 10))
+    }
+
+    @Test func aReplyWithAnUnknownSpinIsNotRead() {
+        #expect(SmartShift(parameters: [0x00, 0x0A]) == nil)
+        #expect(SmartShift(parameters: [0x02]) == nil)
+    }
+}

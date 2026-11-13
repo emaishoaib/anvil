@@ -28,8 +28,18 @@ enum LogitechDiscovery {
             deviceIndex: index,
             controlsFeature: await featureIndex(of: HIDPPRequest.reprogrammableControlsFeature, at: index, on: channel),
             wheelFeature: await featureIndex(of: HIDPPRequest.wheelFeature, at: index, on: channel),
-            wirelessStatusFeature: await featureIndex(of: HIDPPRequest.wirelessStatusFeature, at: index, on: channel)
+            wirelessStatusFeature: await featureIndex(of: HIDPPRequest.wirelessStatusFeature, at: index, on: channel),
+            smartShiftFeature: await smartShiftFeature(at: index, on: channel)
         )
+    }
+
+    private static func smartShiftFeature(at index: UInt8, on channel: HIDPPChannel) async -> SmartShiftFeature? {
+        for version in SmartShiftFeature.Version.allCases {
+            if let featureIndex = await featureIndex(of: version.id, at: index, on: channel) {
+                return SmartShiftFeature(index: featureIndex, version: version)
+            }
+        }
+        return nil
     }
 
     private static func featureIndex(of feature: UInt16, at index: UInt8, on channel: HIDPPChannel) async -> UInt8? {

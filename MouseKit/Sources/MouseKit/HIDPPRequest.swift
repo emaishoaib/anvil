@@ -63,6 +63,14 @@ public struct HIDPPRequest: Hashable, Sendable {
         HIDPPRequest(deviceIndex: device, featureIndex: wheelFeature, function: 2, parameters: [mode.rawValue])
     }
 
+    public static func smartShift(of device: UInt8, feature: SmartShiftFeature) -> HIDPPRequest {
+        HIDPPRequest(deviceIndex: device, featureIndex: feature.index, function: feature.version.readFunction)
+    }
+
+    public static func setSmartShift(_ smartShift: SmartShift, of device: UInt8, feature: SmartShiftFeature) -> HIDPPRequest {
+        HIDPPRequest(deviceIndex: device, featureIndex: feature.index, function: feature.version.writeFunction, parameters: smartShift.parameters)
+    }
+
     public static func reporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8, diverted: Bool) -> HIDPPRequest {
         HIDPPRequest(
             deviceIndex: device,
