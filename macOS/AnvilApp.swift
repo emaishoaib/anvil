@@ -5,8 +5,10 @@ struct AnvilApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("Anvil", image: .menuBarIcon) {
+        MenuBarExtra {
             AnvilMenu()
+        } label: {
+            AnvilMenuIcon()
         }
         SwiftUI.Window("Anvil", id: WindowID.settings) {
             SettingsView()

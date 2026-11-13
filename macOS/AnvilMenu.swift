@@ -24,3 +24,10 @@ struct AnvilMenu: View {
         .keyboardShortcut("q")
     }
 }
+
+struct AnvilMenuIcon: View {
+    var body: some View {
+        Image(KeepAwake.shared.isActive ? .menuBarIconAwake : .menuBarIcon)
+            .accessibilityLabel("Anvil")
+    }
+}
