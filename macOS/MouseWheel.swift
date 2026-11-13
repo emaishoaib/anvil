@@ -32,7 +32,10 @@ nonisolated final class MouseWheel: @unchecked Sendable {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return false
         }
-        guard Tool.mouse.isOn, let ticks = event.verticalWheelTicks else { return false }
+        guard Tool.mouse.isOn, event.isFromMouseWheel else { return false }
+        if ScrollingSettings.reversesWheel { event.reverseVertically() }
+        if ScrollingSettings.reversesThumbWheel { event.reverseHorizontally() }
+        guard !event.hasModifiersLeftToTheSystem, let ticks = event.verticalTicks else { return false }
         let seconds = CACurrentMediaTime()
         DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, atSeconds: seconds) }
         return true
@@ -42,13 +45,30 @@ nonisolated final class MouseWheel: @unchecked Sendable {
 private nonisolated extension CGEvent {
     static let modifiersLeftToTheSystem: CGEventFlags = [.maskShift, .maskControl, .maskAlternate, .maskCommand]
 
-    var verticalWheelTicks: Int? {
-        guard getIntegerValueField(.scrollWheelEventIsContinuous) == 0,
-              getIntegerValueField(.eventSourceUserData) != KeySender.marker,
-              flags.intersection(Self.modifiersLeftToTheSystem).isEmpty
-        else { return nil }
+    var isFromMouseWheel: Bool {
+        getIntegerValueField(.scrollWheelEventIsContinuous) == 0
+            && getIntegerValueField(.eventSourceUserData) != KeySender.marker
+    }
+
+    var hasModifiersLeftToTheSystem: Bool { !flags.intersection(Self.modifiersLeftToTheSystem).isEmpty }
+
+    var verticalTicks: Int? {
         let delta = getIntegerValueField(.scrollWheelEventDeltaAxis1)
         guard delta != 0 else { return nil }
         return Int(delta.signum())
+    }
+
+    func reverseVertically() {
+        negate(.scrollWheelEventDeltaAxis1, .scrollWheelEventPointDeltaAxis1, fixedPoint: .scrollWheelEventFixedPtDeltaAxis1)
+    }
+
+    func reverseHorizontally() {
+        negate(.scrollWheelEventDeltaAxis2, .scrollWheelEventPointDeltaAxis2, fixedPoint: .scrollWheelEventFixedPtDeltaAxis2)
+    }
+
+    private func negate(_ lines: CGEventField, _ points: CGEventField, fixedPoint: CGEventField) {
+        setIntegerValueField(lines, value: -getIntegerValueField(lines))
+        setIntegerValueField(points, value: -getIntegerValueField(points))
+        setDoubleValueField(fixedPoint, value: -getDoubleValueField(fixedPoint))
     }
 }

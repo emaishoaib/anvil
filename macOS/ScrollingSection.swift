@@ -1,7 +1,9 @@
 import MouseKit
 import SwiftUI
 
-enum ScrollingSettings {
+nonisolated enum ScrollingSettings {
+    static let reversesWheelKey = "mouse.reversesWheel"
+    static let reversesThumbWheelKey = "mouse.reversesThumbWheel"
     static let durationFramesKey = "mouse.scrollDurationFrames"
     static let brakeFrameKey = "mouse.scrollBrakeFrame"
     static let pointsPerTickKey = "mouse.scrollPointsPerTick"
@@ -10,6 +12,9 @@ enum ScrollingSettings {
     static let pointsPerTickRange = 10.0...300
     static let accelerationRange = 0.0...1
     static let defaults = ScrollSettings(durationFrames: 12, brakeFrame: 4, pointsPerTick: 90, acceleration: 0.4)
+
+    static var reversesWheel: Bool { UserDefaults.standard.object(forKey: reversesWheelKey) as? Bool ?? true }
+    static var reversesThumbWheel: Bool { UserDefaults.standard.object(forKey: reversesThumbWheelKey) as? Bool ?? true }
 
     static var current: ScrollSettings {
         ScrollSettings(
@@ -30,6 +35,8 @@ enum ScrollingSettings {
 }
 
 struct ScrollingSection: View {
+    @AppStorage(ScrollingSettings.reversesWheelKey) private var reversesWheel = true
+    @AppStorage(ScrollingSettings.reversesThumbWheelKey) private var reversesThumbWheel = true
     @AppStorage(ScrollingSettings.durationFramesKey) private var durationFrames = Double(ScrollingSettings.defaults.durationFrames)
     @AppStorage(ScrollingSettings.brakeFrameKey) private var brakeFrame = Double(ScrollingSettings.defaults.brakeFrame)
     @AppStorage(ScrollingSettings.pointsPerTickKey) private var pointsPerTick = ScrollingSettings.defaults.pointsPerTick
@@ -37,6 +44,8 @@ struct ScrollingSection: View {
 
     var body: some View {
         Section("Scrolling") {
+            Toggle("Reverse the wheel's direction", isOn: $reversesWheel)
+            Toggle("Reverse the thumb wheel's direction", isOn: $reversesThumbWheel)
             SliderRow(title: "Duration of each wheel click", value: $durationFrames, range: ScrollingSettings.durationFramesRange, step: 1) {
                 "\(ScrollingSettings.milliseconds(frames: $0)) ms"
             }
