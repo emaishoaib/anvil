@@ -93,4 +93,14 @@ struct QuickLinkTests {
         #expect(copy.link == original.link)
         #expect(copy.openWith == original.openWith)
     }
+
+    @Test func aWebLinkBelongsToItsSite() {
+        let link = QuickLink(name: "Search Google", link: "https://www.google.com/search?q={Query}")
+        #expect(link.site == URL(string: "https://www.google.com"))
+    }
+
+    @Test func filesAndOtherSchemesHaveNoSite() {
+        #expect(QuickLink(name: "Workshop", link: "~/docs/repos/workshop").site == nil)
+        #expect(QuickLink(name: "Mail", link: "mailto:someone@example.com").site == nil)
+    }
 }

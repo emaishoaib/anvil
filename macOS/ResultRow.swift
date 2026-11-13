@@ -21,7 +21,7 @@ struct ResultRow: View {
                 Spacer()
                 Text("Command").foregroundStyle(.secondary)
             case .quickLink(let link):
-                AppIcon(path: link.app?.path ?? "")
+                QuickLinkIcon(link: link)
                 Text(link.name)
                 if let host = link.host {
                     Text(host).foregroundStyle(.secondary)

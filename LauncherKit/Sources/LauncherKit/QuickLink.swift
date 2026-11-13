@@ -53,6 +53,11 @@ public struct QuickLink: Identifiable, Hashable, Codable, Sendable {
 
     public var target: URL? { target(filling: []) }
 
+    public var site: URL? {
+        guard let scheme, ["http", "https"].contains(scheme), let host = target?.host() else { return nil }
+        return URL(string: "\(scheme)://\(host)")
+    }
+
     public func target(filling values: [String]) -> URL? {
         var filled = link
         for (name, value) in zip(placeholders, values) {

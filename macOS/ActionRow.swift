@@ -30,7 +30,7 @@ struct ActionRow: View {
 
     @ViewBuilder private var icon: some View {
         switch item {
-        case .action(.open): AppIcon(path: link.app?.path ?? "")
+        case .action(.open): QuickLinkIcon(link: link)
         case .action(let action): Symbol(name: action.symbol, isDestructive: action.isDestructive)
         case .app(let app): AppIcon(path: app.path)
         case .confirmDelete: Symbol(name: "trash", isDestructive: true)

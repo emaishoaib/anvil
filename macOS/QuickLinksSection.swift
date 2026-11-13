@@ -41,7 +41,7 @@ private struct QuickLinkRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            AppIcon(path: link.app?.path ?? "")
+            QuickLinkIcon(link: link)
             VStack(alignment: .leading, spacing: 2) {
                 Text(link.name)
                 Text(link.link)
