@@ -24,10 +24,9 @@ struct SearchBarView: View {
                 Divider()
                 QuickLinkForm(draft: $model.draft)
                 SearchFooter(mode: model.mode, selected: nil)
-            } else if !model.results.isEmpty {
+            } else {
                 Divider()
                 SearchResults(model: model)
-                    .frame(minHeight: model.actionPanel == nil ? 0 : ActionPanelView.maximumHeight + Self.actionPanelPadding * 2, alignment: .top)
                     .overlay(alignment: .bottomTrailing) {
                         if let panel = model.actionPanel {
                             ActionPanelView(panel: panel, focus: $focus, perform: model.perform)

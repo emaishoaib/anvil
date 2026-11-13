@@ -3,9 +3,8 @@ import SwiftUI
 
 struct SearchResults: View {
     private static let rowHeight: CGFloat = 40
-    private static let headerHeight: CGFloat = 30
     private static let padding: CGFloat = 8
-    private static let maximumHeight: CGFloat = 380
+    private static let listHeight: CGFloat = 380
 
     let model: SearchModel
 
@@ -33,7 +32,7 @@ struct SearchResults: View {
                 }
                 .padding(Self.padding)
             }
-            .frame(height: min(contentHeight, Self.maximumHeight) + Self.padding * 2)
+            .frame(height: Self.listHeight + Self.padding * 2)
             .onChange(of: model.selected) { proxy.scrollTo(model.selected) }
         }
     }
@@ -50,14 +49,6 @@ struct SearchResults: View {
             if case .answer = result { return nil }
             return (index, result)
         }
-    }
-
-    private var contentHeight: CGFloat {
-        sectionHeight(count: answers.count, itemHeight: AnswerCard.height) + sectionHeight(count: others.count, itemHeight: Self.rowHeight)
-    }
-
-    private func sectionHeight(count: Int, itemHeight: CGFloat) -> CGFloat {
-        count == 0 ? 0 : Self.headerHeight + CGFloat(count) * itemHeight
     }
 }
 

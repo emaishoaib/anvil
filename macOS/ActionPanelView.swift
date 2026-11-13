@@ -2,7 +2,6 @@ import LauncherKit
 import SwiftUI
 
 struct ActionPanelView: View {
-    static let maximumHeight: CGFloat = titleHeight + maximumListHeight + filterHeight
     private static let width: CGFloat = 400
     private static let titleHeight: CGFloat = 34
     private static let maximumListHeight: CGFloat = 300
