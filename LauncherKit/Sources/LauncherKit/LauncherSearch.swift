@@ -13,6 +13,7 @@ public enum LauncherSearch {
         let answers = [
             Calculator.answer(for: query, locale: locale),
             DatePhrases.answer(for: query, now: now, calendar: calendar, locale: locale),
+            UnitConversion.answer(for: query, locale: locale),
             rates.flatMap { CurrencyConversion.answer(for: query, rates: $0, locale: locale) },
         ].compactMap { $0 }
         let matchingApps = AppRanking.matches(for: query, in: apps, launchCounts: launchCounts)
