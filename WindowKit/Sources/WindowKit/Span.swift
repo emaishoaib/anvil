@@ -19,6 +19,14 @@ struct Span: Sendable {
         self.start = start
         self.end = end
     }
+
+    static func first(_ share: Double) -> Span {
+        Span(0, share)
+    }
+
+    static func last(_ share: Double) -> Span {
+        Span(1 - share, 1)
+    }
 }
 
 extension CGRect {

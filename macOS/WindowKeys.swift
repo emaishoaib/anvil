@@ -10,7 +10,7 @@ nonisolated final class WindowKeys: KeyResponder {
         guard press.kind == .keyDown,
               let action = WindowAction.allCases.first(where: { $0.shortcut?.combo == press.combo })
         else { return false }
-        if !press.isRepeat { DispatchQueue.main.async { Snapping.snapFocusedWindow(to: action) } }
+        if !press.isRepeat { DispatchQueue.main.async { Snapping.shared.snapFocusedWindow(to: action) } }
         return true
     }
 }

@@ -9,9 +9,11 @@ public enum WindowAction: String, CaseIterable, Sendable {
     case moveLeft, moveRight, moveUp, moveDown
 
     private static let resizeStepPoints: CGFloat = 30
+    private static let cycledHalfShares = [1.0 / 2, 2.0 / 3, 1.0 / 3]
 
-    public func frame(from current: CGRect, in areaWithTopAtMinY: CGRect) -> CGRect {
-        switch self {
+    public func frame(from current: CGRect, in areaWithTopAtMinY: CGRect, repeats: Int = 0) -> CGRect {
+        let halfShare = Self.cycledHalfShares[repeats % Self.cycledHalfShares.count]
+        return switch self {
         case .maximizeHeight: CGRect(x: current.minX, y: areaWithTopAtMinY.minY, width: current.width, height: areaWithTopAtMinY.height)
         case .center: current.centered(in: areaWithTopAtMinY)
         case .makeSmaller: current.resized(by: -Self.resizeStepPoints, in: areaWithTopAtMinY)
@@ -20,14 +22,16 @@ public enum WindowAction: String, CaseIterable, Sendable {
         case .moveRight: current.moved(to: .right, in: areaWithTopAtMinY)
         case .moveUp: current.moved(to: .top, in: areaWithTopAtMinY)
         case .moveDown: current.moved(to: .bottom, in: areaWithTopAtMinY)
-        default: areaWithTopAtMinY.portion(across: across, down: down)
+        default: areaWithTopAtMinY.portion(across: across(halfShare), down: down(halfShare))
         }
     }
 
-    private var across: Span {
+    private func across(_ halfShare: Double) -> Span {
         switch self {
-        case .leftHalf, .topLeft, .bottomLeft: .firstHalf
-        case .rightHalf, .topRight, .bottomRight: .lastHalf
+        case .leftHalf: .first(halfShare)
+        case .rightHalf: .last(halfShare)
+        case .topLeft, .bottomLeft: .firstHalf
+        case .topRight, .bottomRight: .lastHalf
         case .centerHalf: .centerHalf
         case .firstThird: .firstThird
         case .centerThird: .centerThird
@@ -39,10 +43,12 @@ public enum WindowAction: String, CaseIterable, Sendable {
         }
     }
 
-    private var down: Span {
+    private func down(_ halfShare: Double) -> Span {
         switch self {
-        case .topHalf, .topLeft, .topRight: .firstHalf
-        case .bottomHalf, .bottomLeft, .bottomRight: .lastHalf
+        case .topHalf: .first(halfShare)
+        case .bottomHalf: .last(halfShare)
+        case .topLeft, .topRight: .firstHalf
+        case .bottomLeft, .bottomRight: .lastHalf
         case .almostMaximize: .almostWhole
         default: .whole
         }
