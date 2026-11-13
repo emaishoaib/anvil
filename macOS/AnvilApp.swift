@@ -33,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             RuleKeys.shared.start()
             AppRules.start()
             KeySwapLibrary.shared.start()
+            RulesFolder.shared.start()
             Keyboard.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()
