@@ -29,6 +29,16 @@ final class Snapping {
         return unsnapped
     }
 
+    func toggleMaximize(_ window: WindowUnderPointer) {
+        guard let screen = NSScreen.holding(window.frame) else { return }
+        let area = screen.visibleFrameWithTopAtMinY
+        let maximized = WindowAction.maximize.frame(from: window.frame, in: area, gap: SnappingSettings.gap)
+        if window.frame == maximized, let beforeFirstSnap = restoreFrames.takeFrame(for: window.id) {
+            return window.element.move(to: beforeFirstSnap)
+        }
+        snap(window.element, id: window.id, from: window.frame, to: .maximize, in: area, repeats: 0)
+    }
+
     func restoreFocusedWindow() {
         guard let focused = Self.focusedWindow(), let beforeFirstSnap = restoreFrames.takeFrame(for: focused.id) else { return }
         focused.element.move(to: beforeFirstSnap)

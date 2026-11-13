@@ -2,7 +2,22 @@ import AppKit
 
 nonisolated extension AXUIElement {
     var focusedWindow: AXUIElement? {
-        guard let value = copyValue(kAXFocusedWindowAttribute), CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+        element(kAXFocusedWindowAttribute)
+    }
+
+    var titleBarHeight: CGFloat? {
+        guard let window = frame, let closeButton = element(kAXCloseButtonAttribute)?.frame else { return nil }
+        return 2 * (closeButton.minY - window.minY) + closeButton.height
+    }
+
+    func role(at point: CGPoint) -> String? {
+        var hit: AXUIElement?
+        guard AXUIElementCopyElementAtPosition(self, Float(point.x), Float(point.y), &hit) == .success, let hit else { return nil }
+        return hit.copyValue(kAXRoleAttribute) as? String
+    }
+
+    private func element(_ attribute: String) -> AXUIElement? {
+        guard let value = copyValue(attribute), CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
         return (value as! AXUIElement)
     }
 
