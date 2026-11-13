@@ -1,6 +1,7 @@
 nonisolated struct Shortcut: Identifiable {
-    let keys: String
+    let combo: KeyCombo
     let action: String
 
-    var id: String { keys }
+    var id: KeyCombo { combo }
+    var keys: String { combo.description }
 }

@@ -26,7 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CGRequestScreenCaptureAccess()
         Task {
             await Accessibility.waitUntilTrusted()
-            Hotkeys.shared.start()
+            Keyboard.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()
             Watcher.shared.start()

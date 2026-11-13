@@ -53,13 +53,12 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         }
     }
 
-    var shortcuts: [Shortcut] {
+    var keyResponder: (any KeyResponder)? {
         switch self {
-        case .switcher: [
-            Shortcut(keys: "⌥ Tab", action: "Switch between windows on this Space"),
-            Shortcut(keys: "⌥ `", action: "Switch between the active app's windows"),
-        ]
-        default: []
+        case .switcher: SwitcherKeys.shared
+        default: nil
         }
     }
+
+    var shortcuts: [Shortcut] { keyResponder?.shortcuts ?? [] }
 }

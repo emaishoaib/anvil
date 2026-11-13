@@ -54,7 +54,7 @@ final class Switcher {
     private func open(_ scope: SwitchScope, number: Int) {
         if let pid = NSWorkspace.shared.frontmostPID { Recents.shared.recordFocusedWindow(of: pid) }
         let windows = Recents.shared.sorted(Window.listed(scope))
-        guard !windows.isEmpty else { return Hotkeys.shared.switchEnded(number) }
+        guard !windows.isEmpty else { return SwitcherKeys.shared.switchEnded(number) }
         let selected = windows.count > 1 ? 1 : 0
         current = OpenSwitch(number: number, windows: windows, selected: selected)
         Panel.shared.show(windows, selected: selected)
@@ -102,7 +102,7 @@ final class Switcher {
     private func close() {
         guard let current else { return }
         Panel.shared.hide()
-        Hotkeys.shared.switchEnded(current.number)
+        SwitcherKeys.shared.switchEnded(current.number)
         if let outsideClicks = current.outsideClicks { NSEvent.removeMonitor(outsideClicks) }
         self.current = nil
     }

@@ -20,7 +20,7 @@ struct ToolPage: View {
             if !tool.shortcuts.isEmpty {
                 Section("Shortcuts") {
                     ForEach(tool.shortcuts) { shortcut in
-                        LabeledContent(shortcut.action, value: shortcut.keys)
+                        ShortcutRow(shortcut: shortcut, clashes: tool.clashes(with: shortcut))
                     }
                 }
             }
@@ -47,5 +47,22 @@ private struct ToolHeader: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+private struct ShortcutRow: View {
+    let shortcut: Shortcut
+    let clashes: [ShortcutClash]
+
+    var body: some View {
+        LabeledContent {
+            Text(shortcut.keys)
+        } label: {
+            Text(shortcut.action)
+            if !clashes.isEmpty {
+                Label("Also used by \(clashes.map(\.name).formatted(.list(type: .and)))", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
+        }
     }
 }
