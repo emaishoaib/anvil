@@ -10,9 +10,9 @@ final class SmoothScroller: NSObject {
 
     private static let zoomPerClickThousandths = 100.0
 
-    private var vertical = SmoothScroll(settings: ScrollingSettings.defaults)
-    private var horizontal = SmoothScroll(settings: ScrollingSettings.defaults)
-    private var zoom = SmoothScroll(settings: ScrollingSettings.defaults)
+    private var vertical = SmoothScroll(settings: MouseSettings.defaults.scroll)
+    private var horizontal = SmoothScroll(settings: MouseSettings.defaults.scroll)
+    private var zoom = SmoothScroll(settings: MouseSettings.defaults.scroll)
     private var isPinching = false
     private var displayLink: CADisplayLink?
 
@@ -30,7 +30,7 @@ final class SmoothScroller: NSObject {
     }
 
     private func useCurrentSettings() {
-        let settings = ScrollingSettings.current
+        let settings = MouseSettingsLibrary.current.scroll
         vertical.settings = settings
         horizontal.settings = settings
         zoom.settings = settings

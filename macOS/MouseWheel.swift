@@ -33,10 +33,11 @@ nonisolated final class MouseWheel: @unchecked Sendable {
             return false
         }
         guard Tool.mouse.isOn, event.isFromMouseWheel else { return false }
-        if ScrollingSettings.reversesWheel { event.reverseVertically() }
-        if ScrollingSettings.reversesThumbWheel { event.reverseHorizontally() }
+        let settings = MouseSettingsLibrary.current
+        if settings.reversesWheel { event.reverseVertically() }
+        if settings.reversesThumbWheel { event.reverseHorizontally() }
         guard let ticks = event.verticalTicks, let effect = event.wheelEffect else { return false }
-        let gain = event.flags.contains(.maskCommand) ? ScrollingSettings.commandScrollSpeed.gain : 1
+        let gain = event.flags.contains(.maskCommand) ? settings.commandScrollSpeed.gain : 1
         let seconds = CACurrentMediaTime()
         DispatchQueue.main.async { SmoothScroller.shared.add(ticks: ticks, for: effect, gain: gain, atSeconds: seconds) }
         return true

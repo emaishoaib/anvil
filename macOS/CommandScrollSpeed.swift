@@ -1,4 +1,4 @@
-nonisolated enum CommandScrollSpeed: String, CaseIterable, Identifiable {
+nonisolated enum CommandScrollSpeed: String, CaseIterable, Codable, Identifiable, Sendable {
     case tenth, quarter, half, twice, fourTimes, tenTimes
 
     var id: Self { self }

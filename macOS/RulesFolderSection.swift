@@ -2,9 +2,14 @@ import SwiftUI
 
 struct RulesFolderSection: View {
     private let folder = RulesFolder.shared
+    private let mouseSettings = MouseSettingsLibrary.shared
 
     var body: some View {
         Section {
+            if let problem = mouseSettings.loadProblem {
+                Label(problem, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
             LabeledContent("Rules Folder") {
                 Text(folder.displayPath)
                     .lineLimit(1)
@@ -19,7 +24,7 @@ struct RulesFolderSection: View {
                 }
             }
         } footer: {
-            Text("Rules and key swaps are read from rules.json and key-swaps.json in this folder, and changes are saved back there. A folder without them starts with the rules you have now.")
+            Text("Rules, key swaps and the Mouse page's settings are read from rules.json, key-swaps.json and mouse.json in this folder, and changes are saved back there. A folder without them starts with the settings you have now.")
                 .foregroundStyle(.secondary)
         }
     }

@@ -23,7 +23,7 @@ import Observation
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
-        panel.message = "Choose the folder that holds rules.json and key-swaps.json"
+        panel.message = "Choose the folder that holds rules.json, key-swaps.json and mouse.json"
         guard panel.runModal() == .OK, let chosen = panel.url else { return }
         use(chosen)
     }
@@ -42,6 +42,7 @@ import Observation
     func reload() {
         RuleLibrary.shared.reload()
         KeySwapLibrary.shared.reload()
+        MouseSettingsLibrary.shared.reload()
     }
 
     private func watch() {

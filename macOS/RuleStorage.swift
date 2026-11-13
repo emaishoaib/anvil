@@ -8,7 +8,7 @@ enum RuleStorage {
         set { UserDefaults.standard.set(newValue?.path, forKey: folderKey) }
     }
 
-    static func load<Item: Decodable>(_ type: [Item].Type, file: String, settingsKey: String) throws -> [Item]? {
+    static func load<Value: Decodable>(_ type: Value.Type, file: String, settingsKey: String) throws -> Value? {
         guard let folder else {
             return try UserDefaults.standard.data(forKey: settingsKey).map { try JSONDecoder().decode(type, from: $0) }
         }
@@ -17,10 +17,10 @@ enum RuleStorage {
         return try JSONDecoder().decode(type, from: Data(contentsOf: url))
     }
 
-    static func save<Item: Encodable>(_ items: [Item], file: String, settingsKey: String) {
+    static func save<Value: Encodable>(_ value: Value, file: String, settingsKey: String) {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        guard let data = try? encoder.encode(items) else { return }
+        guard let data = try? encoder.encode(value) else { return }
         if let folder {
             try? data.write(to: folder.appending(path: file), options: .atomic)
         } else {
