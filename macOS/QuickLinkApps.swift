@@ -5,7 +5,7 @@ extension QuickLink {
     var app: URL? { openWith ?? defaultApp }
 
     var defaultApp: URL? {
-        probe.flatMap(NSWorkspace.shared.urlForApplication(toOpen:))
+        probe.flatMap(DefaultApps.shared.app(toOpen:))
     }
 
     var appChoices: [URL] {

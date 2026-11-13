@@ -51,7 +51,7 @@ struct AppIcon: View {
     let path: String
 
     var body: some View {
-        Image(nsImage: NSWorkspace.shared.icon(forFile: path))
+        Image(nsImage: AppIcons.shared.icon(forFile: path))
             .resizable()
             .frame(width: Self.size, height: Self.size)
     }
