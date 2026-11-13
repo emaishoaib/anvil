@@ -15,6 +15,7 @@ import Observation
     var draft = QuickLink()
     private(set) var actionPanel: ActionPanel?
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
+    @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 
     var selectedResult: SearchResult? {
         results.indices.contains(selected) ? results[selected] : nil
@@ -29,6 +30,7 @@ import Observation
     }
 
     func reset() {
+        launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         arguments = LinkArguments()
         draft = QuickLink()
@@ -150,6 +152,7 @@ import Observation
     }
 
     func reloadResults() {
+        launchCounts = SavedLaunchCounts.load()
         refresh()
     }
 
@@ -173,7 +176,7 @@ import Observation
         selected = 0
         switch mode {
         case .launcher:
-            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, launchCounts: SavedLaunchCounts.load(), rates: CurrencyRatesStore.shared.rates)
+            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
         case .defineWord:
             let candidates = isQueryEmpty ? SavedRecentWords.load().words : WordLookup.candidates(for: query)
             wordLookup = Task {
