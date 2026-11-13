@@ -2,11 +2,7 @@ import Carbon.HIToolbox
 import WindowKit
 
 nonisolated extension WindowAction {
-    var shortcut: Shortcut? {
-        combo.map { Shortcut(combo: $0, action: title) }
-    }
-
-    private var combo: KeyCombo? {
+    var defaultCombo: KeyCombo? {
         switch self {
         case .leftHalf: KeyCombo(keyCode: kVK_LeftArrow, modifiers: [.control, .option])
         case .rightHalf: KeyCombo(keyCode: kVK_RightArrow, modifiers: [.control, .option])

@@ -17,7 +17,9 @@ struct ToolPage: View {
             Section {
                 Toggle("Use \(tool.name)", isOn: $isOn)
             }
-            if !tool.shortcuts.isEmpty {
+            if tool == .windows {
+                WindowShortcutsSection()
+            } else if !tool.shortcuts.isEmpty {
                 Section("Shortcuts") {
                     ForEach(tool.shortcuts) { shortcut in
                         ShortcutRow(shortcut: shortcut, clashes: tool.clashes(with: shortcut))

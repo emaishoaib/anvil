@@ -1,9 +1,15 @@
 import AppKit
+import os
 
 nonisolated final class Keyboard: @unchecked Sendable {
     static let shared = Keyboard()
 
     private var tap: CFMachPort?
+    private let shortcutsPaused = OSAllocatedUnfairLock(initialState: false)
+
+    func pauseShortcuts(_ paused: Bool) {
+        shortcutsPaused.withLock { $0 = paused }
+    }
 
     func start() {
         let thread = Thread { [self] in
@@ -32,7 +38,7 @@ nonisolated final class Keyboard: @unchecked Sendable {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return false
         }
-        guard let press = KeyPress(type, event) else { return false }
+        guard !shortcutsPaused.withLock({ $0 }), let press = KeyPress(type, event) else { return false }
         let responders = Tool.allCases.filter(\.isOn).compactMap(\.keyResponder)
         return responders.contains { $0.respond(to: press) }
     }
