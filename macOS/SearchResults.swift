@@ -29,6 +29,7 @@ struct SearchResults: View {
 
 private struct ResultRow: View {
     private static let iconSize: CGFloat = 22
+    private static let selectionOpacity = 0.07
 
     let app: InstalledApp
     let isSelected: Bool
@@ -46,7 +47,7 @@ private struct ResultRow: View {
         .padding(.horizontal, 8)
         .frame(maxHeight: .infinity)
         .background {
-            if isSelected { RoundedRectangle(cornerRadius: 8).fill(.quaternary) }
+            if isSelected { RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(Self.selectionOpacity)) }
         }
         .contentShape(.rect)
     }

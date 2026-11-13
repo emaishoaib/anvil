@@ -4,6 +4,7 @@ struct SearchBarView: View {
     private static let width: CGFloat = 750
     private static let fieldHeight: CGFloat = 56
     private static let fontSize: CGFloat = 17
+    private static let tintOpacity = 0.5
 
     @Bindable var model: SearchModel
     @FocusState private var isFocused: Bool
@@ -23,6 +24,7 @@ struct SearchBarView: View {
         }
         .frame(width: Self.width)
         .fixedSize(horizontal: false, vertical: true)
+        .background(Color(nsColor: .windowBackgroundColor).opacity(Self.tintOpacity))
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { SearchBar.shared.fit(height: $0) }
         .onAppear { isFocused = true }
     }
