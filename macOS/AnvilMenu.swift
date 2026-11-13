@@ -6,7 +6,6 @@ struct AnvilMenu: View {
     var body: some View {
         Button("Settings…") {
             openWindow(id: WindowID.settings)
-            NSApplication.shared.activate()
         }
         .keyboardShortcut(",")
         Button("Check for Updates…") {

@@ -15,5 +15,12 @@ struct SettingsView: View {
                     .id(selection)
             }
         }
+        .onAppear {
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate()
+        }
+        .onDisappear {
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 }
