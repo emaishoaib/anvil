@@ -5,6 +5,7 @@ struct QuickLinksSection: View {
     private let library = QuickLinkLibrary.shared
     @State private var editing: QuickLink?
     @State private var deleting: QuickLink?
+    @State private var transferMessage: String?
 
     var body: some View {
         Section("Quick Links") {
@@ -14,7 +15,13 @@ struct QuickLinksSection: View {
             ForEach(library.links) { link in
                 QuickLinkRow(link: link, edit: { editing = link }, delete: { deleting = link })
             }
-            Button("Add Quick Link…") { editing = QuickLink() }
+            HStack {
+                Button("Add Quick Link…") { editing = QuickLink() }
+                Spacer()
+                Button("Import…") { transferMessage = QuickLinkTransfer.importFile() }
+                Button("Export…") { transferMessage = QuickLinkTransfer.exportFile() }
+                    .disabled(library.links.isEmpty)
+            }
         }
         .sheet(item: $editing) { link in
             QuickLinkEditor(link: link, isNew: !library.contains(link), save: library.save)
@@ -24,6 +31,16 @@ struct QuickLinksSection: View {
         } message: { _ in
             Text("This can't be undone.")
         }
+        .alert(transferMessage ?? "", isPresented: isShowingTransferMessage) {
+            Button("OK") {}
+        }
+    }
+
+    private var isShowingTransferMessage: Binding<Bool> {
+        Binding(
+            get: { transferMessage != nil },
+            set: { if !$0 { transferMessage = nil } }
+        )
     }
 
     private var isConfirmingDelete: Binding<Bool> {

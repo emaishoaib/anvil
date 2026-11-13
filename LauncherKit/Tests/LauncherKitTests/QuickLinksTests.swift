@@ -28,4 +28,13 @@ struct QuickLinksTests {
         links.delete(google)
         #expect(links.links == [drive])
     }
+
+    @Test func addingSkipsLinksWithTheSameNameAndLink() {
+        var links = QuickLinks([google])
+        let copyOfGoogle = QuickLink(name: google.name, link: google.link)
+        let result = links.add([copyOfGoogle, drive, drive])
+        #expect(result.added == 1)
+        #expect(result.skipped == 2)
+        #expect(links.links == [drive, google])
+    }
 }

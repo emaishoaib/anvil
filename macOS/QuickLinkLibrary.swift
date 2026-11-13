@@ -25,6 +25,12 @@ import Observation
         persist()
     }
 
+    func add(_ incoming: [QuickLink]) -> (added: Int, skipped: Int) {
+        let result = quickLinks.add(incoming)
+        persist()
+        return result
+    }
+
     func delete(_ link: QuickLink) {
         quickLinks.delete(link)
         persist()
