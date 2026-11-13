@@ -18,6 +18,7 @@ struct AnvilApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        Tool.registerDefaults()
         AppUpdater.shared.start()
         #if !DEBUG
         LoginItem.addOnFirstLaunch()

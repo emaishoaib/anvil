@@ -38,6 +38,7 @@ nonisolated final class Hotkeys: @unchecked Sendable {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return false
         }
+        guard Tool.switcher.isOn else { return false }
         let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
         let optionHeld = event.flags.contains(.maskAlternate)
         guard let action = state.withLock({ $0.action(for: type, keyCode: keyCode, optionHeld: optionHeld) }) else { return false }

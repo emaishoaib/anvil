@@ -6,7 +6,7 @@ struct ToolPage: View {
 
     init(tool: Tool) {
         self.tool = tool
-        _isOn = AppStorage(wrappedValue: false, tool.isOnKey)
+        _isOn = AppStorage(wrappedValue: tool.isOnByDefault, tool.isOnKey)
     }
 
     var body: some View {
@@ -16,6 +16,13 @@ struct ToolPage: View {
             }
             Section {
                 Toggle("Use \(tool.name)", isOn: $isOn)
+            }
+            if !tool.shortcuts.isEmpty {
+                Section("Shortcuts") {
+                    ForEach(tool.shortcuts) { shortcut in
+                        LabeledContent(shortcut.action, value: shortcut.keys)
+                    }
+                }
             }
         }
         .formStyle(.grouped)
