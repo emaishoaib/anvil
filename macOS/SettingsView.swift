@@ -1,18 +1,30 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var selection: Tool? = .switcher
+    @State private var selection: SettingsPage? = .tool(.switcher)
 
     var body: some View {
         NavigationSplitView {
-            List(Tool.allCases, selection: $selection) { tool in
-                Label(tool.name, systemImage: tool.symbol)
+            List(selection: $selection) {
+                Label("General", systemImage: "gearshape")
+                    .tag(SettingsPage.general)
+                Section("Tools") {
+                    ForEach(Tool.allCases) { tool in
+                        Label(tool.name, systemImage: tool.symbol)
+                            .tag(SettingsPage.tool(tool))
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(190)
         } detail: {
-            if let selection {
-                ToolPage(tool: selection)
-                    .id(selection)
+            switch selection {
+            case .general:
+                GeneralPage()
+            case .tool(let tool):
+                ToolPage(tool: tool)
+                    .id(tool)
+            case nil:
+                EmptyView()
             }
         }
         .onAppear {

@@ -1,11 +1,18 @@
 import Foundation
 
-enum RuleStorage {
-    private static let folderKey = "rules.folder"
+enum SettingsStorage {
+    private static let folderKey = "settings.folder"
+    private static let rulesFolderKey = "rules.folder"
 
     static var folder: URL? {
-        get { UserDefaults.standard.string(forKey: folderKey).map { URL(filePath: $0, directoryHint: .isDirectory) } }
-        set { UserDefaults.standard.set(newValue?.path, forKey: folderKey) }
+        get {
+            let path = UserDefaults.standard.string(forKey: folderKey) ?? UserDefaults.standard.string(forKey: rulesFolderKey)
+            return path.map { URL(filePath: $0, directoryHint: .isDirectory) }
+        }
+        set {
+            UserDefaults.standard.set(newValue?.path, forKey: folderKey)
+            UserDefaults.standard.removeObject(forKey: rulesFolderKey)
+        }
     }
 
     static func load<Value: Decodable>(_ type: Value.Type, file: String, settingsKey: String) throws -> Value? {

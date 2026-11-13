@@ -33,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             RuleKeys.shared.start()
             AppRules.start()
             KeySwapLibrary.shared.start()
-            RulesFolder.shared.start()
+            SettingsFolder.shared.start()
             MouseSettingsLibrary.shared.start()
             Keyboard.shared.start()
             MouseWheel.shared.start()

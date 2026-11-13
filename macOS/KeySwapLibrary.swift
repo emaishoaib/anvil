@@ -39,11 +39,11 @@ import RulesKit
         let before = swaps
         do {
             loadProblem = nil
-            guard let saved = try RuleStorage.load([KeySwap].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load([KeySwap].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
             swaps = saved
             if swaps != before { apply() }
         } catch {
-            loadProblem = RuleStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.file)
         }
     }
 
@@ -57,7 +57,7 @@ import RulesKit
 
     private func persist() {
         guard loadProblem == nil else { return }
-        RuleStorage.save(swaps, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(swaps, file: Self.file, settingsKey: Self.settingsKey)
         apply()
     }
 }

@@ -16,6 +16,10 @@ struct ScrollingSection: View {
 
     var body: some View {
         Section("Scrolling") {
+            if let problem = library.loadProblem {
+                Label(problem, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
             Toggle("Reverse the wheel's direction", isOn: $library.settings.reversesWheel)
             Toggle("Reverse the thumb wheel's direction", isOn: $library.settings.reversesThumbWheel)
             SliderRow(title: "Duration of each wheel click", value: durationFrames, range: ScrollingSettings.durationFramesRange, step: 1) {

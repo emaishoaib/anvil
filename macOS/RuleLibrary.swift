@@ -34,17 +34,17 @@ import RulesKit
     func reload() {
         do {
             loadProblem = nil
-            guard let saved = try RuleStorage.load([Rule].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load([Rule].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
             rules = Rules(saved)
             RuleKeys.shared.use(rules)
         } catch {
-            loadProblem = RuleStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.file)
         }
     }
 
     private func persist() {
         RuleKeys.shared.use(rules)
         guard loadProblem == nil else { return }
-        RuleStorage.save(rules.rules, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(rules.rules, file: Self.file, settingsKey: Self.settingsKey)
     }
 }

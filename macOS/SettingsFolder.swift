@@ -2,12 +2,12 @@ import AppKit
 import CoreServices
 import Observation
 
-@Observable final class RulesFolder {
-    static let shared = RulesFolder()
+@Observable final class SettingsFolder {
+    static let shared = SettingsFolder()
 
     private static let watchLatencySeconds = 0.5
 
-    private(set) var url = RuleStorage.folder
+    private(set) var url = SettingsStorage.folder
     @ObservationIgnored private var stream: FSEventStreamRef?
 
     var displayPath: String {
@@ -23,7 +23,7 @@ import Observation
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
-        panel.message = "Choose the folder that holds rules.json, key-swaps.json and mouse.json"
+        panel.message = "Choose the folder that holds Anvil's settings files"
         guard panel.runModal() == .OK, let chosen = panel.url else { return }
         use(chosen)
     }
@@ -33,7 +33,7 @@ import Observation
     }
 
     private func use(_ folder: URL?) {
-        RuleStorage.folder = folder
+        SettingsStorage.folder = folder
         url = folder
         reload()
         watch()
@@ -55,7 +55,7 @@ import Observation
         guard let url else { return }
         let created = FSEventStreamCreate(
             nil,
-            { _, _, _, _, _, _ in MainActor.assumeIsolated { RulesFolder.shared.reload() } },
+            { _, _, _, _, _, _ in MainActor.assumeIsolated { SettingsFolder.shared.reload() } },
             nil,
             [url.path] as CFArray,
             FSEventStreamEventId(kFSEventStreamEventIdSinceNow),

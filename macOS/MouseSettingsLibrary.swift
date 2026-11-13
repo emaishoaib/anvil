@@ -28,17 +28,17 @@ import os
     func reload() {
         do {
             loadProblem = nil
-            guard let saved = try RuleStorage.load(MouseSettings.self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load(MouseSettings.self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
             lastSaved = saved
             settings = saved
         } catch {
-            loadProblem = RuleStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.file)
         }
     }
 
     private func persist() {
         guard loadProblem == nil else { return }
         lastSaved = settings
-        RuleStorage.save(settings, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(settings, file: Self.file, settingsKey: Self.settingsKey)
     }
 }

@@ -1,16 +1,11 @@
 import SwiftUI
 
-struct RulesFolderSection: View {
-    private let folder = RulesFolder.shared
-    private let mouseSettings = MouseSettingsLibrary.shared
+struct SettingsFolderSection: View {
+    private let folder = SettingsFolder.shared
 
     var body: some View {
         Section {
-            if let problem = mouseSettings.loadProblem {
-                Label(problem, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-            }
-            LabeledContent("Rules Folder") {
+            LabeledContent("Settings Folder") {
                 Text(folder.displayPath)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -24,7 +19,7 @@ struct RulesFolderSection: View {
                 }
             }
         } footer: {
-            Text("Rules, key swaps and the Mouse page's settings are read from rules.json, key-swaps.json and mouse.json in this folder, and changes are saved back there. A folder without them starts with the settings you have now.")
+            Text("Anvil reads its rules, key swaps and mouse settings from rules.json, key-swaps.json and mouse.json in this folder, and saves changes back there. A folder without them starts with the settings you have now.")
                 .foregroundStyle(.secondary)
         }
     }
