@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import SwiftUI
 
 final class SearchBar {
@@ -7,6 +8,7 @@ final class SearchBar {
     private static let topShare = 0.25
 
     private let panel = SearchPanel()
+    private var model = SearchModel()
 
     func toggle() {
         panel.isVisible ? hide() : show()
@@ -17,9 +19,29 @@ final class SearchBar {
         panel.orderOut(nil)
     }
 
+    func fit(height: CGFloat) {
+        guard panel.frame.height != height else { return }
+        var frame = panel.frame
+        frame.origin.y = frame.maxY - height
+        frame.size.height = height
+        panel.setFrame(frame, display: true)
+    }
+
+    func handleKey(_ keyCode: Int) -> Bool {
+        switch keyCode {
+        case kVK_UpArrow: model.moveSelection(by: -1)
+        case kVK_DownArrow: model.moveSelection(by: 1)
+        case kVK_Return, kVK_ANSI_KeypadEnter: model.openSelected()
+        case kVK_Escape: hide()
+        default: return false
+        }
+        return true
+    }
+
     private func show() {
         guard let screen = NSScreen.main, let background = panel.contentView else { return }
-        let content = NSHostingView(rootView: SearchBarView())
+        model = SearchModel()
+        let content = NSHostingView(rootView: SearchBarView(model: model))
         let size = content.fittingSize
         content.frame = NSRect(origin: .zero, size: size)
         content.autoresizingMask = [.width, .height]

@@ -21,6 +21,10 @@ final class SearchPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
 
+    override func sendEvent(_ event: NSEvent) {
+        guard event.type == .keyDown, SearchBar.shared.handleKey(Int(event.keyCode)) else { return super.sendEvent(event) }
+    }
+
     override func resignKey() {
         super.resignKey()
         SearchBar.shared.hide()
