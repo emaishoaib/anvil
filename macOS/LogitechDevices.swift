@@ -81,7 +81,7 @@ import Observation
         let known = devices.first { $0.id == id }
         switch HIDPPNotification(report: report, from: index, controlsFeature: known?.controlsFeature) {
         case .controlsHeld(let held):
-            let isDown = held.contains(HIDPPRequest.gestureButtonControl)
+            let isDown = held.contains(HIDPPRequest.buttonBehindWheelControl)
             guard isDown != heldGestureButtons.contains(id) else { return }
             if isDown { heldGestureButtons.insert(id) } else { heldGestureButtons.remove(id) }
             GestureButton.send(isDown: isDown)

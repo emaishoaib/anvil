@@ -4,7 +4,7 @@ public struct HIDPPRequest: Hashable, Sendable {
     public static let receiverSlots: ClosedRange<UInt8> = 1...6
     public static let deviceNameFeature: UInt16 = 0x0005
     public static let reprogrammableControlsFeature: UInt16 = 0x1B04
-    public static let gestureButtonControl: UInt16 = 0x00C3
+    public static let buttonBehindWheelControl: UInt16 = 0x00C4
     public static let wheelFeature: UInt16 = 0x2121
     static let divertedReporting: UInt8 = 0x03
     static let undivertedReporting: UInt8 = 0x02

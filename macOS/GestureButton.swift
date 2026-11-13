@@ -7,7 +7,7 @@ enum GestureButton {
     static func takeOver(_ device: LogitechDevice, on channel: HIDPPChannel) async {
         guard device.kind == .mouse, let controlsFeature = device.controlsFeature else { return }
         _ = await channel.send(.reporting(
-            of: HIDPPRequest.gestureButtonControl,
+            of: HIDPPRequest.buttonBehindWheelControl,
             on: device.deviceIndex,
             controlsFeature: controlsFeature,
             diverted: Tool.mouse.isOn
