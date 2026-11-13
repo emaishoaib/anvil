@@ -32,15 +32,20 @@ import Observation
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
-            MainActor.assumeIsolated { LogitechDevices.shared.takeOverGestureButtons() }
+            MainActor.assumeIsolated { LogitechDevices.shared.applyMouseTool() }
         }
     }
 
-    func takeOverGestureButtons() {
+    func applyMouseTool() {
         for channel in channels {
             let onChannel = devices.filter { $0.id.hasPrefix(channel.id) }
-            Task { for device in onChannel { await GestureButton.takeOver(device, on: channel) } }
+            Task { for device in onChannel { await Self.applyMouseTool(to: device, on: channel) } }
         }
+    }
+
+    private static func applyMouseTool(to device: LogitechDevice, on channel: HIDPPChannel) async {
+        await GestureButton.takeOver(device, on: channel)
+        await WheelResolution.shared.apply(to: device, on: channel)
     }
 
     private func added(_ device: IOHIDDevice) {
@@ -66,7 +71,7 @@ import Observation
         guard channels.contains(where: { $0 === channel }) else { return }
         devices.removeAll { $0.id == device.id }
         devices.append(device)
-        await GestureButton.takeOver(device, on: channel)
+        await Self.applyMouseTool(to: device, on: channel)
     }
 
     private func notified(_ report: [UInt8], on channel: HIDPPChannel) {

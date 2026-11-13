@@ -45,7 +45,7 @@ struct ToolPage: View {
         .formStyle(.grouped)
         .navigationTitle(tool.name)
         .onChange(of: isOn) {
-            if tool == .mouse { LogitechDevices.shared.takeOverGestureButtons() }
+            if tool == .mouse { LogitechDevices.shared.applyMouseTool() }
             guard tool == .keepAwake, !isOn else { return }
             Task { await KeepAwake.shared.stop() }
         }
