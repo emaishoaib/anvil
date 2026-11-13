@@ -17,18 +17,18 @@ enum UnitCatalog {
     }
 
     static let entries: [UnitEntry] = [
-        UnitEntry(["mg", "milligram", "milligrams"], UnitMass.milligrams, "mg", "Milligrams", to: "g"),
-        UnitEntry(["g", "gram", "grams"], UnitMass.grams, "g", "Grams", to: "oz"),
-        UnitEntry(["kg", "kilo", "kilos", "kilogram", "kilograms"], UnitMass.kilograms, "kg", "Kilograms", to: "lb"),
+        UnitEntry(["mg", "mgs", "milligram", "milligrams"], UnitMass.milligrams, "mg", "Milligrams", to: "g"),
+        UnitEntry(["g", "gm", "gms", "gr", "gram", "grams"], UnitMass.grams, "g", "Grams", to: "oz"),
+        UnitEntry(["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms"], UnitMass.kilograms, "kg", "Kilograms", to: "lb"),
         UnitEntry(["t", "tonne", "tonnes"], UnitMass.metricTons, "t", "Tonnes", to: "kg"),
         UnitEntry(["oz", "ounce", "ounces"], UnitMass(symbol: "oz", converter: exactly(0.028349523125)), "oz", "Ounces", to: "g"),
         UnitEntry(["lb", "lbs", "pound", "pounds"], UnitMass(symbol: "lb", converter: exactly(0.45359237)), "lb", "Pounds", to: "kg"),
         UnitEntry(["st", "stone", "stones"], UnitMass(symbol: "st", converter: exactly(6.35029318)), "st", "Stone", to: "kg"),
 
-        UnitEntry(["mm", "millimeter", "millimeters", "millimetre", "millimetres"], UnitLength.millimeters, "mm", "Millimetres", to: "in"),
-        UnitEntry(["cm", "centimeter", "centimeters", "centimetre", "centimetres"], UnitLength.centimeters, "cm", "Centimetres", to: "in"),
-        UnitEntry(["m", "meter", "meters", "metre", "metres"], UnitLength.meters, "m", "Metres", to: "ft"),
-        UnitEntry(["km", "kilometer", "kilometers", "kilometre", "kilometres"], UnitLength.kilometers, "km", "Kilometres", to: "mi"),
+        UnitEntry(["mm", "mms", "millimeter", "millimeters", "millimetre", "millimetres"], UnitLength.millimeters, "mm", "Millimetres", to: "in"),
+        UnitEntry(["cm", "cms", "centimeter", "centimeters", "centimetre", "centimetres"], UnitLength.centimeters, "cm", "Centimetres", to: "in"),
+        UnitEntry(["m", "mtr", "mtrs", "meter", "meters", "metre", "metres"], UnitLength.meters, "m", "Metres", to: "ft"),
+        UnitEntry(["km", "kms", "kilometer", "kilometers", "kilometre", "kilometres"], UnitLength.kilometers, "km", "Kilometres", to: "mi"),
         UnitEntry(["in", "inch", "inches"], UnitLength.inches, "in", "Inches", to: "cm"),
         UnitEntry(["ft", "foot", "feet"], UnitLength.feet, "ft", "Feet", to: "m"),
         UnitEntry(["yd", "yard", "yards"], UnitLength.yards, "yd", "Yards", to: "m"),
@@ -38,8 +38,8 @@ enum UnitCatalog {
         UnitEntry(["f", "°f", "fahrenheit", "degrees fahrenheit"], UnitTemperature(symbol: "°F", converter: exactly(kelvinPerFahrenheit, plus: fahrenheitAtAbsoluteZero * kelvinPerFahrenheit)), "°F", "Fahrenheit", to: "c"),
         UnitEntry(["k", "kelvin"], UnitTemperature.kelvin, "K", "Kelvin", to: "c"),
 
-        UnitEntry(["ml", "milliliter", "milliliters", "millilitre", "millilitres"], UnitVolume.milliliters, "mL", "Millilitres", to: "fl oz"),
-        UnitEntry(["l", "liter", "liters", "litre", "litres"], UnitVolume.liters, "L", "Litres", to: "gal"),
+        UnitEntry(["ml", "mls", "milliliter", "milliliters", "millilitre", "millilitres"], UnitVolume.milliliters, "mL", "Millilitres", to: "fl oz"),
+        UnitEntry(["l", "ltr", "ltrs", "liter", "liters", "litre", "litres"], UnitVolume.liters, "L", "Litres", to: "gal"),
         UnitEntry(["tsp", "teaspoon", "teaspoons"], UnitVolume(symbol: "tsp", converter: exactly(0.00492892159375)), "tsp", "Teaspoons", to: "ml"),
         UnitEntry(["tbsp", "tablespoon", "tablespoons"], UnitVolume(symbol: "tbsp", converter: exactly(0.01478676478125)), "tbsp", "Tablespoons", to: "ml"),
         UnitEntry(["cup", "cups"], UnitVolume(symbol: "cup", converter: exactly(0.2365882365)), "cups", "Cups", to: "ml"),

@@ -38,6 +38,24 @@ struct UnitConversionTests {
         #expect(output("5 kilos in pounds") == "11.0231131092 lb")
     }
 
+    @Test func informalSpellingsOfMassesWork() {
+        #expect(output("1 kg to gm") == "1,000 g")
+        #expect(output("2 kgs in gms") == "2,000 g")
+        #expect(output("500 gr to kg") == "0.5 kg")
+        #expect(output("1000 mgs to g") == "1 g")
+    }
+
+    @Test func informalSpellingsOfLengthsWork() {
+        #expect(output("3 kms to mtrs") == "3,000 m")
+        #expect(output("10 mms in cms") == "1 cm")
+        #expect(output("1 mtr to cm") == "100 cm")
+    }
+
+    @Test func informalSpellingsOfVolumesWork() {
+        #expect(output("2 ltr to ml") == "2,000 mL")
+        #expect(output("500 mls in ltrs") == "0.5 L")
+    }
+
     @Test func temperaturesConvertWithTheirOffsets() {
         #expect(output("100 c to f") == "212 °F")
         #expect(output("-40°c to °f") == "-40 °F")
