@@ -6,6 +6,7 @@ nonisolated struct MouseSettings: Codable, Equatable, Sendable {
 
     var reversesWheel = true
     var reversesThumbWheel = true
+    var ratchetAlwaysEngaged = true
     var durationFrames = 12
     var brakeFrame = 4
     var pointsPerTick = 90.0
@@ -23,6 +24,7 @@ nonisolated struct MouseSettings: Codable, Equatable, Sendable {
         let defaults = Self.defaults
         reversesWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesWheel) ?? defaults.reversesWheel
         reversesThumbWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesThumbWheel) ?? defaults.reversesThumbWheel
+        ratchetAlwaysEngaged = try container.decodeIfPresent(Bool.self, forKey: .ratchetAlwaysEngaged) ?? defaults.ratchetAlwaysEngaged
         durationFrames = try container.decodeIfPresent(Int.self, forKey: .durationFrames) ?? defaults.durationFrames
         brakeFrame = try container.decodeIfPresent(Int.self, forKey: .brakeFrame) ?? defaults.brakeFrame
         pointsPerTick = try container.decodeIfPresent(Double.self, forKey: .pointsPerTick) ?? defaults.pointsPerTick
