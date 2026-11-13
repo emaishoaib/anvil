@@ -17,6 +17,13 @@ enum RuleTriggerKind: CaseIterable, Identifiable {
         }
     }
 
+    var usesMouseButton: Bool {
+        switch self {
+        case .mouseButton, .mouseDrag: true
+        case .shortcut, .appOpens, .appComesToFront: false
+        }
+    }
+
     var isAppEvent: Bool {
         switch self {
         case .shortcut, .mouseButton, .mouseDrag: false

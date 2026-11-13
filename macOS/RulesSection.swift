@@ -24,7 +24,7 @@ struct RulesSection: View {
             .disabled(library.loadProblem != nil)
         }
         .sheet(item: $editing) { draft in
-            RuleEditor(draft: draft, isNew: !library.contains(draft.id), save: library.save)
+            RuleEditor(draft: draft, isNew: !library.contains(draft.id), triggerKinds: group.triggerKinds, save: library.save)
         }
         .confirmationDialog("Delete this rule?", isPresented: isConfirmingDelete, presenting: deleting) { rule in
             Button("Delete Rule", role: .destructive) { library.delete(rule) }

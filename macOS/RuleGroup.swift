@@ -1,41 +1,42 @@
 import RulesKit
 
-/// Which rules a rules section lists, and what a rule added from that section starts as.
+/// Which rules a rules section lists, which triggers its editor offers, and what a rule added from it starts as.
 enum RuleGroup {
-    case all
+    case keysAndApps
     case mouseButtons
 
     var title: String {
         switch self {
-        case .all: "Rules"
+        case .keysAndApps: "Rules"
         case .mouseButtons: "Buttons"
         }
     }
 
     var emptyText: String {
         switch self {
-        case .all: "No rules yet"
+        case .keysAndApps: "No rules yet"
         case .mouseButtons: "No button actions yet"
         }
     }
 
     var addTitle: String {
         switch self {
-        case .all: "Add Rule…"
+        case .keysAndApps: "Add Rule…"
         case .mouseButtons: "Add Button Action…"
         }
     }
 
+    var triggerKinds: [RuleTriggerKind] {
+        RuleTriggerKind.allCases.filter { $0.usesMouseButton == (self == .mouseButtons) }
+    }
+
     func contains(_ rule: Rule) -> Bool {
-        switch self {
-        case .all: true
-        case .mouseButtons: rule.trigger.usesMouseButton
-        }
+        rule.trigger.usesMouseButton == (self == .mouseButtons)
     }
 
     var newDraft: RuleDraft {
         var draft = RuleDraft()
-        if self == .mouseButtons { draft.triggerKind = .mouseButton }
+        draft.triggerKind = triggerKinds[0]
         return draft
     }
 }

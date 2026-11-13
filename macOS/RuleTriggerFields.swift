@@ -3,10 +3,11 @@ import SwiftUI
 
 struct RuleTriggerFields: View {
     @Binding var draft: RuleDraft
+    let kinds: [RuleTriggerKind]
 
     var body: some View {
         Picker("Trigger", selection: $draft.triggerKind) {
-            ForEach(RuleTriggerKind.allCases) { kind in
+            ForEach(kinds) { kind in
                 Text(kind.title).tag(kind)
             }
         }

@@ -3,12 +3,14 @@ import SwiftUI
 
 struct RuleEditor: View {
     let isNew: Bool
+    let triggerKinds: [RuleTriggerKind]
     let save: (Rule) -> Void
     @State private var draft: RuleDraft
     @Environment(\.dismiss) private var dismiss
 
-    init(draft: RuleDraft, isNew: Bool, save: @escaping (Rule) -> Void) {
+    init(draft: RuleDraft, isNew: Bool, triggerKinds: [RuleTriggerKind], save: @escaping (Rule) -> Void) {
         self.isNew = isNew
+        self.triggerKinds = triggerKinds
         self.save = save
         _draft = State(initialValue: draft)
     }
@@ -17,7 +19,7 @@ struct RuleEditor: View {
         VStack(spacing: 0) {
             Form {
                 Section("When") {
-                    RuleTriggerFields(draft: $draft)
+                    RuleTriggerFields(draft: $draft, kinds: triggerKinds)
                 }
                 Section("In") {
                     RuleAppsPicker(apps: $draft.apps)

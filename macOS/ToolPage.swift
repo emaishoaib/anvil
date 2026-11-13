@@ -38,7 +38,7 @@ struct ToolPage: View {
                 LogitechSection()
             }
             if tool == .rules {
-                RulesSection(group: .all)
+                RulesSection(group: .keysAndApps)
                 KeySwapsSection()
             }
         }
