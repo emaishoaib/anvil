@@ -14,7 +14,7 @@ struct QueryRow: View {
                 BackButton { _ = model.goBack() }
             }
             if model.mode.hasSearchField {
-                TextField(model.mode.placeholder, text: $model.query)
+                TextField(model.mode.placeholder, text: query)
                     .textFieldStyle(.plain)
                     .font(.system(size: Self.fontSize))
                     .focused(focus, equals: .query)
@@ -38,6 +38,16 @@ struct QueryRow: View {
 
     private var queryWidth: CGFloat {
         (model.query as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: Self.fontSize)]).width + Self.caretRoom
+    }
+
+    /// Writes to the model only when the text really changed, because the field
+    /// writes its unchanged text back whenever it loses focus, and that would
+    /// re-run the search and reset the selected result.
+    private var query: Binding<String> {
+        Binding(
+            get: { model.query },
+            set: { if $0 != model.query { model.query = $0 } }
+        )
     }
 
     private func argument(at index: Int) -> Binding<String> {
