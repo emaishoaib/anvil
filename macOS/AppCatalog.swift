@@ -25,9 +25,10 @@ import Observation
     func matches(_ query: String) -> [InstalledApp] {
         let query = query.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return [] }
+        let counts = LaunchCounts.all
         return apps
-            .compactMap { app in app.match(for: query).map { (app: app, match: $0) } }
-            .sorted { ($0.match.rawValue, $0.app.name.localizedLowercase) < ($1.match.rawValue, $1.app.name.localizedLowercase) }
+            .compactMap { app in app.match(for: query).map { (app: app, match: $0, launches: counts[app.url.path] ?? 0) } }
+            .sorted { (-$0.launches, $0.match.rawValue, $0.app.name.localizedLowercase) < (-$1.launches, $1.match.rawValue, $1.app.name.localizedLowercase) }
             .map(\.app)
     }
 
