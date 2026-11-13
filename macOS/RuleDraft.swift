@@ -6,6 +6,7 @@ struct RuleDraft: Identifiable {
     var triggerKind = RuleTriggerKind.shortcut
     var shortcut: KeyCombo?
     var mouseButton: Int?
+    var dragDirection = DragDirection.down
     var apps = RuleApps.all
     var actionKind = RuleActionKind.sendShortcut
     var shortcutToSend: KeyCombo?

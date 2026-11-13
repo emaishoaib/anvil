@@ -10,6 +10,13 @@ public struct Rules: Equatable, Sendable {
         return matching.first(where: \.apps.isChosen) ?? matching.first
     }
 
+    public func hasDragRules(forButton number: Int, in bundleID: String?) -> Bool {
+        rules.contains { rule in
+            guard case .mouseDrag(number, _) = rule.trigger else { return false }
+            return rule.apps.apply(to: bundleID)
+        }
+    }
+
     public mutating func save(_ rule: Rule) {
         if let index = rules.firstIndex(where: { $0.id == rule.id }) {
             rules[index] = rule

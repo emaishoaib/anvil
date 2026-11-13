@@ -1,6 +1,7 @@
 enum RuleTriggerKind: CaseIterable, Identifiable {
     case shortcut
     case mouseButton
+    case mouseDrag
     case appOpens
     case appComesToFront
 
@@ -10,6 +11,7 @@ enum RuleTriggerKind: CaseIterable, Identifiable {
         switch self {
         case .shortcut: "Shortcut"
         case .mouseButton: "Mouse Button"
+        case .mouseDrag: "Mouse Button Drag"
         case .appOpens: "App Opens"
         case .appComesToFront: "App Comes to Front"
         }
@@ -17,7 +19,7 @@ enum RuleTriggerKind: CaseIterable, Identifiable {
 
     var isAppEvent: Bool {
         switch self {
-        case .shortcut, .mouseButton: false
+        case .shortcut, .mouseButton, .mouseDrag: false
         case .appOpens, .appComesToFront: true
         }
     }

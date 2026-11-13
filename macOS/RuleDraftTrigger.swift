@@ -9,6 +9,10 @@ extension RuleDraft {
         case .mouseButton(let number):
             triggerKind = .mouseButton
             mouseButton = number
+        case .mouseDrag(let number, let direction):
+            triggerKind = .mouseDrag
+            mouseButton = number
+            dragDirection = direction
         case .appOpens:
             triggerKind = .appOpens
         case .appComesToFront:
@@ -20,6 +24,7 @@ extension RuleDraft {
         switch triggerKind {
         case .shortcut: shortcut.map { .shortcut($0.keystroke) }
         case .mouseButton: mouseButton.map { .mouseButton(number: $0) }
+        case .mouseDrag: mouseButton.map { .mouseDrag(number: $0, direction: dragDirection) }
         case .appOpens: .appOpens
         case .appComesToFront: .appComesToFront
         }
