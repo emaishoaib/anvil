@@ -30,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CGRequestScreenCaptureAccess()
         Task {
             await Accessibility.waitUntilTrusted()
+            RuleKeys.shared.start()
             Keyboard.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()

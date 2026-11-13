@@ -58,6 +58,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .switcher: SwitcherKeys.shared
         case .launcher: LauncherKeys.shared
         case .windows: WindowKeys.shared
+        case .rules: RuleKeys.shared
         default: nil
         }
     }

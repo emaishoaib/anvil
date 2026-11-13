@@ -31,6 +31,7 @@ import RulesKit
     }
 
     private func persist() {
+        RuleKeys.shared.use(rules)
         UserDefaults.standard.set(try? JSONEncoder().encode(rules.rules), forKey: Self.key)
     }
 }

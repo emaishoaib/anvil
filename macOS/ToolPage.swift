@@ -19,7 +19,7 @@ struct ToolPage: View {
             }
             if tool == .windows {
                 WindowShortcutsSection()
-            } else if !tool.shortcuts.isEmpty {
+            } else if tool != .rules, !tool.shortcuts.isEmpty {
                 Section("Shortcuts") {
                     ForEach(tool.shortcuts) { shortcut in
                         ShortcutRow(shortcut: shortcut, clashes: tool.clashes(with: shortcut))

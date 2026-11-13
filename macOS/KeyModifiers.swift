@@ -32,6 +32,10 @@ nonisolated struct KeyModifiers: OptionSet, Hashable {
         self.init(Self.all.filter { carbonMask & $0.carbonMask != 0 }.map(\.modifier))
     }
 
+    var flags: CGEventFlags {
+        CGEventFlags(Self.all.filter { contains($0.modifier) }.map(\.flag))
+    }
+
     var symbols: String {
         orderedSymbols.joined()
     }
