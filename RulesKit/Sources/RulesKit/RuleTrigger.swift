@@ -4,4 +4,11 @@ public enum RuleTrigger: Hashable, Codable, Sendable {
     case mouseDrag(number: Int, direction: DragDirection)
     case appOpens
     case appComesToFront
+
+    public var usesMouseButton: Bool {
+        switch self {
+        case .mouseButton, .mouseDrag: true
+        case .shortcut, .appOpens, .appComesToFront: false
+        }
+    }
 }

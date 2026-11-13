@@ -34,10 +34,11 @@ struct ToolPage: View {
             }
             if tool == .mouse {
                 ScrollingSection()
+                RulesSection(group: .mouseButtons)
                 LogitechSection()
             }
             if tool == .rules {
-                RulesSection()
+                RulesSection(group: .all)
                 KeySwapsSection()
             }
         }
