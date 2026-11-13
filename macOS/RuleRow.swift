@@ -61,6 +61,8 @@ private struct RuleActionLabel: View {
                 Text("Send")
                 KeyCaps(combo: KeyCombo(keystroke))
             }
+        case .chooseMenuItem(let path):
+            Text("Choose \(path.joined(separator: " > "))")
         }
     }
 }

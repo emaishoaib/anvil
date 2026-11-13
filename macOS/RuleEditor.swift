@@ -25,9 +25,7 @@ struct RuleEditor: View {
                     RuleAppsPicker(apps: $draft.apps)
                 }
                 Section("Do") {
-                    LabeledContent("Send Shortcut") {
-                        ShortcutRecorder(combo: draft.shortcutToSend, requiresModifier: false) { draft.shortcutToSend = $0 }
-                    }
+                    RuleActionFields(draft: $draft)
                 }
             }
             .formStyle(.grouped)

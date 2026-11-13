@@ -4,12 +4,13 @@ import RulesKit
 struct RuleDraft: Identifiable {
     let id: UUID
     var trigger: KeyCombo?
-    var apps: RuleApps
+    var apps = RuleApps.all
+    var actionKind = RuleActionKind.sendShortcut
     var shortcutToSend: KeyCombo?
+    var menuItem = ""
 
     init() {
         id = UUID()
-        apps = .all
     }
 
     init(_ rule: Rule) {
@@ -19,12 +20,27 @@ struct RuleDraft: Identifiable {
         case .shortcut(let keystroke): trigger = KeyCombo(keystroke)
         }
         switch rule.action {
-        case .sendShortcut(let keystroke): shortcutToSend = KeyCombo(keystroke)
+        case .sendShortcut(let keystroke):
+            actionKind = .sendShortcut
+            shortcutToSend = KeyCombo(keystroke)
+        case .chooseMenuItem(let path):
+            actionKind = .chooseMenuItem
+            menuItem = path.joined(separator: " > ")
         }
     }
 
     var rule: Rule? {
-        guard let trigger, let shortcutToSend, apps != .only(bundleIDs: []) else { return nil }
-        return Rule(id: id, trigger: .shortcut(trigger.keystroke), apps: apps, action: .sendShortcut(shortcutToSend.keystroke))
+        guard let trigger, let action, apps != .only(bundleIDs: []) else { return nil }
+        return Rule(id: id, trigger: .shortcut(trigger.keystroke), apps: apps, action: action)
+    }
+
+    private var action: RuleAction? {
+        switch actionKind {
+        case .sendShortcut:
+            return shortcutToSend.map { .sendShortcut($0.keystroke) }
+        case .chooseMenuItem:
+            let path = RuleAction.menuPath(from: menuItem)
+            return path.isEmpty ? nil : .chooseMenuItem(path: path)
+        }
     }
 }
