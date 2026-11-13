@@ -38,6 +38,6 @@ public enum Calculator {
         formatter.numberStyle = .spellOut
         formatter.locale = locale
         guard let words = formatter.string(from: NSNumber(value: value)) else { return "Result" }
-        return words.prefix(1).uppercased() + words.dropFirst()
+        return words.capitalisingFirstLetter
     }
 }
