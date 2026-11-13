@@ -20,23 +20,28 @@ struct SearchFooter: View {
                         .frame(width: 16, height: 16)
                         .foregroundStyle(.secondary)
                 case .defineWord:
-                    AppIcon(path: LauncherCommand.defineWord.iconPath)
+                    CommandIcon(command: .defineWord)
                     Text(LauncherCommand.defineWord.name)
                         .foregroundStyle(.secondary)
                 case .wordEntry(let word, _):
-                    AppIcon(path: LauncherCommand.defineWord.iconPath)
+                    CommandIcon(command: .defineWord)
                     Text(word.text)
+                        .foregroundStyle(.secondary)
+                case .quickLinkForm:
+                    CommandIcon(command: .createQuickLink)
+                    Text(LauncherCommand.createQuickLink.name)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if let action {
                     Text(action)
                         .fontWeight(.medium)
-                    Image(systemName: "return")
-                        .font(.system(size: 11, weight: .semibold))
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 4)
-                        .background(.primary.opacity(0.08), in: .rect(cornerRadius: 4))
+                    HStack(spacing: 4) {
+                        if !mode.hasSearchField {
+                            KeyCap(symbol: "command")
+                        }
+                        KeyCap(symbol: "return")
+                    }
                 }
             }
             .padding(.horizontal, 12)
@@ -47,6 +52,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if case .wordEntry = mode { return "Open in Dictionary" }
+        if case .quickLinkForm = mode { return LauncherCommand.createQuickLink.name }
         return switch selected {
         case .answer: "Copy Answer"
         case .app: "Open Application"
@@ -55,5 +61,17 @@ struct SearchFooter: View {
         case .word: "Show Details"
         case nil: nil
         }
+    }
+}
+
+private struct KeyCap: View {
+    let symbol: String
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 11, weight: .semibold))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(.primary.opacity(0.08), in: .rect(cornerRadius: 4))
     }
 }

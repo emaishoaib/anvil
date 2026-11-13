@@ -12,6 +12,7 @@ import Observation
     private(set) var entryPage = ""
     var field = SearchField.query
     var arguments = LinkArguments()
+    var draft = QuickLink()
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
 
     var selectedResult: SearchResult? {
@@ -92,8 +93,17 @@ import Observation
         case .wordEntry(_, let wordQuery):
             mode = .defineWord
             query = wordQuery
+        case .quickLinkForm(let previousQuery):
+            mode = .launcher
+            query = previousQuery
         }
         return true
+    }
+
+    func saveDraft() {
+        guard draft.isComplete else { return NSSound.beep() }
+        QuickLinkLibrary.shared.save(draft)
+        _ = goBack()
     }
 
     private func refresh() {
@@ -110,7 +120,7 @@ import Observation
                 results = words.map(SearchResult.word)
                 showArguments()
             }
-        case .wordEntry:
+        case .wordEntry, .quickLinkForm:
             results = []
         }
         showArguments()
@@ -124,7 +134,11 @@ import Observation
     private func run(_ command: LauncherCommand) {
         SavedLaunchCounts.record(command.launchKey)
         switch command {
-        case .defineWord: mode = .defineWord
+        case .defineWord:
+            mode = .defineWord
+        case .createQuickLink:
+            draft = QuickLink()
+            mode = .quickLinkForm(query: "")
         }
         query = ""
     }

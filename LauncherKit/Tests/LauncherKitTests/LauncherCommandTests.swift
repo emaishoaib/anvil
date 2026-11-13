@@ -18,4 +18,10 @@ struct LauncherCommandTests {
     @Test func otherTextDoesNotMatchDefineWord() {
         #expect(LauncherCommand.defineWord.match(for: "safari") == nil)
     }
+
+    @Test func createQuickLinkMatchesItsNameAndKeyword() {
+        #expect(LauncherCommand.createQuickLink.match(for: "cre") == .namePrefix)
+        #expect(LauncherCommand.createQuickLink.match(for: "quick") == .wordPrefix)
+        #expect(LauncherCommand.createQuickLink.match(for: "link") == .namePrefix)
+    }
 }

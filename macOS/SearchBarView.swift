@@ -18,6 +18,10 @@ struct SearchBarView: View {
                 EntryView(page: model.entryPage)
                     .frame(height: Self.entryHeight)
                 SearchFooter(mode: model.mode, selected: nil)
+            } else if case .quickLinkForm = model.mode {
+                Divider()
+                QuickLinkForm(draft: $model.draft)
+                SearchFooter(mode: model.mode, selected: nil)
             } else if !model.results.isEmpty {
                 Divider()
                 SearchResults(model: model)

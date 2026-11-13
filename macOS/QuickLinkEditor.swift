@@ -1,4 +1,3 @@
-import AppKit
 import LauncherKit
 import SwiftUI
 
@@ -21,7 +20,7 @@ struct QuickLinkEditor: View {
                     TextField("Name", text: $draft.name, prompt: Text("Quick link name"))
                     LinkField(link: $draft.link)
                 } footer: {
-                    Text("Put {Query} in the link to type something in when you open it. The word in the braces is the hint you see, and a link can have up to \(QuickLink.placeholderLimit).")
+                    Text(QuickLink.placeholderHint)
                         .foregroundStyle(.secondary)
                 }
                 Section {
@@ -44,53 +43,5 @@ struct QuickLinkEditor: View {
         }
         .frame(width: 520)
         .navigationTitle(isNew ? "Create Quick Link" : "Edit Quick Link")
-    }
-}
-
-private struct LinkField: View {
-    @Binding var link: String
-
-    var body: some View {
-        HStack {
-            TextField("Link", text: $link, prompt: Text("https://google.com/search?q={Query}"))
-            Button("Choose a File or Folder", systemImage: "folder", action: choose)
-                .buttonStyle(.borderless)
-                .labelStyle(.iconOnly)
-        }
-    }
-
-    private func choose() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = true
-        panel.message = "Choose a file or folder to open"
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        link = (url.path as NSString).abbreviatingWithTildeInPath
-    }
-}
-
-private struct OpenWithPicker: View {
-    let link: QuickLink
-    @Binding var selection: URL?
-
-    var body: some View {
-        Picker("Open With", selection: $selection) {
-            Label { Text(defaultName) } icon: { link.defaultApp.map { Image(nsImage: $0.menuIcon) } }
-                .tag(URL?.none)
-            ForEach(otherApps, id: \.self) { app in
-                Label { Text(app.appName) } icon: { Image(nsImage: app.menuIcon) }
-                    .tag(URL?.some(app))
-            }
-        }
-    }
-
-    private var defaultName: String {
-        link.defaultApp.map { "\($0.appName) (Default)" } ?? "Default App"
-    }
-
-    private var otherApps: [URL] {
-        let choices = link.appChoices.filter { $0 != link.defaultApp }
-        guard let selection, !choices.contains(selection) else { return choices }
-        return choices + [selection]
     }
 }

@@ -14,7 +14,7 @@ struct ResultRow: View {
                 Spacer()
                 Text("Application").foregroundStyle(.secondary)
             case .command(let command):
-                AppIcon(path: command.iconPath)
+                CommandIcon(command: command)
                 Text(command.name)
                 Text(command.subtitle).foregroundStyle(.secondary)
                 KeywordTag(keyword: command.keyword)
@@ -67,13 +67,5 @@ private struct KeywordTag: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .overlay(RoundedRectangle(cornerRadius: 4).stroke(.secondary.opacity(0.6)))
-    }
-}
-
-extension LauncherCommand {
-    var iconPath: String {
-        switch self {
-        case .defineWord: "/System/Applications/Dictionary.app"
-        }
     }
 }

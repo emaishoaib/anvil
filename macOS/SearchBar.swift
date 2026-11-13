@@ -9,14 +9,28 @@ final class SearchBar {
 
     private let panel = SearchPanel()
     private var model = SearchModel()
+    private var isPresentingModal = false
 
     func toggle() {
         panel.isVisible ? hide() : show()
     }
 
     func hide() {
-        guard panel.isVisible else { return }
+        guard panel.isVisible, !isPresentingModal else { return }
         panel.orderOut(nil)
+        if NSApp.isActive, NSApp.activationPolicy() == .accessory { NSApp.hide(nil) }
+    }
+
+    func presentModal<Result>(_ present: () -> Result) -> Result {
+        isPresentingModal = true
+        panel.level = .floating
+        NSApp.activate()
+        defer {
+            isPresentingModal = false
+            panel.level = .popUpMenu
+            panel.makeKeyAndOrderFront(nil)
+        }
+        return present()
     }
 
     func fit(height: CGFloat) {
@@ -28,6 +42,7 @@ final class SearchBar {
     }
 
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         switch keyCode {
         case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_UpArrow: model.moveSelection(by: -1)
@@ -36,6 +51,19 @@ final class SearchBar {
         case kVK_Escape: if !model.leaveArguments(), !model.goBack() { hide() }
         case kVK_Delete: guard model.field == .query, model.query.isEmpty, model.goBack() else { return false }
         default: return false
+        }
+        return true
+    }
+
+    private func handleFormKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        switch keyCode {
+        case kVK_Return, kVK_ANSI_KeypadEnter:
+            guard modifiers.contains(.command) else { return false }
+            model.saveDraft()
+        case kVK_Escape:
+            _ = model.goBack()
+        default:
+            return false
         }
         return true
     }

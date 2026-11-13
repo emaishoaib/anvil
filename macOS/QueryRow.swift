@@ -13,11 +13,15 @@ struct QueryRow: View {
             if model.mode != .launcher {
                 BackButton { _ = model.goBack() }
             }
-            TextField(model.mode.placeholder, text: $model.query)
-                .textFieldStyle(.plain)
-                .font(.system(size: Self.fontSize))
-                .focused($focus, equals: .query)
-                .frame(width: hasArguments ? queryWidth : nil)
+            if model.mode.hasSearchField {
+                TextField(model.mode.placeholder, text: $model.query)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: Self.fontSize))
+                    .focused($focus, equals: .query)
+                    .frame(width: hasArguments ? queryWidth : nil)
+            } else {
+                Spacer()
+            }
             if hasArguments {
                 ForEach(Array(model.arguments.placeholders.enumerated()), id: \.offset) { index, hint in
                     ArgumentField(hint: hint, text: argument(at: index))
