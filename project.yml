@@ -27,6 +27,8 @@ settings:
 packages:
   LauncherKit:
     path: LauncherKit
+  WindowKit:
+    path: WindowKit
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     from: 2.10.1
@@ -40,6 +42,7 @@ targets:
       - Icon/AppIcon.icon
     dependencies:
       - package: LauncherKit
+      - package: WindowKit
       - package: Sparkle
     info:
       path: macOS/Info.plist
