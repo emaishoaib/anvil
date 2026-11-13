@@ -47,6 +47,26 @@ struct ResultRankingTests {
         #expect(results == [.app(zed), .app(zoom)])
     }
 
+    @Test func everyQueryWordCanMatchTheStartOfADifferentWordInTheName() {
+        #expect(names(for: "visual code") == ["Visual Studio Code"])
+        #expect(names(for: "code vis") == ["Visual Studio Code"])
+    }
+
+    @Test func aQueryWordThatMatchesNoWordLeavesTheNameOut() {
+        #expect(names(for: "visual xyz").isEmpty)
+    }
+
+    @Test func wordByWordMatchesComeAfterTighterMatches() {
+        let codeMyWorkshop = InstalledApp(url: URL(filePath: "/Applications/Code My Workshop.app"))
+        let codeWorkspace = InstalledApp(url: URL(filePath: "/Applications/Code Workspace.app"))
+        let results = ResultRanking.matches(for: "code work", in: [.app(codeMyWorkshop), .app(codeWorkspace)], launchCounts: LaunchCounts())
+        #expect(results == [.app(codeWorkspace), .app(codeMyWorkshop)])
+    }
+
+    @Test func aQueryOfOnlySymbolsDoesNotMatchEveryName() {
+        #expect(names(for: "+").isEmpty)
+    }
+
     func suggestedNames(launchCounts: LaunchCounts, limit: Int = 8) -> [String] {
         ResultRanking.suggestions(in: candidates, launchCounts: launchCounts, limit: limit).map(\.name)
     }
