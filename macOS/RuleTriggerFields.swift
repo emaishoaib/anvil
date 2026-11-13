@@ -47,9 +47,16 @@ private struct MouseButtonPicker: View {
     var body: some View {
         Picker("Button", selection: $selection) {
             Text("Choose a Button").tag(Int?.none)
-            ForEach(MouseButton.numbers, id: \.self) { number in
+            ForEach(choices, id: \.self) { number in
                 Text(MouseButton.name(for: number)).tag(Int?.some(number))
             }
         }
+        LabeledContent("Or press it") {
+            MouseButtonRecorder { selection = $0 }
+        }
+    }
+
+    private var choices: [Int] {
+        Set(MouseButton.numbers + [selection].compactMap { $0 }).sorted()
     }
 }
