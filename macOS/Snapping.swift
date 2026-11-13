@@ -10,7 +10,7 @@ final class Snapping {
     func snapFocusedWindow(to action: WindowAction) {
         guard let focused = Self.focusedWindow(), let screen = NSScreen.holding(focused.frame) else { return }
         let repeats = repeatedSnaps.repeats(of: action, on: focused.id, at: focused.frame)
-        focused.element.move(to: action.frame(from: focused.frame, in: screen.visibleFrameWithTopAtMinY, repeats: repeats))
+        focused.element.move(to: action.frame(from: focused.frame, in: screen.visibleFrameWithTopAtMinY, repeats: repeats, gap: SnappingSettings.gap))
         let landedAt = focused.element.frame ?? focused.frame
         repeatedSnaps.record(action, on: focused.id, repeats: repeats, landedAt: landedAt)
         restoreFrames.recordSnap(of: focused.id, from: focused.frame, landedAt: landedAt)

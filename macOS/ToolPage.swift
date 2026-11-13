@@ -27,6 +27,9 @@ struct ToolPage: View {
             if tool == .launcher {
                 QuickLinksSection()
             }
+            if tool == .windows {
+                SnappingSection()
+            }
         }
         .formStyle(.grouped)
         .navigationTitle(tool.name)
