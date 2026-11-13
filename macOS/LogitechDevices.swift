@@ -46,7 +46,7 @@ import Observation
     private static func applyMouseTool(to device: LogitechDevice, on channel: HIDPPChannel) async {
         await GestureButton.takeOver(device, on: channel)
         await WheelResolution.shared.apply(to: device, on: channel)
-        await WheelRatchet.shared.apply(to: device, on: channel)
+        await WheelRatchet.apply(to: device, on: channel)
     }
 
     private func added(_ device: IOHIDDevice) {

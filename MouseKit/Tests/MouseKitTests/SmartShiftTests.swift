@@ -35,4 +35,14 @@ struct SmartShiftTests {
         #expect(SmartShift(parameters: [0x00, 0x0A]) == nil)
         #expect(SmartShift(parameters: [0x02]) == nil)
     }
+
+    @Test func theDefaultDisengageSpeedComesFromTheThirdByteOfTheReply() {
+        let reply: [UInt8] = [0x02, 0xFF, 0x0A]
+        #expect(SmartShift.ratchetDisengagingAtDefaultSpeed(from: reply) == SmartShift(mode: .ratchet, disengageSpeed: 10))
+    }
+
+    @Test func aReplyWithoutADefaultDisengageSpeedGivesNone() {
+        #expect(SmartShift.ratchetDisengagingAtDefaultSpeed(from: [0x02, 0xFF]) == nil)
+        #expect(SmartShift.ratchetDisengagingAtDefaultSpeed(from: [0x02, 0xFF, 0x00]) == nil)
+    }
 }
