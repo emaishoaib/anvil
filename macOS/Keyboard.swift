@@ -13,7 +13,10 @@ nonisolated final class Keyboard: @unchecked Sendable {
 
     func start() {
         let thread = Thread { [self] in
-            let mask = CGEventMask(1 << CGEventType.keyDown.rawValue | 1 << CGEventType.flagsChanged.rawValue)
+            let mask = CGEventMask(
+                1 << CGEventType.keyDown.rawValue | 1 << CGEventType.flagsChanged.rawValue
+                    | 1 << CGEventType.otherMouseDown.rawValue | 1 << CGEventType.otherMouseUp.rawValue
+            )
             tap = CGEvent.tapCreate(
                 tap: .cgSessionEventTap,
                 place: .headInsertEventTap,
@@ -38,7 +41,13 @@ nonisolated final class Keyboard: @unchecked Sendable {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             return false
         }
-        guard !shortcutsPaused.withLock({ $0 }), let press = KeyPress(type, event) else { return false }
+        guard !shortcutsPaused.withLock({ $0 }) else { return false }
+        if type == .otherMouseDown || type == .otherMouseUp {
+            guard Tool.rules.isOn else { return false }
+            let number = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            return RuleKeys.shared.respond(toMouseButton: number, isDown: type == .otherMouseDown)
+        }
+        guard let press = KeyPress(type, event) else { return false }
         let responders = Tool.allCases.filter(\.isOn).compactMap(\.keyResponder)
         return responders.contains { $0.respond(to: press) }
     }

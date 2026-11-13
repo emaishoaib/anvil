@@ -17,9 +17,7 @@ struct RuleEditor: View {
         VStack(spacing: 0) {
             Form {
                 Section("When") {
-                    LabeledContent("Shortcut") {
-                        ShortcutRecorder(combo: draft.trigger, requiresModifier: false) { draft.trigger = $0 }
-                    }
+                    RuleTriggerFields(draft: $draft)
                 }
                 Section("In") {
                     RuleAppsPicker(apps: $draft.apps)

@@ -34,6 +34,13 @@ struct RulesTests {
         #expect(rules.rule(for: .shortcut(Keystroke(keyCode: 4, modifiers: 9)), in: obsidian) == nil)
     }
 
+    @Test func aMouseButtonRuleMatchesOnlyThatButton() {
+        let back = Rule(trigger: .mouseButton(number: 3), apps: .only(bundleIDs: [obsidian]), action: findAndReplace)
+        let rules = Rules([back])
+        #expect(rules.rule(for: .mouseButton(number: 3), in: obsidian) == back)
+        #expect(rules.rule(for: .mouseButton(number: 4), in: obsidian) == nil)
+    }
+
     @Test func savingANewRuleAddsItAtTheEnd() {
         let first = Rule(trigger: commandH, action: findAndReplace)
         let second = Rule(trigger: commandH, apps: .only(bundleIDs: [obsidian]), action: history)

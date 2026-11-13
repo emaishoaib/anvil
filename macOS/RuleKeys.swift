@@ -29,6 +29,13 @@ nonisolated final class RuleKeys: KeyResponder {
         rules.withLock { $0 = newRules }
     }
 
+    func respond(toMouseButton number: Int, isDown: Bool) -> Bool {
+        let bundleID = frontmostBundleID.withLock { $0 }
+        guard let rule = rules.withLock({ $0.rule(for: .mouseButton(number: number), in: bundleID) }) else { return false }
+        if isDown { RuleActions.perform(rule.action) }
+        return true
+    }
+
     func respond(to press: KeyPress) -> Bool {
         guard press.kind == .keyDown, !press.isFromAnvil else { return false }
         let bundleID = frontmostBundleID.withLock { $0 }
