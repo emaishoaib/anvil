@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             RulesFolder.shared.start()
             Keyboard.shared.start()
             MouseWheel.shared.start()
+            LogitechDevices.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()
             Watcher.shared.start()

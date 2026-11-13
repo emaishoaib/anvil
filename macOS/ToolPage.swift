@@ -34,6 +34,7 @@ struct ToolPage: View {
             }
             if tool == .mouse {
                 ScrollingSection()
+                LogitechSection()
             }
             if tool == .rules {
                 RulesFolderSection()
