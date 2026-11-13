@@ -54,4 +54,34 @@ struct QuickLinkTests {
         #expect(link.match(for: "asig") == .namePrefix)
         #expect(link.match(for: "twitter") == nil)
     }
+
+    @Test func placeholdersAreTheWordsInBracesInOrder() {
+        let link = QuickLink(name: "Maps", link: "https://maps.example.com/{From}/{To}?from={From}")
+        #expect(link.placeholders == ["From", "To"])
+    }
+
+    @Test func aLinkHasAtMostThreePlaceholders() {
+        let link = QuickLink(name: "Many", link: "https://example.com/{A}/{B}/{C}/{D}")
+        #expect(link.placeholders == ["A", "B", "C"])
+    }
+
+    @Test func typedTextIsEncodedIntoTheLink() {
+        let link = QuickLink(name: "Search Google", link: "https://google.com/search?q={Query}")
+        #expect(link.target(filling: ["cats & dogs"]) == URL(string: "https://google.com/search?q=cats%20%26%20dogs"))
+    }
+
+    @Test func everyCopyOfAPlaceholderIsFilled() {
+        let link = QuickLink(name: "Maps", link: "https://example.com/{Place}?near={Place}")
+        #expect(link.target(filling: ["york"]) == URL(string: "https://example.com/york?near=york"))
+    }
+
+    @Test func placeholdersLeftEmptyAreRemoved() {
+        let link = QuickLink(name: "Search Google", link: "https://google.com/search?q={Query}")
+        #expect(link.target == URL(string: "https://google.com/search?q="))
+    }
+
+    @Test func aFilePathIsFilledWithoutEncoding() {
+        let link = QuickLink(name: "Repo", link: "/Users/me/repos/{Repo}")
+        #expect(link.target(filling: ["my repo"]) == URL(filePath: "/Users/me/repos/my repo"))
+    }
 }

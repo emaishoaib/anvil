@@ -17,9 +17,16 @@ struct QuickLinkEditor: View {
     var body: some View {
         VStack(spacing: 0) {
             Form {
-                TextField("Name", text: $draft.name, prompt: Text("Quick link name"))
-                LinkField(link: $draft.link)
-                OpenWithPicker(link: draft, selection: $draft.openWith)
+                Section {
+                    TextField("Name", text: $draft.name, prompt: Text("Quick link name"))
+                    LinkField(link: $draft.link)
+                } footer: {
+                    Text("Put {Query} in the link to type something in when you open it. The word in the braces is the hint you see, and a link can have up to \(QuickLink.placeholderLimit).")
+                        .foregroundStyle(.secondary)
+                }
+                Section {
+                    OpenWithPicker(link: draft, selection: $draft.openWith)
+                }
             }
             .formStyle(.grouped)
             HStack {
@@ -45,7 +52,7 @@ private struct LinkField: View {
 
     var body: some View {
         HStack {
-            TextField("Link", text: $link, prompt: Text("https://google.com/search?q=…"))
+            TextField("Link", text: $link, prompt: Text("https://google.com/search?q={Query}"))
             Button("Choose a File or Folder", systemImage: "folder", action: choose)
                 .buttonStyle(.borderless)
                 .labelStyle(.iconOnly)

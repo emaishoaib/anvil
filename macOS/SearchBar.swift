@@ -27,13 +27,14 @@ final class SearchBar {
         panel.setFrame(frame, display: true)
     }
 
-    func handleKey(_ keyCode: Int) -> Bool {
+    func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         switch keyCode {
+        case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_UpArrow: model.moveSelection(by: -1)
         case kVK_DownArrow: model.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.openSelected()
-        case kVK_Escape: if !model.goBack() { hide() }
-        case kVK_Delete: guard model.query.isEmpty, model.goBack() else { return false }
+        case kVK_Escape: if !model.leaveArguments(), !model.goBack() { hide() }
+        case kVK_Delete: guard model.field == .query, model.query.isEmpty, model.goBack() else { return false }
         default: return false
         }
         return true

@@ -1,6 +1,8 @@
 import Foundation
 
 public struct QuickLink: Identifiable, Hashable, Codable, Sendable {
+    public static let placeholderLimit = 3
+
     public var id: UUID
     public var name: String
     public var link: String
@@ -37,12 +39,31 @@ public struct QuickLink: Identifiable, Hashable, Codable, Sendable {
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 
-    public var target: URL? {
-        if isFilePath { return URL(filePath: (link as NSString).expandingTildeInPath) }
-        return URL(string: link)
+    public var placeholders: [String] {
+        var names: [String] = []
+        for match in link.matches(of: /\{([^{}]+)\}/) where !names.contains(String(match.1)) {
+            names.append(String(match.1))
+        }
+        return Array(names.prefix(Self.placeholderLimit))
+    }
+
+    public var target: URL? { target(filling: []) }
+
+    public func target(filling values: [String]) -> URL? {
+        var filled = link
+        for (name, value) in zip(placeholders, values) {
+            filled = filled.replacingOccurrences(of: "{\(name)}", with: isFilePath ? value : Self.encoded(value))
+        }
+        filled.replace(/\{[^{}]+\}/, with: "")
+        if isFilePath { return URL(filePath: (filled as NSString).expandingTildeInPath) }
+        return URL(string: filled)
     }
 
     public func match(for query: String) -> NameMatch? {
         NameMatch(name: name, query: query)
+    }
+
+    private static func encoded(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(CharacterSet(charactersIn: "-._~"))) ?? value
     }
 }
