@@ -29,6 +29,8 @@ packages:
     path: LauncherKit
   WindowKit:
     path: WindowKit
+  RulesKit:
+    path: RulesKit
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     from: 2.10.1
@@ -43,6 +45,7 @@ targets:
     dependencies:
       - package: LauncherKit
       - package: WindowKit
+      - package: RulesKit
       - package: Sparkle
     info:
       path: macOS/Info.plist
