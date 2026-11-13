@@ -32,6 +32,9 @@ struct ToolPage: View {
             if tool == .windows {
                 SnappingSection()
             }
+            if tool == .mouse {
+                ScrollingSection()
+            }
             if tool == .rules {
                 RulesFolderSection()
                 RulesSection()

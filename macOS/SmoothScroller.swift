@@ -4,14 +4,13 @@ import MouseKit
 final class SmoothScroller: NSObject {
     static let shared = SmoothScroller()
 
-    private static let settings = ScrollSettings(durationFrames: 12, brakeFrame: 4, pointsPerTick: 90, acceleration: 0.4)
-
-    private var scroll = SmoothScroll(settings: settings)
+    private var scroll = SmoothScroll(settings: ScrollingSettings.defaults)
     private var displayLink: CADisplayLink?
 
     func add(ticks: Int, atSeconds time: Double) {
+        guard displayLink == nil else { return scroll.add(ticks: ticks, atSeconds: time) }
+        scroll.settings = ScrollingSettings.current
         scroll.add(ticks: ticks, atSeconds: time)
-        guard displayLink == nil else { return }
         startFrames()
     }
 
