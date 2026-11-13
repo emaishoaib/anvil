@@ -14,6 +14,8 @@ struct RulesFolderSection: View {
                 Button("Choose Folder…") { folder.choose() }
                 if folder.url != nil {
                     Button("Use Anvil's Settings") { folder.useSettings() }
+                    Spacer()
+                    Button("Reload", systemImage: "arrow.clockwise") { folder.reload() }
                 }
             }
         } footer: {

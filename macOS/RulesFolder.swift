@@ -35,11 +35,11 @@ import Observation
     private func use(_ folder: URL?) {
         RuleStorage.folder = folder
         url = folder
-        reloadAll()
+        reload()
         watch()
     }
 
-    private func reloadAll() {
+    func reload() {
         RuleLibrary.shared.reload()
         KeySwapLibrary.shared.reload()
     }
@@ -54,7 +54,7 @@ import Observation
         guard let url else { return }
         let created = FSEventStreamCreate(
             nil,
-            { _, _, _, _, _, _ in MainActor.assumeIsolated { RulesFolder.shared.reloadAll() } },
+            { _, _, _, _, _, _ in MainActor.assumeIsolated { RulesFolder.shared.reload() } },
             nil,
             [url.path] as CFArray,
             FSEventStreamEventId(kFSEventStreamEventIdSinceNow),
