@@ -27,9 +27,9 @@ struct SearchFooter: View {
                     CommandIcon(command: .defineWord)
                     Text(word.text)
                         .foregroundStyle(.secondary)
-                case .quickLinkForm:
+                case .quickLinkForm(let kind, _):
                     CommandIcon(command: .createQuickLink)
-                    Text(LauncherCommand.createQuickLink.name)
+                    Text(kind.title)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -52,7 +52,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if case .wordEntry = mode { return "Open in Dictionary" }
-        if case .quickLinkForm = mode { return LauncherCommand.createQuickLink.name }
+        if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         return switch selected {
         case .answer: "Copy Answer"
         case .app: "Open Application"

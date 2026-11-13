@@ -93,10 +93,22 @@ import Observation
         case .wordEntry(_, let wordQuery):
             mode = .defineWord
             query = wordQuery
-        case .quickLinkForm(let previousQuery):
+        case .quickLinkForm(_, let previousQuery):
             mode = .launcher
             query = previousQuery
         }
+        return true
+    }
+
+    func editSelectedLink() -> Bool {
+        guard case .quickLink(let link) = selectedResult else { return false }
+        showForm(.edit, for: link, returningTo: query)
+        return true
+    }
+
+    func duplicateSelectedLink() -> Bool {
+        guard case .quickLink(let link) = selectedResult else { return false }
+        showForm(.duplicate, for: link.duplicate, returningTo: query)
         return true
     }
 
@@ -137,9 +149,14 @@ import Observation
         case .defineWord:
             mode = .defineWord
         case .createQuickLink:
-            draft = QuickLink()
-            mode = .quickLinkForm(query: "")
+            showForm(.create, for: QuickLink(), returningTo: "")
         }
+        query = ""
+    }
+
+    private func showForm(_ kind: QuickLinkFormKind, for link: QuickLink, returningTo previousQuery: String) {
+        draft = link
+        mode = .quickLinkForm(kind, query: previousQuery)
         query = ""
     }
 

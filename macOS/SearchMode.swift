@@ -4,7 +4,7 @@ enum SearchMode: Equatable {
     case launcher
     case defineWord
     case wordEntry(Word, query: String)
-    case quickLinkForm(query: String)
+    case quickLinkForm(QuickLinkFormKind, query: String)
 
     var placeholder: String {
         switch self {

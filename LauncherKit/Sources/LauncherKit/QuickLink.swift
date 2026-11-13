@@ -15,6 +15,10 @@ public struct QuickLink: Identifiable, Hashable, Codable, Sendable {
         self.openWith = openWith
     }
 
+    public var duplicate: QuickLink {
+        QuickLink(name: "\(name) copy", link: link, openWith: openWith)
+    }
+
     public var launchKey: String { "quickLink:\(id.uuidString)" }
 
     public var isComplete: Bool {

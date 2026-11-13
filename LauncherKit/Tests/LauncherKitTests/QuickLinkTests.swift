@@ -84,4 +84,13 @@ struct QuickLinkTests {
         let link = QuickLink(name: "Repo", link: "/Users/me/repos/{Repo}")
         #expect(link.target(filling: ["my repo"]) == URL(filePath: "/Users/me/repos/my repo"))
     }
+
+    @Test func aDuplicateIsANewLinkNamedAsACopy() {
+        let original = QuickLink(name: "Listings", link: "https://facebook.com", openWith: URL(filePath: "/Applications/Safari.app"))
+        let copy = original.duplicate
+        #expect(copy.id != original.id)
+        #expect(copy.name == "Listings copy")
+        #expect(copy.link == original.link)
+        #expect(copy.openWith == original.openWith)
+    }
 }
