@@ -5,8 +5,9 @@ import Testing
 struct SnapZoneTests {
     let screen = CGRect(x: 0, y: 0, width: 1440, height: 900)
 
-    func action(at point: CGPoint, on screen: CGRect) -> WindowAction? {
-        SnapZone(at: point, on: screen)?.action(at: point, on: screen)
+    func action(at point: CGPoint, on screen: CGRect, previous: WindowAction? = nil) -> WindowAction? {
+        guard let zone = SnapZone(at: point, on: screen) else { return nil }
+        return zone.action(for: zone.defaultChoice, at: point, on: screen, previous: previous)
     }
 
     @Test func aPointerAwayFromTheEdgesIsInNoZone() {

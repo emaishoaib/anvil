@@ -58,7 +58,7 @@ final class DragSnapping {
     }
 
     private func follow(_ window: DraggedWindow, from previous: Target?) {
-        let target = Self.target(at: pointer)
+        let target = Self.target(at: pointer, after: previous?.action)
         state = .moving(window, target: target)
         guard target != previous else { return }
         guard let target else { return footprint.hide() }
@@ -73,8 +73,11 @@ final class DragSnapping {
         state = .idle
     }
 
-    private static func target(at point: CGPoint) -> Target? {
-        guard let screen = NSScreen.under(point), let zone = SnapZone(at: point, on: screen.frameWithTopAtMinY) else { return nil }
-        return Target(action: zone.action(at: point, on: screen.frameWithTopAtMinY), area: screen.visibleFrameWithTopAtMinY)
+    private static func target(at point: CGPoint, after previous: WindowAction?) -> Target? {
+        guard let screen = NSScreen.under(point),
+              let zone = SnapZone(at: point, on: screen.frameWithTopAtMinY),
+              let action = zone.action(for: SnappingSettings.choice(for: zone), at: point, on: screen.frameWithTopAtMinY, previous: previous)
+        else { return nil }
+        return Target(action: action, area: screen.visibleFrameWithTopAtMinY)
     }
 }

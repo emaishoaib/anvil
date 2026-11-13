@@ -5,7 +5,7 @@ import WindowKit
 nonisolated final class WindowKeys: KeyResponder {
     static let shared = WindowKeys()
 
-    private let restore = Shortcut(combo: KeyCombo(keyCode: kVK_Delete, modifiers: [.control, .option]), action: "Restore the window from before its first snap")
+    private let restore = Shortcut(combo: KeyCombo(keyCode: kVK_Delete, modifiers: [.control, .option]), action: "Restore")
 
     var shortcuts: [Shortcut] { WindowAction.allCases.compactMap(\.shortcut) + [restore] }
 

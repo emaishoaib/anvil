@@ -1,6 +1,6 @@
 import CoreGraphics
 
-public enum SnapZone: Sendable, CaseIterable {
+public enum SnapZone: String, Sendable, CaseIterable {
     case topLeft, top, topRight, left, right, bottomLeft, bottom, bottomRight
 
     private static let edgeMarginPoints: CGFloat = 5
@@ -34,27 +34,6 @@ public enum SnapZone: Sendable, CaseIterable {
             self = .bottom
         } else {
             return nil
-        }
-    }
-
-    public func action(at point: CGPoint, on screenWithTopAtMinY: CGRect) -> WindowAction {
-        switch self {
-        case .topLeft: .topLeft
-        case .top: .maximize
-        case .topRight: .topRight
-        case .left: .leftHalf
-        case .right: .rightHalf
-        case .bottomLeft: .bottomLeft
-        case .bottom: Self.third(at: point.x, across: screenWithTopAtMinY)
-        case .bottomRight: .bottomRight
-        }
-    }
-
-    private static func third(at x: CGFloat, across screen: CGRect) -> WindowAction {
-        switch (x - screen.minX) / screen.width {
-        case ..<(1.0 / 3): .firstThird
-        case ..<(2.0 / 3): .centerThird
-        default: .lastThird
         }
     }
 }

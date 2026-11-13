@@ -1,4 +1,5 @@
 import SwiftUI
+import WindowKit
 
 enum SnappingSettings {
     static let snapsByDraggingKey = "windows.snapsByDragging"
@@ -7,6 +8,12 @@ enum SnappingSettings {
 
     static var snapsByDragging: Bool { UserDefaults.standard.object(forKey: snapsByDraggingKey) as? Bool ?? true }
     static var gap: CGFloat { UserDefaults.standard.double(forKey: gapKey) }
+
+    static func choiceKey(for zone: SnapZone) -> String { "windows.zone.\(zone.rawValue)" }
+
+    static func choice(for zone: SnapZone) -> ZoneChoice {
+        UserDefaults.standard.string(forKey: choiceKey(for: zone)).flatMap(ZoneChoice.init(rawValue:)) ?? zone.defaultChoice
+    }
 }
 
 struct SnappingSection: View {
@@ -25,5 +32,11 @@ struct SnappingSection: View {
                 }
             }
         }
+        Section("Snap Zones") {
+            ForEach(SnapZone.allCases, id: \.self) { zone in
+                SnapZoneRow(zone: zone)
+            }
+        }
+        .disabled(!snapsByDragging)
     }
 }

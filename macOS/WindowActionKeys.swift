@@ -3,7 +3,7 @@ import WindowKit
 
 nonisolated extension WindowAction {
     var shortcut: Shortcut? {
-        combo.map { Shortcut(combo: $0, action: name) }
+        combo.map { Shortcut(combo: $0, action: title) }
     }
 
     private var combo: KeyCombo? {
@@ -32,26 +32,26 @@ nonisolated extension WindowAction {
         }
     }
 
-    private var name: String {
+    var title: String {
         switch self {
-        case .leftHalf: "Snap to the left half"
-        case .rightHalf: "Snap to the right half"
-        case .centerHalf: "Snap to the center half"
-        case .topHalf: "Snap to the top half"
-        case .bottomHalf: "Snap to the bottom half"
-        case .topLeft: "Snap to the top left corner"
-        case .topRight: "Snap to the top right corner"
-        case .bottomLeft: "Snap to the bottom left corner"
-        case .bottomRight: "Snap to the bottom right corner"
-        case .firstThird: "Snap to the first third"
-        case .centerThird: "Snap to the center third"
-        case .lastThird: "Snap to the last third"
-        case .firstTwoThirds: "Snap to the first two thirds"
-        case .lastTwoThirds: "Snap to the last two thirds"
+        case .leftHalf: "Left half"
+        case .rightHalf: "Right half"
+        case .centerHalf: "Center half"
+        case .topHalf: "Top half"
+        case .bottomHalf: "Bottom half"
+        case .topLeft: "Top left corner"
+        case .topRight: "Top right corner"
+        case .bottomLeft: "Bottom left corner"
+        case .bottomRight: "Bottom right corner"
+        case .firstThird: "First third"
+        case .centerThird: "Center third"
+        case .lastThird: "Last third"
+        case .firstTwoThirds: "First two thirds"
+        case .lastTwoThirds: "Last two thirds"
         case .maximize: "Maximize"
         case .almostMaximize: "Almost maximize"
-        case .maximizeHeight: "Maximize the height"
-        case .center: "Center on the screen"
+        case .maximizeHeight: "Maximize height"
+        case .center: "Center"
         case .makeSmaller: "Make smaller"
         case .makeLarger: "Make larger"
         case .moveLeft: "Move to the left edge"
