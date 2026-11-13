@@ -37,7 +37,7 @@ struct ToolPage: View {
         .navigationTitle(tool.name)
         .onChange(of: isOn) {
             guard tool == .keepAwake, !isOn else { return }
-            KeepAwake.shared.stop()
+            Task { await KeepAwake.shared.stop() }
         }
     }
 }

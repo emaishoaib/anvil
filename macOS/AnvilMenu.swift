@@ -6,7 +6,15 @@ struct AnvilMenu: View {
 
     var body: some View {
         if usesKeepAwake {
-            Toggle("Keep Awake", isOn: Binding(get: { KeepAwake.shared.isActive }, set: { KeepAwake.shared.setActive($0) }))
+            Toggle("Keep Awake", isOn: Binding(
+                get: { KeepAwake.shared.isActive },
+                set: { isActive in Task { await KeepAwake.shared.setActive(isActive) } }
+            ))
+            Toggle("Stay Awake with Lid Closed", isOn: Binding(
+                get: { KeepAwake.shared.staysAwakeWithLidClosed },
+                set: { withLidClosed in Task { await KeepAwake.shared.setStaysAwakeWithLidClosed(withLidClosed) } }
+            ))
+            .disabled(!KeepAwake.shared.isActive)
             Divider()
         }
         Button("Settings…") {

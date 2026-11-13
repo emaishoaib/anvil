@@ -3,18 +3,35 @@ import Observation
 
 @Observable
 final class KeepAwake {
+    enum State {
+        case off
+        case awake(IOPMAssertionID, withLidClosed: Bool)
+    }
+
     static let shared = KeepAwake()
 
-    private(set) var assertion: IOPMAssertionID?
+    private(set) var state = State.off
 
-    var isActive: Bool { assertion != nil }
+    var isActive: Bool {
+        switch state {
+        case .off: false
+        case .awake: true
+        }
+    }
 
-    func setActive(_ isActive: Bool) {
-        isActive ? start() : stop()
+    var staysAwakeWithLidClosed: Bool {
+        switch state {
+        case .off: false
+        case .awake(_, let withLidClosed): withLidClosed
+        }
+    }
+
+    func setActive(_ isActive: Bool) async {
+        if isActive { start() } else { await stop() }
     }
 
     func start() {
-        guard assertion == nil else { return }
+        guard case .off = state else { return }
         var id = IOPMAssertionID(0)
         let result = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
@@ -23,12 +40,20 @@ final class KeepAwake {
             &id
         )
         guard result == kIOReturnSuccess else { return }
-        assertion = id
+        state = .awake(id, withLidClosed: false)
     }
 
-    func stop() {
-        guard let assertion else { return }
+    func stop() async {
+        guard case .awake(_, let withLidClosed) = state else { return }
+        if withLidClosed { guard await LidSleep.setDisabled(false) else { return } }
+        guard case .awake(let assertion, _) = state else { return }
         IOPMAssertionRelease(assertion)
-        self.assertion = nil
+        state = .off
+    }
+
+    func setStaysAwakeWithLidClosed(_ withLidClosed: Bool) async {
+        guard isActive, withLidClosed != staysAwakeWithLidClosed, await LidSleep.setDisabled(withLidClosed),
+              case .awake(let assertion, _) = state else { return }
+        state = .awake(assertion, withLidClosed: withLidClosed)
     }
 }

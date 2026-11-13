@@ -38,6 +38,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             TitleBarClicks.shared.start()
         }
     }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard KeepAwake.shared.staysAwakeWithLidClosed else { return .terminateNow }
+        Task {
+            await KeepAwake.shared.stop()
+            sender.reply(toApplicationShouldTerminate: !KeepAwake.shared.staysAwakeWithLidClosed)
+        }
+        return .terminateLater
+    }
 }
 
 enum WindowID {
