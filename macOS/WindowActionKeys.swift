@@ -3,7 +3,7 @@ import WindowKit
 
 nonisolated extension WindowAction {
     var shortcut: Shortcut? {
-        combo.map { Shortcut(combo: $0, action: "Snap to the \(place)") }
+        combo.map { Shortcut(combo: $0, action: name) }
     }
 
     private var combo: KeyCombo? {
@@ -22,25 +22,33 @@ nonisolated extension WindowAction {
         case .lastThird: KeyCombo(keyCode: kVK_ANSI_G, modifiers: [.control, .option])
         case .firstTwoThirds: KeyCombo(keyCode: kVK_ANSI_E, modifiers: [.control, .option])
         case .lastTwoThirds: KeyCombo(keyCode: kVK_ANSI_T, modifiers: [.control, .option])
+        case .maximize: KeyCombo(keyCode: kVK_Return, modifiers: [.control, .option])
+        case .almostMaximize: nil
+        case .maximizeHeight: KeyCombo(keyCode: kVK_UpArrow, modifiers: [.control, .option, .shift])
+        case .center: KeyCombo(keyCode: kVK_ANSI_C, modifiers: [.control, .option])
         }
     }
 
-    private var place: String {
+    private var name: String {
         switch self {
-        case .leftHalf: "left half"
-        case .rightHalf: "right half"
-        case .centerHalf: "center half"
-        case .topHalf: "top half"
-        case .bottomHalf: "bottom half"
-        case .topLeft: "top left corner"
-        case .topRight: "top right corner"
-        case .bottomLeft: "bottom left corner"
-        case .bottomRight: "bottom right corner"
-        case .firstThird: "first third"
-        case .centerThird: "center third"
-        case .lastThird: "last third"
-        case .firstTwoThirds: "first two thirds"
-        case .lastTwoThirds: "last two thirds"
+        case .leftHalf: "Snap to the left half"
+        case .rightHalf: "Snap to the right half"
+        case .centerHalf: "Snap to the center half"
+        case .topHalf: "Snap to the top half"
+        case .bottomHalf: "Snap to the bottom half"
+        case .topLeft: "Snap to the top left corner"
+        case .topRight: "Snap to the top right corner"
+        case .bottomLeft: "Snap to the bottom left corner"
+        case .bottomRight: "Snap to the bottom right corner"
+        case .firstThird: "Snap to the first third"
+        case .centerThird: "Snap to the center third"
+        case .lastThird: "Snap to the last third"
+        case .firstTwoThirds: "Snap to the first two thirds"
+        case .lastTwoThirds: "Snap to the last two thirds"
+        case .maximize: "Maximize"
+        case .almostMaximize: "Almost maximize"
+        case .maximizeHeight: "Maximize the height"
+        case .center: "Center on the screen"
         }
     }
 }

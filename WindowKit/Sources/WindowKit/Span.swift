@@ -2,6 +2,7 @@ import CoreGraphics
 
 struct Span: Sendable {
     static let whole = Span(0, 1)
+    static let almostWhole = Span(0.05, 0.95)
     static let firstHalf = Span(0, 1.0 / 2)
     static let lastHalf = Span(1.0 / 2, 1)
     static let centerHalf = Span(1.0 / 4, 3.0 / 4)

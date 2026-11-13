@@ -8,6 +8,6 @@ enum Snapping {
               let frame = window.frame,
               let screen = NSScreen.holding(frame)
         else { return }
-        window.move(to: action.frame(in: screen.visibleFrameWithTopAtMinY))
+        window.move(to: action.frame(from: frame, in: screen.visibleFrameWithTopAtMinY))
     }
 }
