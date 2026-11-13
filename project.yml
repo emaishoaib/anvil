@@ -25,6 +25,8 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 
 packages:
+  LauncherKit:
+    path: LauncherKit
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     from: 2.10.1
@@ -37,6 +39,7 @@ targets:
       - macOS
       - Icon/AppIcon.icon
     dependencies:
+      - package: LauncherKit
       - package: Sparkle
     info:
       path: macOS/Info.plist

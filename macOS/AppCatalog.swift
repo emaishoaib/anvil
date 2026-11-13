@@ -1,5 +1,6 @@
 import CoreServices
 import Foundation
+import LauncherKit
 import Observation
 
 @Observable final class AppCatalog {
@@ -11,7 +12,6 @@ import Observation
         URL.homeDirectory.appending(path: "Applications"),
     ]
     private static let finder = URL(filePath: "/System/Library/CoreServices/Finder.app")
-    private static let folderDepth = 2
     private static let watchLatencySeconds = 1.0
 
     private(set) var apps: [InstalledApp] = []
@@ -23,17 +23,11 @@ import Observation
     }
 
     func matches(_ query: String) -> [InstalledApp] {
-        let query = query.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else { return [] }
-        let counts = LaunchCounts.all
-        return apps
-            .compactMap { app in app.match(for: query).map { (app: app, match: $0, launches: counts[app.url.path] ?? 0) } }
-            .sorted { (-$0.launches, $0.match.rawValue, $0.app.name.localizedLowercase) < (-$1.launches, $1.match.rawValue, $1.app.name.localizedLowercase) }
-            .map(\.app)
+        AppRanking.matches(for: query, in: apps, launchCounts: SavedLaunchCounts.load())
     }
 
     private func reload() {
-        let urls = Set(Self.folders.flatMap(Self.apps(in:)) + [Self.finder])
+        let urls = Set(Self.folders.flatMap { AppScanner.apps(in: $0) } + [Self.finder])
         apps = urls.map(InstalledApp.init(url:)).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
@@ -52,15 +46,5 @@ import Observation
         FSEventStreamSetDispatchQueue(created, .main)
         FSEventStreamStart(created)
         stream = created
-    }
-
-    private static func apps(in folder: URL) -> [URL] {
-        guard let items = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: nil, options: .skipsPackageDescendants) else { return [] }
-        var apps: [URL] = []
-        for case let url as URL in items {
-            if items.level >= folderDepth { items.skipDescendants() }
-            if url.pathExtension == "app" { apps.append(url) }
-        }
-        return apps
     }
 }

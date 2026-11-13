@@ -1,3 +1,4 @@
+import LauncherKit
 import SwiftUI
 
 struct SearchResults: View {

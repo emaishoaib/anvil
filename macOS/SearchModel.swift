@@ -1,4 +1,5 @@
 import AppKit
+import LauncherKit
 import Observation
 
 @Observable final class SearchModel {
@@ -22,7 +23,7 @@ import Observation
     }
 
     func open(_ app: InstalledApp) {
-        LaunchCounts.record(app)
+        SavedLaunchCounts.record(app)
         NSWorkspace.shared.openApplication(at: app.url, configuration: NSWorkspace.OpenConfiguration())
         SearchBar.shared.hide()
     }
