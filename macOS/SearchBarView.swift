@@ -19,21 +19,21 @@ struct SearchBarView: View {
                 Divider()
                 EntryView(page: model.entryPage)
                     .frame(height: Self.entryHeight)
-                SearchFooter(mode: model.mode, selected: nil)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else if case .quickLinkForm = model.mode {
                 Divider()
                 QuickLinkForm(draft: $model.draft)
-                SearchFooter(mode: model.mode, selected: nil)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else {
                 Divider()
                 SearchResults(model: model)
-                    .overlay(alignment: .bottomTrailing) {
+                    .overlay(alignment: actionPanelAlignment) {
                         if let panel = model.actionPanel {
                             ActionPanelView(panel: panel, focus: $focus, perform: model.perform)
                                 .padding(Self.actionPanelPadding)
                         }
                     }
-                SearchFooter(mode: model.mode, selected: model.selectedResult)
+                SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
             }
         }
         .frame(width: Self.width)
@@ -44,5 +44,9 @@ struct SearchBarView: View {
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }
         .onChange(of: focus) { if let focus { model.field = focus } }
+    }
+
+    private var actionPanelAlignment: Alignment {
+        if case .anvil = model.actionPanel?.subject { .bottomLeading } else { .bottomTrailing }
     }
 }

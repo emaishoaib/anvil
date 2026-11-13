@@ -35,4 +35,8 @@ enum AnvilAction: CaseIterable {
         guard !filter.isEmpty else { return available }
         return available.filter { NameMatch(name: $0.name, query: filter) != nil }
     }
+
+    static func forShortcut(_ combo: KeyCombo) -> AnvilAction? {
+        allCases.first { $0.shortcut == combo }
+    }
 }

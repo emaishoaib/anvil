@@ -70,7 +70,16 @@ final class SearchBar {
 
     private func handleActionKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
-        if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
+        let combo = Self.combo(keyCode, modifiers)
+        switch model.actionPanel?.subject {
+        case .anvil:
+            if let action = AnvilAction.forShortcut(combo) {
+                model.perform(.anvil(action))
+                return true
+            }
+        case .quickLink, nil:
+            if let action = QuickLinkAction.forShortcut(combo) { return model.run(action) }
+        }
         switch keyCode {
         case kVK_UpArrow: model.actionPanel?.moveSelection(by: -1)
         case kVK_DownArrow: model.actionPanel?.moveSelection(by: 1)

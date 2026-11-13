@@ -145,6 +145,12 @@ import Observation
         return true
     }
 
+    func toggleAnvilActions() {
+        if case .anvil = actionPanel?.subject { return closeActions() }
+        actionPanel = ActionPanel(subject: .anvil)
+        field = .actionFilter
+    }
+
     func showActions(for link: QuickLink, page: ActionPanel.Page) {
         actionPanel = ActionPanel(subject: .quickLink(link), page: page)
         field = .actionFilter
