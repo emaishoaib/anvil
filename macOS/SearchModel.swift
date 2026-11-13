@@ -5,12 +5,16 @@ import Observation
 @Observable final class SearchModel {
     var query = "" {
         didSet {
-            results = AppCatalog.shared.matches(query)
+            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, launchCounts: SavedLaunchCounts.load())
             selected = 0
         }
     }
-    private(set) var results: [InstalledApp] = []
+    private(set) var results: [SearchResult] = []
     private(set) var selected = 0
+
+    var selectedResult: SearchResult? {
+        results.indices.contains(selected) ? results[selected] : nil
+    }
 
     func moveSelection(by offset: Int) {
         guard !results.isEmpty else { return }
@@ -22,9 +26,21 @@ import Observation
         open(results[selected])
     }
 
-    func open(_ app: InstalledApp) {
+    func open(_ result: SearchResult) {
+        switch result {
+        case .answer(let answer): copy(answer.copyText)
+        case .app(let app): launch(app)
+        }
+        SearchBar.shared.hide()
+    }
+
+    private func copy(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    private func launch(_ app: InstalledApp) {
         SavedLaunchCounts.record(app)
         NSWorkspace.shared.openApplication(at: app.url, configuration: NSWorkspace.OpenConfiguration())
-        SearchBar.shared.hide()
     }
 }

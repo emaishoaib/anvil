@@ -22,10 +22,6 @@ import Observation
         watch()
     }
 
-    func matches(_ query: String) -> [InstalledApp] {
-        AppRanking.matches(for: query, in: apps, launchCounts: SavedLaunchCounts.load())
-    }
-
     private func reload() {
         let urls = Set(Self.folders.flatMap { AppScanner.apps(in: $0) } + [Self.finder])
         apps = urls.map(InstalledApp.init(url:)).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }

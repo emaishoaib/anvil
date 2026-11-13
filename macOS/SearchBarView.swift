@@ -20,6 +20,7 @@ struct SearchBarView: View {
             if !model.results.isEmpty {
                 Divider()
                 SearchResults(model: model)
+                SearchFooter(selected: model.selectedResult)
             }
         }
         .frame(width: Self.width)
