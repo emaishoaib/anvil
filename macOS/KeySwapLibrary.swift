@@ -5,13 +5,15 @@ import RulesKit
 @Observable final class KeySwapLibrary {
     static let shared = KeySwapLibrary()
 
-    private static let key = "rules.keySwaps"
+    private static let file = "key-swaps.json"
+    private static let settingsKey = "rules.keySwaps"
     private static let builtInKeyboard = #"{"Built-In":true,"PrimaryUsagePage":1,"PrimaryUsage":6}"#
 
-    private(set) var swaps: [KeySwap]
+    private(set) var swaps: [KeySwap] = []
+    private(set) var loadProblem: String?
 
     private init() {
-        swaps = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode([KeySwap].self, from: $0) } ?? []
+        reload()
     }
 
     func start() {
@@ -33,6 +35,18 @@ import RulesKit
         persist()
     }
 
+    func reload() {
+        let before = swaps
+        do {
+            loadProblem = nil
+            guard let saved = try RuleStorage.load([KeySwap].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            swaps = saved
+            if swaps != before { apply() }
+        } catch {
+            loadProblem = RuleStorage.problem(reading: Self.file)
+        }
+    }
+
     func apply() {
         guard Tool.rules.isOn else { return }
         let process = Process()
@@ -42,7 +56,8 @@ import RulesKit
     }
 
     private func persist() {
-        UserDefaults.standard.set(try? JSONEncoder().encode(swaps), forKey: Self.key)
+        guard loadProblem == nil else { return }
+        RuleStorage.save(swaps, file: Self.file, settingsKey: Self.settingsKey)
         apply()
     }
 }

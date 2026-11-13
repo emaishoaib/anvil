@@ -7,6 +7,10 @@ struct KeySwapsSection: View {
 
     var body: some View {
         Section {
+            if let problem = library.loadProblem {
+                Label(problem, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
             ForEach(library.swaps) { swap in
                 HStack {
                     Text(HIDKeys.name(for: swap.first))
@@ -20,6 +24,7 @@ struct KeySwapsSection: View {
                 }
             }
             Button("Add Key Swap…") { isAdding = true }
+                .disabled(library.loadProblem != nil)
         } header: {
             Text("Key Swaps")
         } footer: {

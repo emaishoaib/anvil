@@ -8,13 +8,19 @@ struct RulesSection: View {
 
     var body: some View {
         Section("Rules") {
-            if library.all.isEmpty {
+            if let problem = library.loadProblem {
+                Label(problem, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            } else if library.all.isEmpty {
                 Text("No rules yet").foregroundStyle(.secondary)
             }
-            ForEach(library.all) { rule in
-                RuleRow(rule: rule, edit: { editing = RuleDraft(rule) }, delete: { deleting = rule })
+            Group {
+                ForEach(library.all) { rule in
+                    RuleRow(rule: rule, edit: { editing = RuleDraft(rule) }, delete: { deleting = rule })
+                }
+                Button("Add Rule…") { editing = RuleDraft() }
             }
-            Button("Add Rule…") { editing = RuleDraft() }
+            .disabled(library.loadProblem != nil)
         }
         .sheet(item: $editing) { draft in
             RuleEditor(draft: draft, isNew: !library.contains(draft.id), save: library.save)

@@ -5,13 +5,14 @@ import RulesKit
 @Observable final class RuleLibrary {
     static let shared = RuleLibrary()
 
-    private static let key = "rules.rules"
+    private static let file = "rules.json"
+    private static let settingsKey = "rules.rules"
 
-    private(set) var rules: Rules
+    private(set) var rules = Rules()
+    private(set) var loadProblem: String?
 
     private init() {
-        let saved = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode([Rule].self, from: $0) }
-        rules = Rules(saved ?? [])
+        reload()
     }
 
     var all: [Rule] { rules.rules }
@@ -30,8 +31,20 @@ import RulesKit
         persist()
     }
 
+    func reload() {
+        do {
+            loadProblem = nil
+            guard let saved = try RuleStorage.load([Rule].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            rules = Rules(saved)
+            RuleKeys.shared.use(rules)
+        } catch {
+            loadProblem = RuleStorage.problem(reading: Self.file)
+        }
+    }
+
     private func persist() {
         RuleKeys.shared.use(rules)
-        UserDefaults.standard.set(try? JSONEncoder().encode(rules.rules), forKey: Self.key)
+        guard loadProblem == nil else { return }
+        RuleStorage.save(rules.rules, file: Self.file, settingsKey: Self.settingsKey)
     }
 }

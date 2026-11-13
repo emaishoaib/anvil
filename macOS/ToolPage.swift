@@ -33,6 +33,7 @@ struct ToolPage: View {
                 SnappingSection()
             }
             if tool == .rules {
+                RulesFolderSection()
                 RulesSection()
                 KeySwapsSection()
             }
