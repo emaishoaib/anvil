@@ -146,7 +146,7 @@ import Observation
     }
 
     func showActions(for link: QuickLink, page: ActionPanel.Page) {
-        actionPanel = ActionPanel(link: link, page: page)
+        actionPanel = ActionPanel(subject: .quickLink(link), page: page)
         field = .actionFilter
     }
 

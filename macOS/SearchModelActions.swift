@@ -1,3 +1,4 @@
+import AppKit
 import LauncherKit
 
 extension SearchModel {
@@ -34,20 +35,38 @@ extension SearchModel {
     }
 
     func perform(_ item: ActionPanel.Item) {
-        guard let link = actionPanel?.link else { return }
+        let link = actionPanel?.link
         switch item {
         case .action(let action):
             _ = run(action)
         case .app(let app):
+            guard let link else { return }
             closeActions()
             open(link, filling: arguments.values, in: app)
             SearchBar.shared.hide()
         case .confirmDelete:
+            guard let link else { return }
             QuickLinkLibrary.shared.delete(link)
             closeActions()
             reloadResults()
         case .cancel:
             closeActions()
+        case .anvil(let action):
+            closeActions()
+            run(action)
+        }
+    }
+
+    private func run(_ action: AnvilAction) {
+        switch action {
+        case .settings:
+            SearchBar.shared.hide()
+            SettingsWindow.shared.show()
+        case .checkForUpdates:
+            SearchBar.shared.hide()
+            AppUpdater.shared.check()
+        case .quit:
+            NSApplication.shared.terminate(nil)
         }
     }
 

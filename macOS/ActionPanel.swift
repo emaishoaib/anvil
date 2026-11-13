@@ -3,6 +3,15 @@ import LauncherKit
 import Observation
 
 @Observable final class ActionPanel {
+    enum Subject {
+        case quickLink(QuickLink)
+        case anvil
+
+        var link: QuickLink? {
+            if case .quickLink(let link) = self { link } else { nil }
+        }
+    }
+
     enum Page {
         case actions, openWith, confirmDelete
     }
@@ -12,31 +21,41 @@ import Observation
         case app(URL)
         case confirmDelete
         case cancel
+        case anvil(AnvilAction)
     }
 
-    let link: QuickLink
+    private static let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+
+    let subject: Subject
     private(set) var page: Page
     private(set) var selected = 0
     var filter = "" {
         didSet { selected = 0 }
     }
 
-    init(link: QuickLink, page: Page = .actions) {
-        self.link = link
+    init(subject: Subject, page: Page = .actions) {
+        self.subject = subject
         self.page = page
     }
 
+    var link: QuickLink? { subject.link }
+
     var title: String {
-        page == .confirmDelete ? "Delete \(link.name)?" : link.name
+        switch subject {
+        case .quickLink(let link): page == .confirmDelete ? "Delete \(link.name)?" : link.name
+        case .anvil: "Anvil v\(Self.version)"
+        }
     }
 
     var items: [Item] {
-        switch page {
-        case .actions:
+        switch (subject, page) {
+        case (.anvil, _):
+            AnvilAction.matching(filter).map(Item.anvil)
+        case (.quickLink(let link), .actions):
             QuickLinkAction.matching(filter, appName: link.app?.appName).map(Item.action)
-        case .openWith:
+        case (.quickLink(let link), .openWith):
             link.appChoices.filter { filter.isEmpty || $0.appName.localizedStandardContains(filter) }.map(Item.app)
-        case .confirmDelete:
+        case (.quickLink, .confirmDelete):
             [.confirmDelete, .cancel]
         }
     }

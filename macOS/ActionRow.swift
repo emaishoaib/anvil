@@ -6,7 +6,7 @@ struct ActionRow: View {
     static let height: CGFloat = 36
 
     let item: ActionPanel.Item
-    let link: QuickLink
+    let link: QuickLink?
     let isSelected: Bool
 
     var body: some View {
@@ -30,20 +30,22 @@ struct ActionRow: View {
 
     @ViewBuilder private var icon: some View {
         switch item {
-        case .action(.open): QuickLinkIcon(link: link)
+        case .action(.open): if let link { QuickLinkIcon(link: link) }
         case .action(let action): Symbol(name: action.symbol, isDestructive: action.isDestructive)
         case .app(let app): AppIcon(path: app.path)
         case .confirmDelete: Symbol(name: "trash", isDestructive: true)
         case .cancel: Symbol(name: "xmark", isDestructive: false)
+        case .anvil(let action): Symbol(name: action.symbol, isDestructive: false)
         }
     }
 
     private var title: String {
         switch item {
-        case .action(let action): action.name(openingIn: link.app?.appName)
+        case .action(let action): action.name(openingIn: link?.app?.appName)
         case .app(let app): app.appName
         case .confirmDelete: QuickLinkAction.delete.name(openingIn: nil)
         case .cancel: "Cancel"
+        case .anvil(let action): action.name
         }
     }
 
@@ -51,7 +53,7 @@ struct ActionRow: View {
         switch item {
         case .action(let action): action.isDestructive
         case .confirmDelete: true
-        case .app, .cancel: false
+        case .app, .cancel, .anvil: false
         }
     }
 
@@ -60,6 +62,7 @@ struct ActionRow: View {
         case .action(let action): action.shortcut
         case .confirmDelete: KeyCombo(keyCode: kVK_Return, modifiers: [])
         case .cancel: KeyCombo(keyCode: kVK_Escape, modifiers: [])
+        case .anvil(let action): action.shortcut
         case .app: nil
         }
     }
