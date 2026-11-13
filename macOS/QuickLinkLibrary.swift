@@ -1,0 +1,36 @@
+import Foundation
+import LauncherKit
+import Observation
+
+@Observable final class QuickLinkLibrary {
+    static let shared = QuickLinkLibrary()
+
+    private static let key = "launcher.quickLinks"
+
+    private(set) var quickLinks: QuickLinks
+
+    private init() {
+        let saved = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode([QuickLink].self, from: $0) }
+        quickLinks = QuickLinks(saved ?? [])
+    }
+
+    var links: [QuickLink] { quickLinks.links }
+
+    func contains(_ link: QuickLink) -> Bool {
+        links.contains { $0.id == link.id }
+    }
+
+    func save(_ link: QuickLink) {
+        quickLinks.save(link)
+        persist()
+    }
+
+    func delete(_ link: QuickLink) {
+        quickLinks.delete(link)
+        persist()
+    }
+
+    private func persist() {
+        UserDefaults.standard.set(try? JSONEncoder().encode(quickLinks.links), forKey: Self.key)
+    }
+}

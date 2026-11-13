@@ -24,6 +24,9 @@ struct ToolPage: View {
                     }
                 }
             }
+            if tool == .launcher {
+                QuickLinksSection()
+            }
         }
         .formStyle(.grouped)
         .navigationTitle(tool.name)
