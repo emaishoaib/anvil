@@ -40,6 +40,7 @@ final class SearchBar {
 
     private func show() {
         guard let screen = NSScreen.main, let background = panel.contentView else { return }
+        CurrencyRatesStore.shared.refreshIfStale()
         model = SearchModel()
         let content = NSHostingView(rootView: SearchBarView(model: model))
         let size = content.fittingSize

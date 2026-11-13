@@ -20,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         Tool.registerDefaults()
         AppCatalog.shared.start()
+        CurrencyRatesStore.shared.start()
         AppUpdater.shared.start()
         #if !DEBUG
         LoginItem.addOnFirstLaunch()

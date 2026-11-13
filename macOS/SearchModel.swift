@@ -5,7 +5,12 @@ import Observation
 @Observable final class SearchModel {
     var query = "" {
         didSet {
-            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, launchCounts: SavedLaunchCounts.load())
+            results = LauncherSearch.results(
+                for: query,
+                in: AppCatalog.shared.apps,
+                launchCounts: SavedLaunchCounts.load(),
+                rates: CurrencyRatesStore.shared.rates
+            )
             selected = 0
         }
     }
