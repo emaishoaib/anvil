@@ -22,7 +22,11 @@ import Observation
     }
 
     var resultsTitle: String {
-        mode == .defineWord && isQueryEmpty ? "Recent Words" : "Results"
+        switch (mode, isQueryEmpty) {
+        case (.defineWord, true): "Recent Words"
+        case (.launcher, true): "Suggestions"
+        default: "Results"
+        }
     }
 
     private var isQueryEmpty: Bool {

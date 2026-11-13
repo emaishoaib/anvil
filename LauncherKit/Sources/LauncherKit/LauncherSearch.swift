@@ -1,6 +1,8 @@
 import Foundation
 
 public enum LauncherSearch {
+    private static let suggestionLimit = 8
+
     public static func results(
         for query: String,
         in apps: [InstalledApp],
@@ -18,6 +20,9 @@ public enum LauncherSearch {
             rates.flatMap { CurrencyConversion.answer(for: query, rates: $0, locale: locale) },
         ].compactMap { $0 }
         let candidates = apps.map(SearchResult.app) + LauncherCommand.allCases.map(SearchResult.command) + quickLinks.map(SearchResult.quickLink)
-        return answers.map(SearchResult.answer) + ResultRanking.matches(for: query, in: candidates, launchCounts: launchCounts)
+        let ranked = query.trimmingCharacters(in: .whitespaces).isEmpty
+            ? ResultRanking.suggestions(in: candidates, launchCounts: launchCounts, limit: suggestionLimit)
+            : ResultRanking.matches(for: query, in: candidates, launchCounts: launchCounts)
+        return answers.map(SearchResult.answer) + ranked
     }
 }

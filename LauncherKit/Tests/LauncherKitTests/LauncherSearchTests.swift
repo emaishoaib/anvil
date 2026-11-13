@@ -28,4 +28,10 @@ struct LauncherSearchTests {
         let answer = Answer(input: "10x4", inputLabel: "Product", output: "40", outputLabel: "Forty", copyText: "40")
         #expect(results(for: "10x4") == [.answer(answer), .app(tenByFourNotes)])
     }
+
+    @Test func anEmptyQueryListsTheMostOpenedResults() {
+        let counts = LaunchCounts([safariTips.launchKey: 4, safari.url.path: 1])
+        let results = LauncherSearch.results(for: " ", in: [safari, tenByFourNotes], quickLinks: [safariTips], launchCounts: counts, locale: locale)
+        #expect(results == [.quickLink(safariTips), .app(safari)])
+    }
 }

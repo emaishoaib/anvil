@@ -46,4 +46,22 @@ struct ResultRankingTests {
         let results = ResultRanking.matches(for: "z", in: [.app(zoom), .app(zed)], launchCounts: LaunchCounts())
         #expect(results == [.app(zed), .app(zoom)])
     }
+
+    func suggestedNames(launchCounts: LaunchCounts, limit: Int = 8) -> [String] {
+        ResultRanking.suggestions(in: candidates, launchCounts: launchCounts, limit: limit).map(\.name)
+    }
+
+    @Test func suggestionsAreTheMostOpenedResultsFirst() {
+        let counts = LaunchCounts([safari.url.path: 2, xcode.url.path: 5, LauncherCommand.defineWord.launchKey: 3])
+        #expect(suggestedNames(launchCounts: counts) == ["Xcode", "Define Word", "Safari"])
+    }
+
+    @Test func suggestionsLeaveOutResultsNeverOpened() {
+        #expect(suggestedNames(launchCounts: LaunchCounts()).isEmpty)
+    }
+
+    @Test func suggestionsStopAtTheLimit() {
+        let counts = LaunchCounts([safari.url.path: 2, xcode.url.path: 5])
+        #expect(suggestedNames(launchCounts: counts, limit: 1) == ["Xcode"])
+    }
 }
