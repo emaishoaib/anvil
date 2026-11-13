@@ -48,6 +48,7 @@ private struct RuleTriggerLabel: View {
         switch trigger {
         case .shortcut(let keystroke): KeyCaps(combo: KeyCombo(keystroke))
         case .mouseButton(let number): Text(MouseButton.name(for: number))
+        case .appOpens: Text("App opens")
         }
     }
 }
@@ -66,6 +67,8 @@ private struct RuleActionLabel: View {
             Text("Choose \(path.joined(separator: " > "))")
         case .playSound(let name):
             Text("Play \(name)")
+        case .quitApp:
+            Text("Quit it")
         }
     }
 }

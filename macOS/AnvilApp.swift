@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             await Accessibility.waitUntilTrusted()
             RuleKeys.shared.start()
+            AppRules.start()
             Keyboard.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()

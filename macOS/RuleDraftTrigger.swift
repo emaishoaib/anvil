@@ -9,6 +9,8 @@ extension RuleDraft {
         case .mouseButton(let number):
             triggerKind = .mouseButton
             mouseButton = number
+        case .appOpens:
+            triggerKind = .appOpens
         }
     }
 
@@ -16,6 +18,7 @@ extension RuleDraft {
         switch triggerKind {
         case .shortcut: shortcut.map { .shortcut($0.keystroke) }
         case .mouseButton: mouseButton.map { .mouseButton(number: $0) }
+        case .appOpens: .appOpens
         }
     }
 }

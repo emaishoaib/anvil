@@ -5,7 +5,7 @@ struct RuleActionFields: View {
 
     var body: some View {
         Picker("Action", selection: $draft.actionKind) {
-            ForEach(RuleActionKind.allCases) { kind in
+            ForEach(RuleActionKind.allCases.filter { $0.isAvailable(for: draft.triggerKind) }) { kind in
                 Text(kind.title).tag(kind)
             }
         }
@@ -26,6 +26,9 @@ struct RuleActionFields: View {
             .onChange(of: draft.sound) {
                 if let sound = draft.sound { SystemSounds.play(sound) }
             }
+        case .quitApp:
+            Text("Quits the app that set off the rule.")
+                .foregroundStyle(.secondary)
         }
     }
 }

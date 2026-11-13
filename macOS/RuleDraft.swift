@@ -24,7 +24,7 @@ struct RuleDraft: Identifiable {
     }
 
     var rule: Rule? {
-        guard let trigger, let action, apps != .only(bundleIDs: []) else { return nil }
+        guard let trigger, let action, apps != .only(bundleIDs: []), !triggerKind.isAppEvent || apps.isChosen else { return nil }
         return Rule(id: id, trigger: trigger, apps: apps, action: action)
     }
 }

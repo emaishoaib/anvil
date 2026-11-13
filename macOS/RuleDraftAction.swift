@@ -12,6 +12,8 @@ extension RuleDraft {
         case .playSound(let name):
             actionKind = .playSound
             sound = name
+        case .quitApp:
+            actionKind = .quitApp
         }
     }
 
@@ -24,6 +26,8 @@ extension RuleDraft {
             return path.isEmpty ? nil : .chooseMenuItem(path: path)
         case .playSound:
             return sound.map { .playSound(name: $0) }
+        case .quitApp:
+            return .quitApp
         }
     }
 }

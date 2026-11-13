@@ -41,6 +41,14 @@ struct RulesTests {
         #expect(rules.rule(for: .mouseButton(number: 4), in: obsidian) == nil)
     }
 
+    @Test func anAppOpensRuleMatchesOnlyItsChosenApps() {
+        let autoUpdate = "com.microsoft.autoupdate2"
+        let quit = Rule(trigger: .appOpens, apps: .only(bundleIDs: [autoUpdate]), action: .quitApp)
+        let rules = Rules([quit])
+        #expect(rules.rule(for: .appOpens, in: autoUpdate) == quit)
+        #expect(rules.rule(for: .appOpens, in: obsidian) == nil)
+    }
+
     @Test func savingANewRuleAddsItAtTheEnd() {
         let first = Rule(trigger: commandH, action: findAndReplace)
         let second = Rule(trigger: commandH, apps: .only(bundleIDs: [obsidian]), action: history)

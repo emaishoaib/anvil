@@ -9,6 +9,9 @@ struct RuleTriggerFields: View {
                 Text(kind.title).tag(kind)
             }
         }
+        .onChange(of: draft.triggerKind) {
+            if !draft.actionKind.isAvailable(for: draft.triggerKind) { draft.actionKind = .sendShortcut }
+        }
         switch draft.triggerKind {
         case .shortcut:
             LabeledContent("Shortcut") {
@@ -21,6 +24,9 @@ struct RuleTriggerFields: View {
                     Text(MouseButton.name(for: number)).tag(Int?.some(number))
                 }
             }
+        case .appOpens:
+            Text("Runs when one of the chosen apps opens.")
+                .foregroundStyle(.secondary)
         }
     }
 }
