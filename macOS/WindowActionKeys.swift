@@ -26,6 +26,9 @@ nonisolated extension WindowAction {
         case .almostMaximize: nil
         case .maximizeHeight: KeyCombo(keyCode: kVK_UpArrow, modifiers: [.control, .option, .shift])
         case .center: KeyCombo(keyCode: kVK_ANSI_C, modifiers: [.control, .option])
+        case .makeSmaller: KeyCombo(keyCode: kVK_LeftArrow, modifiers: [.control, .option, .shift])
+        case .makeLarger: KeyCombo(keyCode: kVK_RightArrow, modifiers: [.control, .option, .shift])
+        case .moveLeft, .moveRight, .moveUp, .moveDown: nil
         }
     }
 
@@ -49,6 +52,12 @@ nonisolated extension WindowAction {
         case .almostMaximize: "Almost maximize"
         case .maximizeHeight: "Maximize the height"
         case .center: "Center on the screen"
+        case .makeSmaller: "Make smaller"
+        case .makeLarger: "Make larger"
+        case .moveLeft: "Move to the left edge"
+        case .moveRight: "Move to the right edge"
+        case .moveUp: "Move to the top edge"
+        case .moveDown: "Move to the bottom edge"
         }
     }
 }
