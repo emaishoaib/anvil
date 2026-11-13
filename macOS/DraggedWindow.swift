@@ -6,7 +6,7 @@ struct DraggedWindow {
 
     let element: AXUIElement
     let id: CGWindowID
-    let frameBeforeDrag: CGRect
+    var frameBeforeSnap: CGRect
     let pointerAtPress: CGPoint
 
     var liveFrame: CGRect? {
@@ -25,7 +25,7 @@ struct DraggedWindow {
         AXUIElementSetMessagingTimeout(element, Self.frameAnswerTimeout)
         self.element = element
         self.id = id
-        frameBeforeDrag = frame
+        frameBeforeSnap = frame
         pointerAtPress = pointer
     }
 

@@ -41,6 +41,20 @@ struct RestoreFramesTests {
         #expect(frames.takeFrame(for: 2) == leftHalf)
     }
 
+    @Test func unsnappingAWindowStillWhereItSnappedGivesBackItsFrame() {
+        var frames = RestoreFrames()
+        frames.recordSnap(of: 1, from: original, landedAt: leftHalf)
+        #expect(frames.takeFrame(for: 1, ifStillSnappedAt: leftHalf) == original)
+        #expect(frames.takeFrame(for: 1) == nil)
+    }
+
+    @Test func unsnappingAWindowMovedSinceItsSnapGivesNothingAndKeepsTheFrame() {
+        var frames = RestoreFrames()
+        frames.recordSnap(of: 1, from: original, landedAt: leftHalf)
+        #expect(frames.takeFrame(for: 1, ifStillSnappedAt: rightHalf) == nil)
+        #expect(frames.takeFrame(for: 1) == original)
+    }
+
     @Test func restoringForgetsTheFrame() {
         var frames = RestoreFrames()
         frames.recordSnap(of: 1, from: original, landedAt: leftHalf)

@@ -14,7 +14,19 @@ final class Snapping {
     }
 
     func snap(_ window: DraggedWindow, to action: WindowAction, in area: CGRect) {
-        snap(window.element, id: window.id, from: window.frameBeforeDrag, to: action, in: area, repeats: 0)
+        snap(window.element, id: window.id, from: window.frameBeforeSnap, to: action, in: area, repeats: 0)
+    }
+
+    func unsnap(_ window: DraggedWindow, under pointer: CGPoint) -> DraggedWindow {
+        guard SnappingSettings.restoresSizeWhenUnsnapped,
+              let beforeFirstSnap = restoreFrames.takeFrame(for: window.id, ifStillSnappedAt: window.frameBeforeSnap),
+              let current = window.liveFrame
+        else { return window }
+        let unsnappedFrame = current.resized(to: beforeFirstSnap.size, keepingPointerAt: pointer)
+        window.element.move(to: unsnappedFrame)
+        var unsnapped = window
+        unsnapped.frameBeforeSnap = unsnappedFrame
+        return unsnapped
     }
 
     func restoreFocusedWindow() {

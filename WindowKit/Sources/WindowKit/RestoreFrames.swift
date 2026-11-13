@@ -18,4 +18,9 @@ public struct RestoreFrames: Sendable {
     public mutating func takeFrame(for window: CGWindowID) -> CGRect? {
         byWindow.removeValue(forKey: window)?.beforeFirstSnap
     }
+
+    public mutating func takeFrame(for window: CGWindowID, ifStillSnappedAt frame: CGRect) -> CGRect? {
+        guard byWindow[window]?.landedAt == frame else { return nil }
+        return takeFrame(for: window)
+    }
 }
