@@ -29,6 +29,9 @@ struct RuleActionFields: View {
         case .quitApp:
             Text("Quits the app that set off the rule.")
                 .foregroundStyle(.secondary)
+        case .resizeWindow:
+            TextField("Width", value: $draft.windowWidth, format: .number, prompt: Text("1050"))
+            TextField("Height", value: $draft.windowHeight, format: .number, prompt: Text("650"))
         }
     }
 }

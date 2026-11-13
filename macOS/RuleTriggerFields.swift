@@ -27,6 +27,9 @@ struct RuleTriggerFields: View {
         case .appOpens:
             Text("Runs when one of the chosen apps opens.")
                 .foregroundStyle(.secondary)
+        case .appComesToFront:
+            Text("Runs whenever one of the chosen apps comes to the front.")
+                .foregroundStyle(.secondary)
         }
     }
 }

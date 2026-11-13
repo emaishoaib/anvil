@@ -11,6 +11,8 @@ extension RuleDraft {
             mouseButton = number
         case .appOpens:
             triggerKind = .appOpens
+        case .appComesToFront:
+            triggerKind = .appComesToFront
         }
     }
 
@@ -19,6 +21,7 @@ extension RuleDraft {
         case .shortcut: shortcut.map { .shortcut($0.keystroke) }
         case .mouseButton: mouseButton.map { .mouseButton(number: $0) }
         case .appOpens: .appOpens
+        case .appComesToFront: .appComesToFront
         }
     }
 }

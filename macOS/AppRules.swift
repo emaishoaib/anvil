@@ -6,6 +6,9 @@ enum AppRules {
         NSWorkspace.shared.onAppChange(NSWorkspace.didLaunchApplicationNotification) { pid in
             run(.appOpens, for: pid)
         }
+        NSWorkspace.shared.onAppChange(NSWorkspace.didActivateApplicationNotification) { pid in
+            run(.appComesToFront, for: pid)
+        }
     }
 
     private static func run(_ trigger: RuleTrigger, for pid: pid_t) {

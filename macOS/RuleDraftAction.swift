@@ -14,6 +14,10 @@ extension RuleDraft {
             sound = name
         case .quitApp:
             actionKind = .quitApp
+        case .resizeWindow(let width, let height):
+            actionKind = .resizeWindow
+            windowWidth = width
+            windowHeight = height
         }
     }
 
@@ -28,6 +32,9 @@ extension RuleDraft {
             return sound.map { .playSound(name: $0) }
         case .quitApp:
             return .quitApp
+        case .resizeWindow:
+            guard let windowWidth, let windowHeight, windowWidth > 0, windowHeight > 0 else { return nil }
+            return .resizeWindow(width: windowWidth, height: windowHeight)
         }
     }
 }

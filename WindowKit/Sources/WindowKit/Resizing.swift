@@ -9,7 +9,7 @@ extension CGRect {
         return CGRect(x: midX - width / 2, y: midY - height / 2, width: width, height: height).kept(inside: area)
     }
 
-    func kept(inside area: CGRect) -> CGRect {
+    public func kept(inside area: CGRect) -> CGRect {
         let width = min(width, area.width)
         let height = min(height, area.height)
         let x = min(max(minX, area.minX), area.maxX - width)

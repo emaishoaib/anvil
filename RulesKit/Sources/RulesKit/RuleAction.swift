@@ -5,6 +5,7 @@ public enum RuleAction: Hashable, Codable, Sendable {
     case chooseMenuItem(path: [String])
     case playSound(name: String)
     case quitApp
+    case resizeWindow(width: Int, height: Int)
 
     public static func menuPath(from text: String) -> [String] {
         text.split(separator: ">").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }

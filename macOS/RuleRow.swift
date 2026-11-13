@@ -49,6 +49,7 @@ private struct RuleTriggerLabel: View {
         case .shortcut(let keystroke): KeyCaps(combo: KeyCombo(keystroke))
         case .mouseButton(let number): Text(MouseButton.name(for: number))
         case .appOpens: Text("App opens")
+        case .appComesToFront: Text("App comes to front")
         }
     }
 }
@@ -69,6 +70,8 @@ private struct RuleActionLabel: View {
             Text("Play \(name)")
         case .quitApp:
             Text("Quit it")
+        case .resizeWindow(let width, let height):
+            Text("Resize its window to \(width) by \(height)")
         }
     }
 }

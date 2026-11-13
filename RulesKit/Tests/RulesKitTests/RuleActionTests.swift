@@ -16,6 +16,11 @@ struct RuleActionTests {
         #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)
     }
 
+    @Test func aResizeRuleComesBackUnchangedFromJSON() throws {
+        let rule = Rule(trigger: .appComesToFront, apps: .only(bundleIDs: ["com.apple.finder"]), action: .resizeWindow(width: 1050, height: 650))
+        #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)
+    }
+
     @Test func aSoundRuleComesBackUnchangedFromJSON() throws {
         let rule = Rule(trigger: .shortcut(Keystroke(keyCode: 35, modifiers: 10)), action: .playSound(name: "Glass"))
         #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)

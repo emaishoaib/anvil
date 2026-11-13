@@ -11,6 +11,8 @@ struct RuleDraft: Identifiable {
     var shortcutToSend: KeyCombo?
     var menuItem = ""
     var sound: String?
+    var windowWidth: Int?
+    var windowHeight: Int?
 
     init() {
         id = UUID()
