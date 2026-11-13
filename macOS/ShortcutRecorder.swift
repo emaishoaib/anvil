@@ -5,6 +5,7 @@ struct ShortcutRecorder: View {
     private static let requiredModifiers: KeyModifiers = [.control, .option, .command]
 
     let combo: KeyCombo?
+    var requiresModifier = true
     let record: (KeyCombo?) -> Void
     @State private var monitor: Any?
 
@@ -45,7 +46,7 @@ struct ShortcutRecorder: View {
 
     private func typed(_ typedCombo: KeyCombo) {
         if typedCombo.keyCode == kVK_Escape && typedCombo.modifiers.isEmpty { return stop() }
-        guard !typedCombo.modifiers.isDisjoint(with: Self.requiredModifiers) else { return NSSound.beep() }
+        guard !requiresModifier || !typedCombo.modifiers.isDisjoint(with: Self.requiredModifiers) else { return NSSound.beep() }
         record(typedCombo)
         stop()
     }

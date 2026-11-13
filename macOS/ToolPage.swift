@@ -32,6 +32,9 @@ struct ToolPage: View {
             if tool == .windows {
                 SnappingSection()
             }
+            if tool == .rules {
+                RulesSection()
+            }
         }
         .formStyle(.grouped)
         .navigationTitle(tool.name)
