@@ -6,6 +6,7 @@ struct ShortcutRecorder: View {
 
     let combo: KeyCombo?
     var requiresModifier = true
+    var canClear = true
     let record: (KeyCombo?) -> Void
     @State private var monitor: Any?
 
@@ -16,7 +17,7 @@ struct ShortcutRecorder: View {
             } label: {
                 recorderLabel
             }
-            if combo != nil && monitor == nil {
+            if canClear && combo != nil && monitor == nil {
                 Button("Clear", systemImage: "xmark.circle.fill") { record(nil) }
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
