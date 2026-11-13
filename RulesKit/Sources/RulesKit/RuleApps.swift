@@ -10,4 +10,15 @@ public enum RuleApps: Hashable, Codable, Sendable {
     }
 
     public var isChosen: Bool { self != .all }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .all:
+            _ = container.nestedContainer(keyedBy: AllCodingKeys.self, forKey: .all)
+        case .only(let bundleIDs):
+            var only = container.nestedContainer(keyedBy: OnlyCodingKeys.self, forKey: .only)
+            try only.encode(bundleIDs.sorted(), forKey: .bundleIDs)
+        }
+    }
 }
