@@ -12,7 +12,7 @@ struct LinkField: View {
 
     var body: some View {
         HStack {
-            TextField("Link", text: $link, prompt: Text("https://google.com/search?q={Query}"))
+            TextField("Link", text: $link, prompt: Text(verbatim: "https://google.com/search?q={Query}"))
             Button("Choose a File or Folder", systemImage: "folder") {
                 guard let url = choose() else { return }
                 link = (url.path as NSString).abbreviatingWithTildeInPath
