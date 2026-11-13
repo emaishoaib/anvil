@@ -39,6 +39,9 @@ struct RuleActionFields: View {
                 Text("Forward").tag(SwipeDirection.forward)
             }
             .pickerStyle(.segmented)
+        case .playOrPauseMedia:
+            Text("Plays or pauses whatever is playing, like the play key on a keyboard.")
+                .foregroundStyle(.secondary)
         }
     }
 }

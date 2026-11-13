@@ -21,6 +21,8 @@ extension RuleDraft {
         case .swipe(let direction):
             actionKind = .swipe
             swipeDirection = direction
+        case .playOrPauseMedia:
+            actionKind = .playOrPauseMedia
         }
     }
 
@@ -40,6 +42,8 @@ extension RuleDraft {
             return .resizeWindow(width: windowWidth, height: windowHeight)
         case .swipe:
             return .swipe(swipeDirection)
+        case .playOrPauseMedia:
+            return .playOrPauseMedia
         }
     }
 }

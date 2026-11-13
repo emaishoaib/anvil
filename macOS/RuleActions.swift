@@ -9,6 +9,7 @@ nonisolated enum RuleActions {
         case .playSound(let name): DispatchQueue.main.async { SystemSounds.play(name) }
         case .quitApp: DispatchQueue.main.async { pid.flatMap(NSRunningApplication.init)?.terminate() }
         case .swipe(let direction): SwipeSender.send(direction)
+        case .playOrPauseMedia: DispatchQueue.main.async { MediaKeySender.playOrPause() }
         case .resizeWindow(let width, let height):
             guard let pid else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {

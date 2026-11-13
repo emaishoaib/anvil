@@ -5,6 +5,7 @@ enum RuleActionKind: CaseIterable, Identifiable {
     case quitApp
     case resizeWindow
     case swipe
+    case playOrPauseMedia
 
     var id: Self { self }
 
@@ -16,6 +17,7 @@ enum RuleActionKind: CaseIterable, Identifiable {
         case .quitApp: "Quit the App"
         case .resizeWindow: "Resize Its Window"
         case .swipe: "Swipe Back or Forward"
+        case .playOrPauseMedia: "Play or Pause Media"
         }
     }
 
