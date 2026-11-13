@@ -10,26 +10,26 @@ struct ResultRow: View {
             switch result {
             case .app(let app):
                 AppIcon(path: app.url.path)
-                Text(app.name)
+                Text(app.name).foregroundStyle(Color(nsColor: .textColor))
                 Spacer()
                 Text("Application").foregroundStyle(.secondary)
             case .command(let command):
                 CommandIcon(command: command)
-                Text(command.name)
+                Text(command.name).foregroundStyle(Color(nsColor: .textColor))
                 Text(command.subtitle).foregroundStyle(.secondary)
                 KeywordTag(keyword: command.keyword)
                 Spacer()
                 Text("Command").foregroundStyle(.secondary)
             case .quickLink(let link):
                 QuickLinkIcon(link: link)
-                Text(link.name)
+                Text(link.name).foregroundStyle(Color(nsColor: .textColor))
                 if let host = link.host {
                     Text(host).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Text("Quick Link").foregroundStyle(.secondary)
             case .word(let word):
-                Text(word.text).layoutPriority(1)
+                Text(word.text).foregroundStyle(Color(nsColor: .textColor)).layoutPriority(1)
                 Text(word.definition).foregroundStyle(.secondary).lineLimit(1)
                 Spacer(minLength: 0)
             case .answer:
