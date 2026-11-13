@@ -16,6 +16,14 @@ import Observation
         results.indices.contains(selected) ? results[selected] : nil
     }
 
+    var resultsTitle: String {
+        mode == .defineWord && isQueryEmpty ? "Recent Words" : "Results"
+    }
+
+    private var isQueryEmpty: Bool {
+        query.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     func moveSelection(by offset: Int) {
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
@@ -41,6 +49,7 @@ import Observation
         case .command(let command):
             run(command)
         case .word(let word):
+            SavedRecentWords.record(word.text)
             entryPage = DictionaryEntries.page(for: word.text)
             mode = .wordEntry(word, query: query)
             query = ""
@@ -68,7 +77,7 @@ import Observation
         case .launcher:
             results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, launchCounts: SavedLaunchCounts.load(), rates: CurrencyRatesStore.shared.rates)
         case .defineWord:
-            let candidates = WordLookup.candidates(for: query)
+            let candidates = isQueryEmpty ? SavedRecentWords.load().words : WordLookup.candidates(for: query)
             wordLookup = Task {
                 let words = await Task.detached { WordLookup.words(from: candidates) }.value
                 guard !Task.isCancelled else { return }

@@ -22,7 +22,7 @@ struct SearchResults: View {
                         }
                     }
                     if !others.isEmpty {
-                        SectionHeader(title: "Results")
+                        SectionHeader(title: model.resultsTitle)
                         ForEach(others, id: \.index) { item in
                             ResultRow(result: item.result, isSelected: item.index == model.selected)
                                 .frame(height: Self.rowHeight)
