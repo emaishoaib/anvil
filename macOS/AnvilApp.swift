@@ -35,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             KeySwapLibrary.shared.start()
             RulesFolder.shared.start()
             Keyboard.shared.start()
+            MouseWheel.shared.start()
             Recents.shared.start()
             KnownWindows.shared.start()
             Watcher.shared.start()

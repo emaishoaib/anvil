@@ -6,6 +6,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
     case windows
     case keepAwake
     case rules
+    case mouse
     case dockWidgets
 
     var id: Self { self }
@@ -27,6 +28,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .windows: "Windows"
         case .keepAwake: "Keep Awake"
         case .rules: "Rules"
+        case .mouse: "Mouse"
         case .dockWidgets: "Dock Widgets"
         }
     }
@@ -38,6 +40,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .windows: "rectangle.split.2x1"
         case .keepAwake: "cup.and.saucer"
         case .rules: "keyboard"
+        case .mouse: "computermouse"
         case .dockWidgets: "dock.rectangle"
         }
     }
@@ -49,6 +52,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .windows: "Snap windows to halves, thirds and corners of the screen."
         case .keepAwake: "Keep your Mac from going to sleep for a while."
         case .rules: "Remap keys in specific apps and react to system events."
+        case .mouse: "Scroll smoothly with a mouse wheel."
         case .dockWidgets: "Show your next meeting in the space beside the Dock."
         }
     }
