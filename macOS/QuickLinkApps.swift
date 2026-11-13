@@ -13,7 +13,7 @@ extension QuickLink {
     }
 
     private var probe: URL? {
-        if isFilePath { return URL(filePath: (link as NSString).expandingTildeInPath) }
+        if isFilePath { return target }
         return scheme.flatMap { URL(string: "\($0):") }
     }
 }

@@ -4,6 +4,7 @@ public enum LauncherSearch {
     public static func results(
         for query: String,
         in apps: [InstalledApp],
+        quickLinks: [QuickLink] = [],
         launchCounts: LaunchCounts,
         rates: CurrencyRates? = nil,
         now: Date = .now,
@@ -16,7 +17,7 @@ public enum LauncherSearch {
             UnitConversion.answer(for: query, locale: locale),
             rates.flatMap { CurrencyConversion.answer(for: query, rates: $0, locale: locale) },
         ].compactMap { $0 }
-        let candidates = apps.map(SearchResult.app) + LauncherCommand.allCases.map(SearchResult.command)
+        let candidates = apps.map(SearchResult.app) + LauncherCommand.allCases.map(SearchResult.command) + quickLinks.map(SearchResult.quickLink)
         return answers.map(SearchResult.answer) + ResultRanking.matches(for: query, in: candidates, launchCounts: launchCounts)
     }
 }

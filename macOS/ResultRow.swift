@@ -20,6 +20,14 @@ struct ResultRow: View {
                 KeywordTag(keyword: command.keyword)
                 Spacer()
                 Text("Command").foregroundStyle(.secondary)
+            case .quickLink(let link):
+                AppIcon(path: link.app?.path ?? "")
+                Text(link.name)
+                if let host = link.host {
+                    Text(host).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Text("Quick Link").foregroundStyle(.secondary)
             case .word(let word):
                 Text(word.text).layoutPriority(1)
                 Text(word.definition).foregroundStyle(.secondary).lineLimit(1)

@@ -51,6 +51,7 @@ struct SearchFooter: View {
         case .answer: "Copy Answer"
         case .app: "Open Application"
         case .command: "Open Command"
+        case .quickLink(let link): link.app.map { "Open in \($0.appName)" } ?? "Open Quick Link"
         case .word: "Show Details"
         case nil: nil
         }

@@ -48,6 +48,9 @@ import Observation
             SearchBar.shared.hide()
         case .command(let command):
             run(command)
+        case .quickLink(let link):
+            open(link)
+            SearchBar.shared.hide()
         case .word(let word):
             SavedRecentWords.record(word.text)
             entryPage = DictionaryEntries.page(for: word.text)
@@ -75,7 +78,7 @@ import Observation
         selected = 0
         switch mode {
         case .launcher:
-            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, launchCounts: SavedLaunchCounts.load(), rates: CurrencyRatesStore.shared.rates)
+            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, launchCounts: SavedLaunchCounts.load(), rates: CurrencyRatesStore.shared.rates)
         case .defineWord:
             let candidates = isQueryEmpty ? SavedRecentWords.load().words : WordLookup.candidates(for: query)
             wordLookup = Task {
@@ -104,5 +107,15 @@ import Observation
     private func launch(_ app: InstalledApp) {
         SavedLaunchCounts.record(app.url.path)
         NSWorkspace.shared.openApplication(at: app.url, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    private func open(_ link: QuickLink) {
+        guard let target = link.target else { return }
+        SavedLaunchCounts.record(link.launchKey)
+        if let app = link.openWith {
+            NSWorkspace.shared.open([target], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
+        } else {
+            NSWorkspace.shared.open(target)
+        }
     }
 }
