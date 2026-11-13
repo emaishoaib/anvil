@@ -4,18 +4,26 @@ import SwiftUI
 struct SearchFooter: View {
     static let height: CGFloat = 40
 
+    let mode: SearchMode
     let selected: SearchResult?
 
     var body: some View {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 8) {
-                Image(.menuBarIcon)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(.secondary)
+                switch mode {
+                case .launcher:
+                    Image(.menuBarIcon)
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(.secondary)
+                case .defineWord:
+                    AppIcon(path: LauncherCommand.defineWord.iconPath)
+                    Text(LauncherCommand.defineWord.name)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
                 if let action {
                     Text(action)
@@ -37,6 +45,8 @@ struct SearchFooter: View {
         switch selected {
         case .answer: "Copy Answer"
         case .app: "Open Application"
+        case .command: "Open Command"
+        case .word: "Open in Dictionary"
         case nil: nil
         }
     }

@@ -16,7 +16,7 @@ public enum LauncherSearch {
             UnitConversion.answer(for: query, locale: locale),
             rates.flatMap { CurrencyConversion.answer(for: query, rates: $0, locale: locale) },
         ].compactMap { $0 }
-        let matchingApps = AppRanking.matches(for: query, in: apps, launchCounts: launchCounts)
-        return answers.map(SearchResult.answer) + matchingApps.map(SearchResult.app)
+        let candidates = apps.map(SearchResult.app) + LauncherCommand.allCases.map(SearchResult.command)
+        return answers.map(SearchResult.answer) + ResultRanking.matches(for: query, in: candidates, launchCounts: launchCounts)
     }
 }

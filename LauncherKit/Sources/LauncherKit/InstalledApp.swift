@@ -11,11 +11,7 @@ public struct InstalledApp: Identifiable, Hashable, Sendable {
         name = url.deletingPathExtension().lastPathComponent
     }
 
-    public func match(for query: String) -> AppMatch? {
-        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive, .anchored]
-        if name.range(of: query, options: options) != nil { return .namePrefix }
-        let words = name.split { !$0.isLetter && !$0.isNumber }
-        if words.contains(where: { $0.range(of: query, options: options) != nil }) { return .wordPrefix }
-        return name.localizedStandardContains(query) ? .contains : nil
+    public func match(for query: String) -> NameMatch? {
+        NameMatch(name: name, query: query)
     }
 }

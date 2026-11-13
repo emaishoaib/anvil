@@ -15,6 +15,10 @@ struct LauncherSearchTests {
         #expect(results(for: "saf") == [.app(safari)])
     }
 
+    @Test func commandsAreListedWithApps() {
+        #expect(results(for: "def") == [.command(.defineWord)])
+    }
+
     @Test func aSumListsItsAnswerBeforeAnyApps() {
         let answer = Answer(input: "10x4", inputLabel: "Product", output: "40", outputLabel: "Forty", copyText: "40")
         #expect(results(for: "10x4") == [.answer(answer), .app(tenByFourNotes)])

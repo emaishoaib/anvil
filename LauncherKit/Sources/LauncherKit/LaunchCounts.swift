@@ -1,15 +1,15 @@
 public struct LaunchCounts: Equatable, Sendable {
-    public private(set) var byPath: [String: Int]
+    public private(set) var byKey: [String: Int]
 
-    public init(_ byPath: [String: Int] = [:]) {
-        self.byPath = byPath
+    public init(_ byKey: [String: Int] = [:]) {
+        self.byKey = byKey
     }
 
-    public func count(for app: InstalledApp) -> Int {
-        byPath[app.url.path] ?? 0
+    public func count(for key: String) -> Int {
+        byKey[key] ?? 0
     }
 
-    public mutating func record(_ app: InstalledApp) {
-        byPath[app.url.path, default: 0] += 1
+    public mutating func record(_ key: String) {
+        byKey[key, default: 0] += 1
     }
 }

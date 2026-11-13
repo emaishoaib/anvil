@@ -3,19 +3,13 @@ import LauncherKit
 import Observation
 
 @Observable final class SearchModel {
+    private(set) var mode = SearchMode.launcher
     var query = "" {
-        didSet {
-            results = LauncherSearch.results(
-                for: query,
-                in: AppCatalog.shared.apps,
-                launchCounts: SavedLaunchCounts.load(),
-                rates: CurrencyRatesStore.shared.rates
-            )
-            selected = 0
-        }
+        didSet { refresh() }
     }
     private(set) var results: [SearchResult] = []
     private(set) var selected = 0
+    @ObservationIgnored private var wordLookup: Task<Void, Never>?
 
     var selectedResult: SearchResult? {
         results.indices.contains(selected) ? results[selected] : nil
@@ -33,10 +27,49 @@ import Observation
 
     func open(_ result: SearchResult) {
         switch result {
-        case .answer(let answer): copy(answer.copyText)
-        case .app(let app): launch(app)
+        case .answer(let answer):
+            copy(answer.copyText)
+            SearchBar.shared.hide()
+        case .app(let app):
+            launch(app)
+            SearchBar.shared.hide()
+        case .command(let command):
+            run(command)
+        case .word(let word):
+            WordLookup.openInDictionary(word)
+            SearchBar.shared.hide()
         }
-        SearchBar.shared.hide()
+    }
+
+    func goBack() -> Bool {
+        guard mode != .launcher else { return false }
+        mode = .launcher
+        query = ""
+        return true
+    }
+
+    private func refresh() {
+        wordLookup?.cancel()
+        selected = 0
+        switch mode {
+        case .launcher:
+            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, launchCounts: SavedLaunchCounts.load(), rates: CurrencyRatesStore.shared.rates)
+        case .defineWord:
+            let candidates = WordLookup.candidates(for: query)
+            wordLookup = Task {
+                let words = await Task.detached { WordLookup.words(from: candidates) }.value
+                guard !Task.isCancelled else { return }
+                results = words.map(SearchResult.word)
+            }
+        }
+    }
+
+    private func run(_ command: LauncherCommand) {
+        SavedLaunchCounts.record(command.launchKey)
+        switch command {
+        case .defineWord: mode = .defineWord
+        }
+        query = ""
     }
 
     private func copy(_ text: String) {
@@ -45,7 +78,7 @@ import Observation
     }
 
     private func launch(_ app: InstalledApp) {
-        SavedLaunchCounts.record(app)
+        SavedLaunchCounts.record(app.url.path)
         NSWorkspace.shared.openApplication(at: app.url, configuration: NSWorkspace.OpenConfiguration())
     }
 }

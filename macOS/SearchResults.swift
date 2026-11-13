@@ -21,13 +21,13 @@ struct SearchResults: View {
                                 .onTapGesture { model.open(.answer(item.answer)) }
                         }
                     }
-                    if !apps.isEmpty {
+                    if !others.isEmpty {
                         SectionHeader(title: "Results")
-                        ForEach(apps, id: \.index) { item in
-                            AppRow(app: item.app, isSelected: item.index == model.selected)
+                        ForEach(others, id: \.index) { item in
+                            ResultRow(result: item.result, isSelected: item.index == model.selected)
                                 .frame(height: Self.rowHeight)
                                 .id(item.index)
-                                .onTapGesture { model.open(.app(item.app)) }
+                                .onTapGesture { model.open(item.result) }
                         }
                     }
                 }
@@ -45,15 +45,15 @@ struct SearchResults: View {
         }
     }
 
-    private var apps: [(index: Int, app: InstalledApp)] {
+    private var others: [(index: Int, result: SearchResult)] {
         model.results.enumerated().compactMap { index, result in
-            guard case .app(let app) = result else { return nil }
-            return (index, app)
+            if case .answer = result { return nil }
+            return (index, result)
         }
     }
 
     private var contentHeight: CGFloat {
-        sectionHeight(count: answers.count, itemHeight: AnswerCard.height) + sectionHeight(count: apps.count, itemHeight: Self.rowHeight)
+        sectionHeight(count: answers.count, itemHeight: AnswerCard.height) + sectionHeight(count: others.count, itemHeight: Self.rowHeight)
     }
 
     private func sectionHeight(count: Int, itemHeight: CGFloat) -> CGFloat {
@@ -70,30 +70,5 @@ private struct SectionHeader: View {
             .foregroundStyle(.secondary)
             .padding(.leading, 8)
             .frame(height: 30, alignment: .center)
-    }
-}
-
-private struct AppRow: View {
-    private static let iconSize: CGFloat = 22
-
-    let app: InstalledApp
-    let isSelected: Bool
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Image(nsImage: NSWorkspace.shared.icon(forFile: app.url.path))
-                .resizable()
-                .frame(width: Self.iconSize, height: Self.iconSize)
-            Text(app.name)
-            Spacer()
-            Text("Application")
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 8)
-        .frame(maxHeight: .infinity)
-        .background {
-            if isSelected { RoundedRectangle(cornerRadius: SearchStyle.cornerRadius).fill(.primary.opacity(SearchStyle.selectionOpacity)) }
-        }
-        .contentShape(.rect)
     }
 }

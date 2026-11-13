@@ -11,16 +11,21 @@ struct SearchBarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TextField("Search for apps and quick links…", text: $model.query)
-                .textFieldStyle(.plain)
-                .font(.system(size: Self.fontSize))
-                .focused($isFocused)
-                .padding(.horizontal, 16)
-                .frame(height: Self.fieldHeight)
+            HStack(spacing: 12) {
+                if model.mode != .launcher {
+                    BackButton { _ = model.goBack() }
+                }
+                TextField(model.mode.placeholder, text: $model.query)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: Self.fontSize))
+                    .focused($isFocused)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: Self.fieldHeight)
             if !model.results.isEmpty {
                 Divider()
                 SearchResults(model: model)
-                SearchFooter(selected: model.selectedResult)
+                SearchFooter(mode: model.mode, selected: model.selectedResult)
             }
         }
         .frame(width: Self.width)
@@ -28,5 +33,19 @@ struct SearchBarView: View {
         .background(Color(nsColor: .windowBackgroundColor).opacity(Self.tintOpacity))
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { SearchBar.shared.fit(height: $0) }
         .onAppear { isFocused = true }
+    }
+}
+
+private struct BackButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "arrow.left")
+                .font(.system(size: 13, weight: .semibold))
+                .frame(width: 28, height: 28)
+                .background(.primary.opacity(0.08), in: .rect(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
     }
 }
