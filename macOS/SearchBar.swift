@@ -43,12 +43,12 @@ final class SearchBar {
         model = SearchModel()
         let content = NSHostingView(rootView: SearchBarView(model: model))
         let size = content.fittingSize
-        content.frame = NSRect(origin: .zero, size: size)
+        let top = screen.frame.maxY - screen.frame.height * Self.topShare
+        panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
+        content.frame = background.bounds
         content.autoresizingMask = [.width, .height]
         background.subviews.forEach { $0.removeFromSuperview() }
         background.addSubview(content)
-        let top = screen.frame.maxY - screen.frame.height * Self.topShare
-        panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
     }
