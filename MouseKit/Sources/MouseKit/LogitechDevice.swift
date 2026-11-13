@@ -20,12 +20,18 @@ public struct LogitechDevice: Identifiable, Equatable, Sendable {
     public let name: String
     public let kind: LogitechDeviceKind?
     public let deviceIndex: UInt8
+    public let controlsFeature: UInt8?
 
-    public init(channel: String, name: String, kind: LogitechDeviceKind?, deviceIndex: UInt8) {
-        id = "\(channel)/\(deviceIndex)"
+    public init(channel: String, name: String, kind: LogitechDeviceKind?, deviceIndex: UInt8, controlsFeature: UInt8? = nil) {
+        id = Self.id(channel: channel, deviceIndex: deviceIndex)
         self.name = name
         self.kind = kind
         self.deviceIndex = deviceIndex
+        self.controlsFeature = controlsFeature
+    }
+
+    public static func id(channel: String, deviceIndex: UInt8) -> String {
+        "\(channel)/\(deviceIndex)"
     }
 
     public var isOnAReceiver: Bool { deviceIndex != HIDPPRequest.directDeviceIndex }

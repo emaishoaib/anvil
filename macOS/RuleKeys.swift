@@ -38,6 +38,11 @@ nonisolated final class RuleKeys: KeyResponder {
         }
     }
 
+    func pointerMoved(to location: CGPoint) {
+        guard let button = drag.withLock({ $0?.button }) else { return }
+        _ = dragged(button, to: location)
+    }
+
     private func pressed(_ number: Int, at location: CGPoint) -> Bool {
         let bundleID = frontmostBundleID.withLock { $0 }
         guard rules.withLock({ $0.hasDragRules(forButton: number, in: bundleID) }) else {

@@ -16,7 +16,7 @@ nonisolated final class Keyboard: @unchecked Sendable {
             let mask = CGEventMask(
                 1 << CGEventType.keyDown.rawValue | 1 << CGEventType.flagsChanged.rawValue
                     | 1 << CGEventType.otherMouseDown.rawValue | 1 << CGEventType.otherMouseUp.rawValue
-                    | 1 << CGEventType.otherMouseDragged.rawValue
+                    | 1 << CGEventType.otherMouseDragged.rawValue | 1 << CGEventType.mouseMoved.rawValue
             )
             tap = CGEvent.tapCreate(
                 tap: .cgSessionEventTap,
@@ -43,6 +43,10 @@ nonisolated final class Keyboard: @unchecked Sendable {
             return false
         }
         guard !shortcutsPaused.withLock({ $0 }) else { return false }
+        if type == .mouseMoved {
+            if Tool.rules.isOn { RuleKeys.shared.pointerMoved(to: event.location) }
+            return false
+        }
         if type == .otherMouseDown || type == .otherMouseUp || type == .otherMouseDragged {
             guard Tool.rules.isOn, event.getIntegerValueField(.eventSourceUserData) != KeySender.marker else { return false }
             let number = Int(event.getIntegerValueField(.mouseEventButtonNumber))

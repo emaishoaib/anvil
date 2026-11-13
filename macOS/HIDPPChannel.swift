@@ -14,6 +14,7 @@ final class HIDPPChannel {
 
     let device: IOHIDDevice
     let id = UUID().uuidString
+    var onNotification: (([UInt8]) -> Void)?
     private let reportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: reportCapacity)
     private var waiting: Waiting?
     private var nextID = 0
@@ -30,6 +31,7 @@ final class HIDPPChannel {
 
     func stop() {
         IOHIDDeviceRegisterInputReportCallback(device, reportBuffer, Self.reportCapacity, nil, nil)
+        onNotification = nil
         finish(with: nil)
     }
 
@@ -55,7 +57,10 @@ final class HIDPPChannel {
     }
 
     private func received(_ report: [UInt8]) {
-        guard let waiting, let reply = HIDPPReply(report: report, answering: waiting.request) else { return }
+        guard let waiting, let reply = HIDPPReply(report: report, answering: waiting.request) else {
+            onNotification?(report)
+            return
+        }
         finish(with: reply)
     }
 

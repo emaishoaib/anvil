@@ -3,6 +3,10 @@ public struct HIDPPRequest: Hashable, Sendable {
     public static let directDeviceIndex: UInt8 = 0xFF
     public static let receiverSlots: ClosedRange<UInt8> = 1...6
     public static let deviceNameFeature: UInt16 = 0x0005
+    public static let reprogrammableControlsFeature: UInt16 = 0x1B04
+    public static let gestureButtonControl: UInt16 = 0x00C3
+    static let divertedReporting: UInt8 = 0x03
+    static let undivertedReporting: UInt8 = 0x02
     static let longReportID: UInt8 = 0x11
     static let longReportLength = 20
     static let softwareID: UInt8 = 0x0B
@@ -47,5 +51,14 @@ public struct HIDPPRequest: Hashable, Sendable {
 
     public static func kind(of device: UInt8, nameFeature: UInt8) -> HIDPPRequest {
         HIDPPRequest(deviceIndex: device, featureIndex: nameFeature, function: 2)
+    }
+
+    public static func reporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8, diverted: Bool) -> HIDPPRequest {
+        HIDPPRequest(
+            deviceIndex: device,
+            featureIndex: controlsFeature,
+            function: 3,
+            parameters: [UInt8(control >> 8), UInt8(control & 0xFF), diverted ? divertedReporting : undivertedReporting, 0, 0]
+        )
     }
 }

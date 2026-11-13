@@ -1,3 +1,4 @@
+import AppKit
 import IOKit.hid
 import MouseKit
 import Observation
@@ -12,6 +13,7 @@ import Observation
 
     private(set) var devices: [LogitechDevice] = []
     @ObservationIgnored private var channels: [HIDPPChannel] = []
+    @ObservationIgnored private var heldGestureButtons: Set<String> = []
     @ObservationIgnored private let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
 
     func start() {
@@ -29,15 +31,27 @@ import Observation
         }, context)
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { LogitechDevices.shared.takeOverGestureButtons() }
+        }
+    }
+
+    func takeOverGestureButtons() {
+        for channel in channels {
+            let onChannel = devices.filter { $0.id.hasPrefix(channel.id) }
+            Task { for device in onChannel { await GestureButton.takeOver(device, on: channel) } }
+        }
     }
 
     private func added(_ device: IOHIDDevice) {
         let channel = HIDPPChannel(device: device)
+        channel.onNotification = { [weak self, weak channel] report in
+            guard let self, let channel else { return }
+            notified(report, on: channel)
+        }
         channels.append(channel)
         Task {
-            let found = await Self.discover(on: channel)
-            guard channels.contains(where: { $0 === channel }) else { return }
-            devices += found
+            for device in await LogitechDiscovery.devices(on: channel) { await use(device, on: channel) }
         }
     }
 
@@ -48,27 +62,28 @@ import Observation
         devices.removeAll { found in gone.contains { found.id.hasPrefix($0.id) } }
     }
 
-    private static func discover(on channel: HIDPPChannel) async -> [LogitechDevice] {
-        if let direct = await device(at: HIDPPRequest.directDeviceIndex, on: channel) { return [direct] }
-        var found: [LogitechDevice] = []
-        for slot in HIDPPRequest.receiverSlots {
-            if let device = await device(at: slot, on: channel) { found.append(device) }
-        }
-        return found
+    private func use(_ device: LogitechDevice, on channel: HIDPPChannel) async {
+        guard channels.contains(where: { $0 === channel }) else { return }
+        devices.removeAll { $0.id == device.id }
+        devices.append(device)
+        await GestureButton.takeOver(device, on: channel)
     }
 
-    private static func device(at index: UInt8, on channel: HIDPPChannel) async -> LogitechDevice? {
-        guard let version = await channel.send(.protocolVersion(of: index))?.parameters, version.first ?? 0 >= 2,
-              let nameFeature = await channel.send(.featureIndex(of: HIDPPRequest.deviceNameFeature, on: index))?.parameters?.first,
-              nameFeature != 0,
-              let length = await channel.send(.nameLength(of: index, nameFeature: nameFeature))?.parameters?.first
-        else { return nil }
-        var parts: [[UInt8]] = []
-        while parts.map(\.count).reduce(0, +) < Int(length),
-              let part = await channel.send(.namePart(of: index, nameFeature: nameFeature, from: parts.map(\.count).reduce(0, +)))?.parameters {
-            parts.append(part)
+    private func notified(_ report: [UInt8], on channel: HIDPPChannel) {
+        guard report.count > 1 else { return }
+        let index = report[1]
+        let id = LogitechDevice.id(channel: channel.id, deviceIndex: index)
+        let known = devices.first { $0.id == id }
+        switch HIDPPNotification(report: report, from: index, controlsFeature: known?.controlsFeature) {
+        case .controlsHeld(let held):
+            let isDown = held.contains(HIDPPRequest.gestureButtonControl)
+            guard isDown != heldGestureButtons.contains(id) else { return }
+            if isDown { heldGestureButtons.insert(id) } else { heldGestureButtons.remove(id) }
+            GestureButton.send(isDown: isDown)
+        case .linkRestored:
+            Task { if let device = await LogitechDiscovery.device(at: index, on: channel) { await use(device, on: channel) } }
+        case nil:
+            return
         }
-        let kind = await channel.send(.kind(of: index, nameFeature: nameFeature))?.parameters?.first.flatMap(LogitechDeviceKind.init(rawValue:))
-        return LogitechDevice(channel: channel.id, name: LogitechDevice.name(from: parts, length: Int(length)), kind: kind, deviceIndex: index)
     }
 }
