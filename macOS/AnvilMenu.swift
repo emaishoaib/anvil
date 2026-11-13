@@ -18,6 +18,8 @@ struct AnvilMenu: View {
             Divider()
         }
         Button("Settings…") {
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate()
             openWindow(id: WindowID.settings)
         }
         .keyboardShortcut(",")
