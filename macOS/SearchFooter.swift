@@ -1,3 +1,4 @@
+import Carbon.HIToolbox
 import LauncherKit
 import SwiftUI
 
@@ -36,18 +37,26 @@ struct SearchFooter: View {
                 if let action {
                     Text(action)
                         .fontWeight(.medium)
-                    HStack(spacing: 4) {
-                        if !mode.hasSearchField {
-                            KeyCap(symbol: "command")
-                        }
-                        KeyCap(symbol: "return")
-                    }
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Return, modifiers: mode.hasSearchField ? [] : .command))
+                }
+                if hasActions {
+                    Rectangle()
+                        .fill(.primary.opacity(0.15))
+                        .frame(width: 1, height: 16)
+                    Text("Actions")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_K, modifiers: .command))
                 }
             }
             .padding(.horizontal, 12)
             .frame(height: Self.height - 1)
             .background(.primary.opacity(0.02))
         }
+    }
+
+    private var hasActions: Bool {
+        guard mode == .launcher, case .quickLink = selected else { return false }
+        return true
     }
 
     private var action: String? {
@@ -61,17 +70,5 @@ struct SearchFooter: View {
         case .word: "Show Details"
         case nil: nil
         }
-    }
-}
-
-private struct KeyCap: View {
-    let symbol: String
-
-    var body: some View {
-        Image(systemName: symbol)
-            .font(.system(size: 11, weight: .semibold))
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
-            .background(.primary.opacity(0.08), in: .rect(cornerRadius: 4))
     }
 }

@@ -8,6 +8,12 @@ enum SavedLaunchCounts {
         LaunchCounts(UserDefaults.standard.dictionary(forKey: key) as? [String: Int] ?? [:])
     }
 
+    static func reset(_ launchKey: String) {
+        var counts = load()
+        counts.reset(launchKey)
+        UserDefaults.standard.set(counts.byKey, forKey: key)
+    }
+
     static func record(_ launchKey: String) {
         var counts = load()
         counts.record(launchKey)

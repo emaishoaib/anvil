@@ -1,6 +1,7 @@
 enum SearchField: Hashable {
     case query
     case argument(Int)
+    case actionFilter
 
     func moved(by offset: Int, argumentCount: Int) -> SearchField {
         let fields = [SearchField.query] + (0..<argumentCount).map(SearchField.argument)

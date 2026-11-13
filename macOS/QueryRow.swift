@@ -6,7 +6,7 @@ struct QueryRow: View {
     private static let caretRoom: CGFloat = 8
 
     @Bindable var model: SearchModel
-    @FocusState private var focus: SearchField?
+    let focus: FocusState<SearchField?>.Binding
 
     var body: some View {
         HStack(spacing: 12) {
@@ -17,7 +17,7 @@ struct QueryRow: View {
                 TextField(model.mode.placeholder, text: $model.query)
                     .textFieldStyle(.plain)
                     .font(.system(size: Self.fontSize))
-                    .focused($focus, equals: .query)
+                    .focused(focus, equals: .query)
                     .frame(width: hasArguments ? queryWidth : nil)
             } else {
                 Spacer()
@@ -25,14 +25,11 @@ struct QueryRow: View {
             if hasArguments {
                 ForEach(Array(model.arguments.placeholders.enumerated()), id: \.offset) { index, hint in
                     ArgumentField(hint: hint, text: argument(at: index))
-                        .focused($focus, equals: .argument(index))
+                        .focused(focus, equals: .argument(index))
                 }
                 Spacer(minLength: 0)
             }
         }
-        .onAppear { focus = .query }
-        .onChange(of: model.field) { focus = model.field }
-        .onChange(of: focus) { if let focus { model.field = focus } }
     }
 
     private var hasArguments: Bool {

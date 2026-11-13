@@ -1,5 +1,6 @@
 import AppKit
 import Carbon.HIToolbox
+import LauncherKit
 import SwiftUI
 
 final class SearchBar {
@@ -43,13 +44,9 @@ final class SearchBar {
 
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
-        if Self.onlyCommand(in: modifiers) {
-            switch keyCode {
-            case kVK_ANSI_E: return model.editSelectedLink()
-            case kVK_ANSI_D: return model.duplicateSelectedLink()
-            default: return false
-            }
-        }
+        guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
+        if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
+        if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         switch keyCode {
         case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_UpArrow: model.moveSelection(by: -1)
@@ -64,6 +61,23 @@ final class SearchBar {
 
     private static func onlyCommand(in modifiers: NSEvent.ModifierFlags) -> Bool {
         modifiers.intersection([.command, .shift, .option, .control]) == .command
+    }
+
+    private static func combo(_ keyCode: Int, _ modifiers: NSEvent.ModifierFlags) -> KeyCombo {
+        KeyCombo(keyCode: keyCode, modifiers: KeyModifiers(eventFlags: modifiers))
+    }
+
+    private func handleActionKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
+        if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
+        switch keyCode {
+        case kVK_UpArrow: model.actionPanel?.moveSelection(by: -1)
+        case kVK_DownArrow: model.actionPanel?.moveSelection(by: 1)
+        case kVK_Return, kVK_ANSI_KeypadEnter: model.performSelectedAction()
+        case kVK_Escape: model.backInActions()
+        default: return false
+        }
+        return true
     }
 
     private func handleFormKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {

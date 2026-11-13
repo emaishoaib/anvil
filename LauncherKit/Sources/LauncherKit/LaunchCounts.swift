@@ -12,4 +12,8 @@ public struct LaunchCounts: Equatable, Sendable {
     public mutating func record(_ key: String) {
         byKey[key, default: 0] += 1
     }
+
+    public mutating func reset(_ key: String) {
+        byKey[key] = nil
+    }
 }

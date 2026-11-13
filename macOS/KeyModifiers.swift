@@ -1,5 +1,5 @@
+import AppKit
 import Carbon.HIToolbox
-import CoreGraphics
 
 nonisolated struct KeyModifiers: OptionSet, Hashable {
     let rawValue: Int
@@ -9,11 +9,11 @@ nonisolated struct KeyModifiers: OptionSet, Hashable {
     static let shift = KeyModifiers(rawValue: 1 << 2)
     static let command = KeyModifiers(rawValue: 1 << 3)
 
-    private static let all: [(modifier: KeyModifiers, flag: CGEventFlags, carbonMask: Int, symbol: String)] = [
-        (.control, .maskControl, controlKey, "⌃"),
-        (.option, .maskAlternate, optionKey, "⌥"),
-        (.shift, .maskShift, shiftKey, "⇧"),
-        (.command, .maskCommand, cmdKey, "⌘"),
+    private static let all: [(modifier: KeyModifiers, flag: CGEventFlags, eventFlag: NSEvent.ModifierFlags, carbonMask: Int, symbol: String)] = [
+        (.control, .maskControl, .control, controlKey, "⌃"),
+        (.option, .maskAlternate, .option, optionKey, "⌥"),
+        (.shift, .maskShift, .shift, shiftKey, "⇧"),
+        (.command, .maskCommand, .command, cmdKey, "⌘"),
     ]
 
     init(rawValue: Int) {
@@ -24,11 +24,19 @@ nonisolated struct KeyModifiers: OptionSet, Hashable {
         self.init(Self.all.filter { flags.contains($0.flag) }.map(\.modifier))
     }
 
+    init(eventFlags: NSEvent.ModifierFlags) {
+        self.init(Self.all.filter { eventFlags.contains($0.eventFlag) }.map(\.modifier))
+    }
+
     init(carbonMask: Int) {
         self.init(Self.all.filter { carbonMask & $0.carbonMask != 0 }.map(\.modifier))
     }
 
     var symbols: String {
-        Self.all.filter { contains($0.modifier) }.map(\.symbol).joined()
+        orderedSymbols.joined()
+    }
+
+    var orderedSymbols: [String] {
+        Self.all.filter { contains($0.modifier) }.map(\.symbol)
     }
 }

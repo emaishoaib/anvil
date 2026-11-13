@@ -16,6 +16,13 @@ struct LaunchCountsTests {
         #expect(counts.count(for: safari) == 2)
     }
 
+    @Test func resettingAKeyForgetsOnlyItsCount() {
+        var counts = LaunchCounts([safari: 4, "command:defineWord": 2])
+        counts.reset(safari)
+        #expect(counts.count(for: safari) == 0)
+        #expect(counts.count(for: "command:defineWord") == 2)
+    }
+
     @Test func appsAreCountedByTheirPathAndCommandsByTheirName() {
         let app = SearchResult.app(InstalledApp(url: URL(filePath: safari)))
         #expect(app.launchKey == safari)

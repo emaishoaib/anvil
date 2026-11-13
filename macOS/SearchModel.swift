@@ -13,6 +13,7 @@ import Observation
     var field = SearchField.query
     var arguments = LinkArguments()
     var draft = QuickLink()
+    private(set) var actionPanel: ActionPanel?
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
 
     var selectedResult: SearchResult? {
@@ -73,7 +74,7 @@ import Observation
                 field = .argument(blank)
                 return
             }
-            open(link, filling: arguments.values)
+            open(link, filling: arguments.values, in: link.openWith)
             SearchBar.shared.hide()
         case .word(let word):
             SavedRecentWords.record(word.text)
@@ -118,6 +119,45 @@ import Observation
         _ = goBack()
     }
 
+    func toggleActions() -> Bool {
+        if actionPanel != nil {
+            closeActions()
+            return true
+        }
+        guard case .quickLink(let link) = selectedResult else { return false }
+        showActions(for: link, page: .actions)
+        return true
+    }
+
+    func showActions(for link: QuickLink, page: ActionPanel.Page) {
+        actionPanel = ActionPanel(link: link, page: page)
+        field = .actionFilter
+    }
+
+    func closeActions() {
+        actionPanel = nil
+        field = .query
+    }
+
+    func reloadResults() {
+        refresh()
+    }
+
+    func copy(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    func open(_ link: QuickLink, filling values: [String], in app: URL?) {
+        guard let target = link.target(filling: values) else { return }
+        SavedLaunchCounts.record(link.launchKey)
+        if let app {
+            NSWorkspace.shared.open([target], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
+        } else {
+            NSWorkspace.shared.open(target)
+        }
+    }
+
     private func refresh() {
         wordLookup?.cancel()
         selected = 0
@@ -160,23 +200,8 @@ import Observation
         query = ""
     }
 
-    private func copy(_ text: String) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
-    }
-
     private func launch(_ app: InstalledApp) {
         SavedLaunchCounts.record(app.url.path)
         NSWorkspace.shared.openApplication(at: app.url, configuration: NSWorkspace.OpenConfiguration())
-    }
-
-    private func open(_ link: QuickLink, filling values: [String]) {
-        guard let target = link.target(filling: values) else { return }
-        SavedLaunchCounts.record(link.launchKey)
-        if let app = link.openWith {
-            NSWorkspace.shared.open([target], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
-        } else {
-            NSWorkspace.shared.open(target)
-        }
     }
 }
