@@ -32,6 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Recents.shared.start()
             KnownWindows.shared.start()
             Watcher.shared.start()
+            DragSnapping.shared.start()
         }
     }
 }
