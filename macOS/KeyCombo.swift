@@ -14,6 +14,7 @@ nonisolated struct KeyCombo: Hashable, CustomStringConvertible {
         case kVK_Space: "Space"
         case kVK_Return: "Return"
         case kVK_Escape: "Esc"
+        case kVK_Delete: "Delete"
         case kVK_LeftArrow: "Left"
         case kVK_RightArrow: "Right"
         case kVK_UpArrow: "Up"
