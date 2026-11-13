@@ -6,6 +6,5 @@ struct GeneralPage: View {
             SettingsFolderSection()
         }
         .formStyle(.grouped)
-        .navigationTitle("General")
     }
 }
