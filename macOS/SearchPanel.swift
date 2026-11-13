@@ -14,8 +14,7 @@ final class SearchPanel: NSPanel {
         background.material = .popover
         background.state = .active
         background.wantsLayer = true
-        background.layer?.cornerRadius = 12
-        background.layer?.masksToBounds = true
+        background.roundCorners(radius: 12)
         contentView = background
     }
 

@@ -15,8 +15,7 @@ enum PanelViews {
         background.material = .hudWindow
         background.state = .active
         background.wantsLayer = true
-        background.layer?.cornerRadius = 16
-        background.layer?.masksToBounds = true
+        background.roundCorners(radius: 16)
         window.contentView = background
         return window
     }
