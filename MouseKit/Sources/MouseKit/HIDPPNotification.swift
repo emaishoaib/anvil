@@ -8,18 +8,27 @@ public enum HIDPPNotification: Equatable, Sendable {
     static let eventFunctionAndSoftwareID: UInt8 = 0x00
     static let heldControlBytes = 4..<12
 
-    public init?(report: [UInt8], from device: UInt8, controlsFeature: UInt8?) {
+    public init?(report: [UInt8], from device: UInt8, controlsFeature: UInt8?, wirelessStatusFeature: UInt8?) {
         guard report.count >= Self.minimumLength, report[1] == device else { return nil }
         if report[2] == Self.connectionSubID {
             guard report[4] & Self.linkLostFlag == 0 else { return nil }
             self = .linkRestored
             return
         }
-        guard let controlsFeature, report[2] == controlsFeature, report[3] == Self.eventFunctionAndSoftwareID else { return nil }
-        let end = min(report.count, Self.heldControlBytes.upperBound)
-        let controls = stride(from: Self.heldControlBytes.lowerBound, to: end - 1, by: 2).map {
+        guard report[3] == Self.eventFunctionAndSoftwareID else { return nil }
+        if report[2] == wirelessStatusFeature {
+            self = .linkRestored
+            return
+        }
+        guard report[2] == controlsFeature else { return nil }
+        self = .controlsHeld(Self.heldControls(in: report))
+    }
+
+    private static func heldControls(in report: [UInt8]) -> Set<UInt16> {
+        let end = min(report.count, heldControlBytes.upperBound)
+        let controls = stride(from: heldControlBytes.lowerBound, to: end - 1, by: 2).map {
             UInt16(report[$0]) << 8 | UInt16(report[$0 + 1])
         }
-        self = .controlsHeld(Set(controls.filter { $0 != 0 }))
+        return Set(controls.filter { $0 != 0 })
     }
 }

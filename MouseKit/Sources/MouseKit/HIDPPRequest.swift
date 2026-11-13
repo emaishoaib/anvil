@@ -6,6 +6,7 @@ public struct HIDPPRequest: Hashable, Sendable {
     public static let reprogrammableControlsFeature: UInt16 = 0x1B04
     public static let buttonBehindWheelControl: UInt16 = 0x00C4
     public static let wheelFeature: UInt16 = 0x2121
+    public static let wirelessStatusFeature: UInt16 = 0x1D4B
     static let divertedReporting: UInt8 = 0x03
     static let undivertedReporting: UInt8 = 0x02
     static let longReportID: UInt8 = 0x11

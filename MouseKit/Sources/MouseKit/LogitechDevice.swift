@@ -22,6 +22,7 @@ public struct LogitechDevice: Identifiable, Equatable, Sendable {
     public let deviceIndex: UInt8
     public let controlsFeature: UInt8?
     public let wheelFeature: UInt8?
+    public let wirelessStatusFeature: UInt8?
 
     public init(
         channel: String,
@@ -29,7 +30,8 @@ public struct LogitechDevice: Identifiable, Equatable, Sendable {
         kind: LogitechDeviceKind?,
         deviceIndex: UInt8,
         controlsFeature: UInt8? = nil,
-        wheelFeature: UInt8? = nil
+        wheelFeature: UInt8? = nil,
+        wirelessStatusFeature: UInt8? = nil
     ) {
         id = Self.id(channel: channel, deviceIndex: deviceIndex)
         self.name = name
@@ -37,6 +39,7 @@ public struct LogitechDevice: Identifiable, Equatable, Sendable {
         self.deviceIndex = deviceIndex
         self.controlsFeature = controlsFeature
         self.wheelFeature = wheelFeature
+        self.wirelessStatusFeature = wirelessStatusFeature
     }
 
     public static func id(channel: String, deviceIndex: UInt8) -> String {

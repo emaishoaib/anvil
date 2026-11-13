@@ -79,7 +79,12 @@ import Observation
         let index = report[1]
         let id = LogitechDevice.id(channel: channel.id, deviceIndex: index)
         let known = devices.first { $0.id == id }
-        switch HIDPPNotification(report: report, from: index, controlsFeature: known?.controlsFeature) {
+        switch HIDPPNotification(
+            report: report,
+            from: index,
+            controlsFeature: known?.controlsFeature,
+            wirelessStatusFeature: known?.wirelessStatusFeature
+        ) {
         case .controlsHeld(let held):
             let isDown = held.contains(HIDPPRequest.buttonBehindWheelControl)
             guard isDown != heldGestureButtons.contains(id) else { return }

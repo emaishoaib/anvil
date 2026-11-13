@@ -27,7 +27,8 @@ enum LogitechDiscovery {
             kind: kind,
             deviceIndex: index,
             controlsFeature: await featureIndex(of: HIDPPRequest.reprogrammableControlsFeature, at: index, on: channel),
-            wheelFeature: await featureIndex(of: HIDPPRequest.wheelFeature, at: index, on: channel)
+            wheelFeature: await featureIndex(of: HIDPPRequest.wheelFeature, at: index, on: channel),
+            wirelessStatusFeature: await featureIndex(of: HIDPPRequest.wirelessStatusFeature, at: index, on: channel)
         )
     }
 
