@@ -8,6 +8,7 @@ nonisolated struct KeyPress {
     let kind: KeyPressKind
     let keyCode: Int
     let modifiers: KeyModifiers
+    let isRepeat: Bool
 
     var combo: KeyCombo { KeyCombo(keyCode: keyCode, modifiers: modifiers) }
 
@@ -21,5 +22,6 @@ nonisolated struct KeyPress {
         self.kind = kind
         keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
         modifiers = KeyModifiers(flags: event.flags)
+        isRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
     }
 }

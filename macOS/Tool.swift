@@ -12,7 +12,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
 
     var isOnKey: String { "\(rawValue).isOn" }
 
-    var isOnByDefault: Bool { self == .switcher }
+    var isOnByDefault: Bool { self == .switcher || self == .launcher }
 
     var isOn: Bool { UserDefaults.standard.bool(forKey: isOnKey) }
 
@@ -56,6 +56,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
     var keyResponder: (any KeyResponder)? {
         switch self {
         case .switcher: SwitcherKeys.shared
+        case .launcher: LauncherKeys.shared
         default: nil
         }
     }
