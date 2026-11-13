@@ -9,6 +9,7 @@ import Observation
     }
     private(set) var results: [SearchResult] = []
     private(set) var selected = 0
+    private(set) var entryPage = ""
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
 
     var selectedResult: SearchResult? {
@@ -21,6 +22,10 @@ import Observation
     }
 
     func openSelected() {
+        if case .wordEntry(let word, _) = mode {
+            WordLookup.openInDictionary(word)
+            return SearchBar.shared.hide()
+        }
         guard results.indices.contains(selected) else { return }
         open(results[selected])
     }
@@ -36,15 +41,23 @@ import Observation
         case .command(let command):
             run(command)
         case .word(let word):
-            WordLookup.openInDictionary(word)
-            SearchBar.shared.hide()
+            entryPage = DictionaryEntries.page(for: word.text)
+            mode = .wordEntry(word, query: query)
+            query = ""
         }
     }
 
     func goBack() -> Bool {
-        guard mode != .launcher else { return false }
-        mode = .launcher
-        query = ""
+        switch mode {
+        case .launcher:
+            return false
+        case .defineWord:
+            mode = .launcher
+            query = ""
+        case .wordEntry(_, let wordQuery):
+            mode = .defineWord
+            query = wordQuery
+        }
         return true
     }
 
@@ -61,6 +74,8 @@ import Observation
                 guard !Task.isCancelled else { return }
                 results = words.map(SearchResult.word)
             }
+        case .wordEntry:
+            results = []
         }
     }
 

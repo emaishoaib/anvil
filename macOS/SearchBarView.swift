@@ -5,6 +5,7 @@ struct SearchBarView: View {
     private static let fieldHeight: CGFloat = 56
     private static let fontSize: CGFloat = 17
     private static let tintOpacity = 0.5
+    private static let entryHeight: CGFloat = 420
 
     @Bindable var model: SearchModel
     @FocusState private var isFocused: Bool
@@ -22,7 +23,12 @@ struct SearchBarView: View {
             }
             .padding(.horizontal, 16)
             .frame(height: Self.fieldHeight)
-            if !model.results.isEmpty {
+            if case .wordEntry = model.mode {
+                Divider()
+                EntryView(page: model.entryPage)
+                    .frame(height: Self.entryHeight)
+                SearchFooter(mode: model.mode, selected: nil)
+            } else if !model.results.isEmpty {
                 Divider()
                 SearchResults(model: model)
                 SearchFooter(mode: model.mode, selected: model.selectedResult)

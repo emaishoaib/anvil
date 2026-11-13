@@ -23,6 +23,10 @@ struct SearchFooter: View {
                     AppIcon(path: LauncherCommand.defineWord.iconPath)
                     Text(LauncherCommand.defineWord.name)
                         .foregroundStyle(.secondary)
+                case .wordEntry(let word, _):
+                    AppIcon(path: LauncherCommand.defineWord.iconPath)
+                    Text(word.text)
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if let action {
@@ -42,11 +46,12 @@ struct SearchFooter: View {
     }
 
     private var action: String? {
-        switch selected {
+        if case .wordEntry = mode { return "Open in Dictionary" }
+        return switch selected {
         case .answer: "Copy Answer"
         case .app: "Open Application"
         case .command: "Open Command"
-        case .word: "Open in Dictionary"
+        case .word: "Show Details"
         case nil: nil
         }
     }
