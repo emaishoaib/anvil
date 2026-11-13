@@ -2,8 +2,13 @@ import SwiftUI
 
 struct AnvilMenu: View {
     @Environment(\.openWindow) private var openWindow
+    @AppStorage(Tool.keepAwake.isOnKey) private var usesKeepAwake = false
 
     var body: some View {
+        if usesKeepAwake {
+            Toggle("Keep Awake", isOn: Binding(get: { KeepAwake.shared.isActive }, set: { KeepAwake.shared.setActive($0) }))
+            Divider()
+        }
         Button("Settings…") {
             openWindow(id: WindowID.settings)
         }
