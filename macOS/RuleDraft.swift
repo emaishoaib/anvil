@@ -13,6 +13,7 @@ struct RuleDraft: Identifiable {
     var sound: String?
     var windowWidth: Int?
     var windowHeight: Int?
+    var swipeDirection = SwipeDirection.back
 
     init() {
         id = UUID()

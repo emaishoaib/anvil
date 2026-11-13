@@ -1,3 +1,4 @@
+import RulesKit
 import SwiftUI
 
 struct RuleActionFields: View {
@@ -32,6 +33,12 @@ struct RuleActionFields: View {
         case .resizeWindow:
             TextField("Width", value: $draft.windowWidth, format: .number, prompt: Text("1050"))
             TextField("Height", value: $draft.windowHeight, format: .number, prompt: Text("650"))
+        case .swipe:
+            Picker("Direction", selection: $draft.swipeDirection) {
+                Text("Back").tag(SwipeDirection.back)
+                Text("Forward").tag(SwipeDirection.forward)
+            }
+            .pickerStyle(.segmented)
         }
     }
 }

@@ -72,6 +72,8 @@ private struct RuleActionLabel: View {
             Text("Quit it")
         case .resizeWindow(let width, let height):
             Text("Resize its window to \(width) by \(height)")
+        case .swipe(let direction):
+            Text(direction == .back ? "Swipe back" : "Swipe forward")
         }
     }
 }

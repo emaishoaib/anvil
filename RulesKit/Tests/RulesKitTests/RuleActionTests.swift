@@ -21,6 +21,11 @@ struct RuleActionTests {
         #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)
     }
 
+    @Test func aSwipeRuleComesBackUnchangedFromJSON() throws {
+        let rule = Rule(trigger: .mouseButton(number: 3), action: .swipe(.back))
+        #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)
+    }
+
     @Test func aSoundRuleComesBackUnchangedFromJSON() throws {
         let rule = Rule(trigger: .shortcut(Keystroke(keyCode: 35, modifiers: 10)), action: .playSound(name: "Glass"))
         #expect(try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule)) == rule)

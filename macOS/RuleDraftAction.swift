@@ -18,6 +18,9 @@ extension RuleDraft {
             actionKind = .resizeWindow
             windowWidth = width
             windowHeight = height
+        case .swipe(let direction):
+            actionKind = .swipe
+            swipeDirection = direction
         }
     }
 
@@ -35,6 +38,8 @@ extension RuleDraft {
         case .resizeWindow:
             guard let windowWidth, let windowHeight, windowWidth > 0, windowHeight > 0 else { return nil }
             return .resizeWindow(width: windowWidth, height: windowHeight)
+        case .swipe:
+            return .swipe(swipeDirection)
         }
     }
 }
