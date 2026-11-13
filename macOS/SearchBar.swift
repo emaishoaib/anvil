@@ -9,7 +9,8 @@ final class SearchBar {
     private static let topShare = 0.25
 
     private let panel = SearchPanel()
-    private var model = SearchModel()
+    private let model = SearchModel()
+    private lazy var content = NSHostingView(rootView: SearchBarView(model: model))
     private var isPresentingModal = false
 
     func toggle() {
@@ -96,15 +97,15 @@ final class SearchBar {
     private func show() {
         guard let screen = NSScreen.main, let background = panel.contentView else { return }
         CurrencyRatesStore.shared.refreshIfStale()
-        model = SearchModel()
-        let content = NSHostingView(rootView: SearchBarView(model: model))
+        model.reset()
         let size = content.fittingSize
         let top = screen.frame.maxY - screen.frame.height * Self.topShare
         panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
-        content.frame = background.bounds
-        content.autoresizingMask = [.width, .height]
-        background.subviews.forEach { $0.removeFromSuperview() }
-        background.addSubview(content)
+        if content.superview == nil {
+            content.frame = background.bounds
+            content.autoresizingMask = [.width, .height]
+            background.addSubview(content)
+        }
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
     }

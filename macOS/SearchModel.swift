@@ -28,6 +28,16 @@ import Observation
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
+    func reset() {
+        actionPanel = nil
+        arguments = LinkArguments()
+        draft = QuickLink()
+        entryPage = ""
+        field = .query
+        mode = .launcher
+        query = ""
+    }
+
     func moveSelection(by offset: Int) {
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
