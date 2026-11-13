@@ -10,11 +10,6 @@ struct AnvilApp: App {
         } label: {
             AnvilMenuIcon()
         }
-        SwiftUI.Window("Anvil", id: WindowID.settings) {
-            SettingsView()
-        }
-        .defaultSize(width: 680, height: 460)
-        .defaultLaunchBehavior(.suppressed)
     }
 }
 
@@ -26,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CurrencyRatesStore.shared.start()
         AppUpdater.shared.start()
         EntryWebView.warmUp()
+        Task { SettingsWindow.shared.prepare() }
         #if !DEBUG
         LoginItem.addOnFirstLaunch()
         #endif
@@ -56,8 +52,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         return .terminateLater
     }
-}
-
-enum WindowID {
-    static let settings = "settings"
 }

@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct AnvilMenu: View {
-    @Environment(\.openWindow) private var openWindow
     @AppStorage(Tool.keepAwake.isOnKey) private var usesKeepAwake = false
 
     var body: some View {
@@ -18,9 +17,7 @@ struct AnvilMenu: View {
             Divider()
         }
         Button("Settings…") {
-            NSApp.setActivationPolicy(.regular)
-            NSApp.activate()
-            openWindow(id: WindowID.settings)
+            SettingsWindow.shared.show()
         }
         .keyboardShortcut(",")
         Button("Check for Updates…") {

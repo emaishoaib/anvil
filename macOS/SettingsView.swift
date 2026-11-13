@@ -27,8 +27,5 @@ struct SettingsView: View {
                 EmptyView()
             }
         }
-        .onDisappear {
-            NSApp.setActivationPolicy(.accessory)
-        }
     }
 }
