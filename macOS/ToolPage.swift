@@ -34,6 +34,7 @@ struct ToolPage: View {
             }
             if tool == .rules {
                 RulesSection()
+                KeySwapsSection()
             }
         }
         .formStyle(.grouped)
