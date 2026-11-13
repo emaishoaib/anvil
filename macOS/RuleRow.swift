@@ -63,6 +63,8 @@ private struct RuleActionLabel: View {
             }
         case .chooseMenuItem(let path):
             Text("Choose \(path.joined(separator: " > "))")
+        case .playSound(let name):
+            Text("Play \(name)")
         }
     }
 }

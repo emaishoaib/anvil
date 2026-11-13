@@ -16,6 +16,16 @@ struct RuleActionFields: View {
             }
         case .chooseMenuItem:
             TextField("Menu Item", text: $draft.menuItem, prompt: Text("View > Terminal"))
+        case .playSound:
+            Picker("Sound", selection: $draft.sound) {
+                Text("Choose a Sound").tag(String?.none)
+                ForEach(SystemSounds.names, id: \.self) { name in
+                    Text(name).tag(String?.some(name))
+                }
+            }
+            .onChange(of: draft.sound) {
+                if let sound = draft.sound { SystemSounds.play(sound) }
+            }
         }
     }
 }

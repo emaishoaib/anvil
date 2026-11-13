@@ -8,6 +8,7 @@ struct RuleDraft: Identifiable {
     var actionKind = RuleActionKind.sendShortcut
     var shortcutToSend: KeyCombo?
     var menuItem = ""
+    var sound: String?
 
     init() {
         id = UUID()
@@ -26,6 +27,9 @@ struct RuleDraft: Identifiable {
         case .chooseMenuItem(let path):
             actionKind = .chooseMenuItem
             menuItem = path.joined(separator: " > ")
+        case .playSound(let name):
+            actionKind = .playSound
+            sound = name
         }
     }
 
@@ -41,6 +45,8 @@ struct RuleDraft: Identifiable {
         case .chooseMenuItem:
             let path = RuleAction.menuPath(from: menuItem)
             return path.isEmpty ? nil : .chooseMenuItem(path: path)
+        case .playSound:
+            return sound.map { .playSound(name: $0) }
         }
     }
 }
