@@ -21,6 +21,7 @@ struct AnvilApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         Tool.registerDefaults()
+        KeepAwake.shared.restore()
         AppCatalog.shared.start()
         CurrencyRatesStore.shared.start()
         AppUpdater.shared.start()

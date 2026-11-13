@@ -47,7 +47,7 @@ struct ToolPage: View {
         .onChange(of: isOn) {
             if tool == .mouse { LogitechDevices.shared.applyMouseTool() }
             guard tool == .keepAwake, !isOn else { return }
-            Task { await KeepAwake.shared.stop() }
+            Task { await KeepAwake.shared.setActive(false) }
         }
     }
 }

@@ -1,3 +1,4 @@
+import Foundation
 import IOKit.pwr_mgt
 import Observation
 
@@ -9,6 +10,8 @@ final class KeepAwake {
     }
 
     static let shared = KeepAwake()
+
+    private static let isActiveKey = "keepAwake.isActive"
 
     private(set) var state = State.off
 
@@ -26,8 +29,14 @@ final class KeepAwake {
         }
     }
 
+    func restore() {
+        guard Tool.keepAwake.isOn, UserDefaults.standard.bool(forKey: Self.isActiveKey) else { return }
+        start()
+    }
+
     func setActive(_ isActive: Bool) async {
         if isActive { start() } else { await stop() }
+        UserDefaults.standard.set(self.isActive, forKey: Self.isActiveKey)
     }
 
     func start() {
