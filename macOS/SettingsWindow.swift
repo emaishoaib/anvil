@@ -12,6 +12,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     private lazy var window = makeWindow()
 
     func prepare() {
+        SettingsPages.shared.prepare()
         window.contentView?.layoutSubtreeIfNeeded()
     }
 
