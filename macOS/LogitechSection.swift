@@ -16,6 +16,9 @@ struct LogitechSection: View {
                 if let dpi = logitech.dpis[device.id] {
                     DPIRow(dpi: dpi)
                 }
+                if device.kind == .mouse, device.smartShiftFeature != nil {
+                    DisengageRow()
+                }
             } header: {
                 DeviceHeader(device: device, battery: logitech.batteries[device.id])
             }

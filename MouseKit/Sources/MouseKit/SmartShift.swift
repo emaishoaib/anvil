@@ -1,4 +1,4 @@
-/// The MX Master wheel's SmartShift: whether the wheel is in ratchet mode or free spin, and how fast a flick has to be before the ratchet disengages. The mouse's reply also carries its own default disengage speed, as a third byte.
+/// The MX Master wheel's SmartShift: whether the wheel is in ratchet mode or free spin, and how fast a flick has to be before the ratchet disengages. The mouse's reply also carries its own default disengage speed, as a third byte. A disengage speed is chosen from 1 to 50, as Solaar offers it, and the top of that range stands for a ratchet that never disengages.
 public struct SmartShift: Equatable, Sendable {
     public enum Mode: UInt8, Sendable {
         case freeSpin = 1
@@ -7,6 +7,12 @@ public struct SmartShift: Equatable, Sendable {
 
     public static let neverDisengages: UInt8 = 0xFF
     public static let ratchetAlwaysEngaged = SmartShift(mode: .ratchet, disengageSpeed: neverDisengages)
+    public static let disengageSpeeds: ClosedRange<Int> = 1...50
+
+    public static func ratchet(disengagingAt speed: Int) -> SmartShift {
+        guard speed < disengageSpeeds.upperBound else { return ratchetAlwaysEngaged }
+        return SmartShift(mode: .ratchet, disengageSpeed: UInt8(max(speed, disengageSpeeds.lowerBound)))
+    }
 
     public let mode: Mode
     public let disengageSpeed: UInt8

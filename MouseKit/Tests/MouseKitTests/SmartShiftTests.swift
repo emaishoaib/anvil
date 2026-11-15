@@ -26,6 +26,19 @@ struct SmartShiftTests {
         #expect(report[3] == 0x1B)
     }
 
+    @Test func aChosenSpeedIsSentAsItIs() {
+        #expect(SmartShift.ratchet(disengagingAt: 12) == SmartShift(mode: .ratchet, disengageSpeed: 12))
+    }
+
+    @Test func theTopSpeedMeansTheRatchetNeverDisengages() {
+        #expect(SmartShift.ratchet(disengagingAt: 50) == .ratchetAlwaysEngaged)
+        #expect(SmartShift.ratchet(disengagingAt: 80) == .ratchetAlwaysEngaged)
+    }
+
+    @Test func aSpeedBelowTheRangeIsRaisedToTheSlowest() {
+        #expect(SmartShift.ratchet(disengagingAt: 0) == SmartShift(mode: .ratchet, disengageSpeed: 1))
+    }
+
     @Test func aReplyIsReadAsTheModeAndTheDisengageSpeed() {
         #expect(SmartShift(parameters: [0x02, 0x0A, 0x0A]) == SmartShift(mode: .ratchet, disengageSpeed: 10))
         #expect(SmartShift(parameters: [0x01, 0x0A, 0x0A]) == SmartShift(mode: .freeSpin, disengageSpeed: 10))

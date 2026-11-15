@@ -22,10 +22,6 @@ struct ScrollingSection: View {
             }
             Toggle("Reverse the wheel's direction", isOn: $library.settings.reversesWheel)
             Toggle("Reverse the thumb wheel's direction", isOn: $library.settings.reversesThumbWheel)
-            Toggle(isOn: $library.settings.ratchetAlwaysEngaged) {
-                Text("Ratchet mode")
-                Text("Always Engage")
-            }
             SliderRow(title: "Duration of each wheel click", value: durationFrames, range: ScrollingSettings.durationFramesRange, step: 1) {
                 "\(ScrollingSettings.milliseconds(frames: $0)) ms"
             }

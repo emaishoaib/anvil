@@ -15,7 +15,7 @@ import os
             let settings = settings
             Self.snapshot.withLock { $0 = settings }
             if settings != lastSaved { persist() }
-            if settings.ratchetAlwaysEngaged != oldValue.ratchetAlwaysEngaged || settings.dpi != oldValue.dpi {
+            if settings.ratchetDisengageSpeed != oldValue.ratchetDisengageSpeed || settings.dpi != oldValue.dpi {
                 LogitechDevices.shared.applyMouseTool()
             }
         }

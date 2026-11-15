@@ -3,10 +3,15 @@ import MouseKit
 
 nonisolated struct MouseSettings: Codable, Equatable, Sendable {
     static let defaults = MouseSettings()
+    static let middleDisengageSpeed = 25
+
+    private enum OlderKeys: String, CodingKey {
+        case ratchetAlwaysEngaged
+    }
 
     var reversesWheel = true
     var reversesThumbWheel = true
-    var ratchetAlwaysEngaged = true
+    var ratchetDisengageSpeed = SmartShift.disengageSpeeds.upperBound
     var dpi: Int?
     var durationFrames = 12
     var brakeFrame = 4
@@ -25,12 +30,19 @@ nonisolated struct MouseSettings: Codable, Equatable, Sendable {
         let defaults = Self.defaults
         reversesWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesWheel) ?? defaults.reversesWheel
         reversesThumbWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesThumbWheel) ?? defaults.reversesThumbWheel
-        ratchetAlwaysEngaged = try container.decodeIfPresent(Bool.self, forKey: .ratchetAlwaysEngaged) ?? defaults.ratchetAlwaysEngaged
+        ratchetDisengageSpeed = try container.decodeIfPresent(Int.self, forKey: .ratchetDisengageSpeed)
+            ?? Self.disengageSpeed(fromOlder: decoder.container(keyedBy: OlderKeys.self))
+            ?? defaults.ratchetDisengageSpeed
         dpi = try container.decodeIfPresent(Int.self, forKey: .dpi) ?? defaults.dpi
         durationFrames = try container.decodeIfPresent(Int.self, forKey: .durationFrames) ?? defaults.durationFrames
         brakeFrame = try container.decodeIfPresent(Int.self, forKey: .brakeFrame) ?? defaults.brakeFrame
         pointsPerTick = try container.decodeIfPresent(Double.self, forKey: .pointsPerTick) ?? defaults.pointsPerTick
         acceleration = try container.decodeIfPresent(Double.self, forKey: .acceleration) ?? defaults.acceleration
         commandScrollSpeed = try container.decodeIfPresent(CommandScrollSpeed.self, forKey: .commandScrollSpeed) ?? defaults.commandScrollSpeed
+    }
+
+    private static func disengageSpeed(fromOlder container: KeyedDecodingContainer<OlderKeys>) throws -> Int? {
+        guard let alwaysEngaged = try container.decodeIfPresent(Bool.self, forKey: .ratchetAlwaysEngaged) else { return nil }
+        return alwaysEngaged ? SmartShift.disengageSpeeds.upperBound : middleDisengageSpeed
     }
 }
