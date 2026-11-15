@@ -27,6 +27,7 @@ struct SearchResults: View {
 
     private func appDetail(for result: SearchResult) -> String {
         guard model.mode == .uninstallApp, case .app(let app) = result else { return "Application" }
+        guard !LeftoverIndexStore.shared.isSearching else { return "Searching…" }
         return AppSizes.shared.bytes(of: app.url)?.formatted(.byteCount(style: .file)) ?? "Measuring…"
     }
 

@@ -324,8 +324,8 @@ import Observation
             mode = .settings
         case .uninstallApp:
             mode = .uninstallApp
-            AppSizes.shared.measure(appsOtherThanAnvil.filter(\.isRemovable).map(\.url))
-            LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url))
+            let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
+            LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
         }
         query = ""
     }
