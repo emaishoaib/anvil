@@ -4,6 +4,7 @@ import SwiftUI
 struct ResultRow: View {
     let result: SearchResult
     let isSelected: Bool
+    var appDetail = "Application"
 
     var body: some View {
         HStack(spacing: 10) {
@@ -12,7 +13,7 @@ struct ResultRow: View {
                 AppIcon(path: app.url.path)
                 Text(app.name).foregroundStyle(Color(nsColor: .textColor))
                 Spacer()
-                Text("Application").foregroundStyle(.secondary)
+                Text(appDetail).foregroundStyle(.secondary)
             case .command(let command):
                 CommandIcon(command: command)
                 Text(command.name).foregroundStyle(Color(nsColor: .textColor))

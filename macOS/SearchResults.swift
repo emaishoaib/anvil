@@ -12,7 +12,7 @@ struct SearchResults: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(items, id: \.index) { item in
-                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected) {
+                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected, appDetail: appDetail(for: item.result)) {
                             model.open(item.result)
                         }
                     }
@@ -22,6 +22,11 @@ struct SearchResults: View {
             .frame(height: Self.listHeight + Self.padding * 2)
             .onChange(of: model.selected) { proxy.scrollTo(model.selected) }
         }
+    }
+
+    private func appDetail(for result: SearchResult) -> String {
+        guard model.mode == .uninstallApp, case .app(let app) = result else { return "Application" }
+        return AppSizes.shared.bytes(of: app.url)?.formatted(.byteCount(style: .file)) ?? "Measuring…"
     }
 
     private var items: [(index: Int, result: SearchResult, header: String?)] {
@@ -40,6 +45,7 @@ private struct ResultItem: View {
     let result: SearchResult
     let header: String?
     let isSelected: Bool
+    let appDetail: String
     let open: () -> Void
 
     var body: some View {
@@ -54,7 +60,7 @@ private struct ResultItem: View {
         case .answer(let answer):
             AnswerCard(answer: answer, isSelected: isSelected)
         default:
-            ResultRow(result: result, isSelected: isSelected)
+            ResultRow(result: result, isSelected: isSelected, appDetail: appDetail)
                 .frame(height: Self.rowHeight)
         }
     }

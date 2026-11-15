@@ -282,8 +282,7 @@ import Observation
         case .launcher:
             results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, commands: availableCommands, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
         case .uninstallApp:
-            let otherApps = AppCatalog.shared.apps.filter { $0.url != Bundle.main.bundleURL }
-            results = LauncherSearch.removableApps(matching: query, in: otherApps)
+            results = LauncherSearch.removableApps(matching: query, in: appsOtherThanAnvil)
         case .uninstallReview:
             results = []
             review?.select(0)
@@ -321,8 +320,13 @@ import Observation
             mode = .settings
         case .uninstallApp:
             mode = .uninstallApp
+            AppSizes.shared.measure(appsOtherThanAnvil.filter(\.isRemovable).map(\.url))
         }
         query = ""
+    }
+
+    private var appsOtherThanAnvil: [InstalledApp] {
+        AppCatalog.shared.apps.filter { $0.url != Bundle.main.bundleURL }
     }
 
     func moveTickedToTrash() -> Bool {
