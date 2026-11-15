@@ -23,7 +23,7 @@ enum AnvilAction: CaseIterable {
 
     var shortcut: KeyCombo? {
         switch self {
-        case .settings: KeyCombo(keyCode: kVK_ANSI_Comma, modifiers: .command)
+        case .settings: KeyCombo(keyCode: kVK_ANSI_Period, modifiers: .command)
         case .checkForUpdates: nil
         case .quit: KeyCombo(keyCode: kVK_ANSI_Q, modifiers: .command)
         }
