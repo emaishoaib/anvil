@@ -9,7 +9,21 @@ enum WindowsCatalog {
             toggle("Snap windows by dragging them to the screen edges", key: SnappingSettings.snapsByDraggingKey, isOn: SnappingSettings.snapsByDragging),
             toggle("Restore a window's size when dragged out of a snap", key: SnappingSettings.restoresSizeWhenUnsnappedKey, isOn: SnappingSettings.restoresSizeWhenUnsnapped),
             toggle("Maximize or restore a window by double-clicking its title bar", key: SnappingSettings.maximizesOnTitleBarDoubleClickKey, isOn: SnappingSettings.maximizesOnTitleBarDoubleClick, warning: doubleClickWarning),
+            gap,
         ] + SnapZone.allCases.map(zoneChoice(for:))
+    }
+
+    private static var gap: Setting {
+        Setting(
+            entry: SettingEntry(id: SnappingSettings.gapKey, title: "Gap between windows", toolName: Tool.windows.name),
+            row: .number(SettingNumber(
+                value: Double(SnappingSettings.gap),
+                range: SnappingSettings.gapRange,
+                step: 1,
+                label: { "\(Int($0)) pt" },
+                set: { UserDefaults.standard.set($0, forKey: SnappingSettings.gapKey) }
+            ))
+        )
     }
 
     private static var doubleClickWarning: String? {

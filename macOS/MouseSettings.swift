@@ -4,6 +4,8 @@ import MouseKit
 nonisolated struct MouseSettings: Codable, Equatable, Sendable {
     static let defaults = MouseSettings()
     static let middleDisengageSpeed = 25
+    static let thumbWheelSpeedGains = 0.25...4.0
+    static let thumbWheelSpeedGainStep = 0.25
 
     private enum OlderKeys: String, CodingKey {
         case ratchetAlwaysEngaged

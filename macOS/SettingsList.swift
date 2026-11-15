@@ -17,10 +17,16 @@ struct SettingsList: View {
                     ForEach(model.sections) { section in
                         SectionHeader(title: section.title)
                         ForEach(section.settings) { setting in
-                            SettingRowView(setting: setting, isSelected: model.isSelected(setting))
-                                .frame(minHeight: Self.rowHeight)
-                                .id(setting.id)
-                                .onTapGesture { open(setting) }
+                            SettingRowView(
+                                setting: setting,
+                                isSelected: model.isSelected(setting),
+                                adjustedValue: model.adjustedValue(of: setting),
+                                drag: { model.drag(setting, to: $0) },
+                                finishDragging: model.finishAdjusting
+                            )
+                            .frame(minHeight: Self.rowHeight)
+                            .id(setting.id)
+                            .onTapGesture { open(setting) }
                         }
                     }
                 }
@@ -39,12 +45,23 @@ private struct SettingRowView: View {
 
     let setting: Setting
     let isSelected: Bool
+    let adjustedValue: Double?
+    let drag: @MainActor (Double) -> Void
+    let finishDragging: @MainActor () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
             SettingTitle(title: setting.entry.title, subtitle: setting.subtitle, warning: setting.warning)
             Spacer()
-            SettingControl(row: setting.row)
+            switch setting.row {
+            case .toggle(let isOn, _):
+                SwitchControl(isOn: isOn)
+            case .choice(let selected, let options, _):
+                ChosenOption(title: options[selected])
+            case .number(let number):
+                NumberControl(number: number, adjustedValue: adjustedValue, drag: drag, finishDragging: finishDragging)
+                    .disabled(setting.isDisabled)
+            }
         }
         .opacity(setting.isDisabled ? Self.disabledOpacity : 1)
         .padding(.horizontal, 8)
@@ -82,20 +99,15 @@ private struct SettingTitle: View {
     }
 }
 
-private struct SettingControl: View {
-    let row: SettingRow
+private struct SwitchControl: View {
+    let isOn: Bool
 
     var body: some View {
-        switch row {
-        case .toggle(let isOn, _):
-            Toggle("", isOn: .constant(isOn))
-                .toggleStyle(.switch)
-                .labelsHidden()
-                .controlSize(.small)
-                .allowsHitTesting(false)
-        case .choice(let selected, let options, _):
-            ChosenOption(title: options[selected])
-        }
+        Toggle("", isOn: .constant(isOn))
+            .toggleStyle(.switch)
+            .labelsHidden()
+            .controlSize(.small)
+            .allowsHitTesting(false)
     }
 }
 
@@ -110,5 +122,30 @@ private struct ChosenOption: View {
                 .font(.system(size: 10, weight: .semibold))
         }
         .foregroundStyle(.secondary)
+    }
+}
+
+/// A slider and the value it shows. While the row is being adjusted, from the keyboard or by dragging, the value is shown in the accent colour.
+private struct NumberControl: View {
+    private static let sliderWidth: CGFloat = 180
+    private static let valueWidth: CGFloat = 96
+
+    let number: SettingNumber
+    let adjustedValue: Double?
+    let drag: @MainActor (Double) -> Void
+    let finishDragging: @MainActor () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Slider(value: Binding(get: { adjustedValue ?? number.value }, set: drag), in: number.range, step: number.step, onEditingChanged: { isEditing in
+                if !isEditing { finishDragging() }
+            })
+            .controlSize(.small)
+            .frame(width: Self.sliderWidth)
+            Text(number.label(adjustedValue ?? number.value))
+                .monospacedDigit()
+                .foregroundStyle(adjustedValue == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
+                .frame(width: Self.valueWidth, alignment: .trailing)
+        }
     }
 }

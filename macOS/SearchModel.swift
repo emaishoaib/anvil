@@ -36,6 +36,7 @@ import Observation
     }
 
     func reset() {
+        settings.finishAdjusting()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         arguments = LinkArguments()
@@ -109,6 +110,7 @@ import Observation
     }
 
     func open(_ setting: Setting) {
+        settings.finishAdjusting()
         settings.select(setting)
         guard case .choice = setting.row, !setting.isDisabled else { return settings.activate(setting) }
         actionPanel = ActionPanel(subject: .settingChoices(setting))
@@ -129,6 +131,7 @@ import Observation
             mode = .launcher
             query = previousQuery
         case .settings:
+            settings.finishAdjusting()
             mode = .launcher
             query = ""
         }

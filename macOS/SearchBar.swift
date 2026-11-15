@@ -46,6 +46,7 @@ final class SearchBar {
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
+        if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         switch keyCode {
@@ -87,6 +88,17 @@ final class SearchBar {
         case kVK_DownArrow: model.actionPanel?.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.performSelectedAction()
         case kVK_Escape: model.backInActions()
+        default: return false
+        }
+        return true
+    }
+
+    private func handleAdjustingKey(_ keyCode: Int) -> Bool {
+        switch keyCode {
+        case kVK_LeftArrow: model.settings.step(by: -1)
+        case kVK_RightArrow: model.settings.step(by: 1)
+        case kVK_Return, kVK_ANSI_KeypadEnter, kVK_Escape: model.settings.finishAdjusting()
+        case kVK_UpArrow, kVK_DownArrow: break
         default: return false
         }
         return true
