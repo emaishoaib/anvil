@@ -15,6 +15,7 @@ import Observation
     var draft = QuickLink()
     private(set) var actionPanel: ActionPanel?
     private(set) var timesOpened = 0
+    let settings = SettingsBarModel()
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 
@@ -47,6 +48,7 @@ import Observation
     }
 
     func moveSelection(by offset: Int) {
+        if mode == .settings { return settings.moveSelection(by: offset) }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -65,6 +67,7 @@ import Observation
     }
 
     func openSelected() {
+        if mode == .settings { return settings.activateSelected() }
         if case .wordEntry(let word, _) = mode {
             WordLookup.openInDictionary(word)
             return SearchBar.shared.hide()
@@ -115,6 +118,9 @@ import Observation
         case .quickLinkForm(_, let previousQuery):
             mode = .launcher
             query = previousQuery
+        case .settings:
+            mode = .launcher
+            query = ""
         }
         return true
     }
@@ -197,6 +203,9 @@ import Observation
                 results = words.map(SearchResult.word)
                 showArguments()
             }
+        case .settings:
+            results = []
+            settings.filter(query)
         case .wordEntry, .quickLinkForm:
             results = []
         }
@@ -215,6 +224,9 @@ import Observation
             mode = .defineWord
         case .createQuickLink:
             showForm(.create, for: QuickLink(), returningTo: "")
+        case .settings:
+            settings.reload()
+            mode = .settings
         }
         query = ""
     }

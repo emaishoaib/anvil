@@ -24,6 +24,10 @@ struct SearchBarView: View {
                 Divider()
                 QuickLinkForm(draft: $model.draft)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
+            } else if model.mode == .settings {
+                Divider()
+                SettingsList(model: model.settings)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedSetting?.row.actionTitle)
             } else {
                 Divider()
                 SearchResults(model: model)

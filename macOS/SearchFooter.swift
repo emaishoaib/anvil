@@ -8,6 +8,7 @@ struct SearchFooter: View {
     let mode: SearchMode
     let selected: SearchResult?
     let toggleAnvilActions: () -> Void
+    var settingAction: String? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,6 +28,10 @@ struct SearchFooter: View {
                 case .quickLinkForm(let kind, _):
                     CommandIcon(command: .createQuickLink)
                     Text(kind.title)
+                        .foregroundStyle(.secondary)
+                case .settings:
+                    CommandIcon(command: .settings)
+                    Text(LauncherCommand.settings.name)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -56,6 +61,7 @@ struct SearchFooter: View {
     }
 
     private var action: String? {
+        if mode == .settings { return settingAction }
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         return switch selected {

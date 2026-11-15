@@ -5,11 +5,13 @@ enum SearchMode: Equatable {
     case defineWord
     case wordEntry(Word, query: String)
     case quickLinkForm(QuickLinkFormKind, query: String)
+    case settings
 
     var placeholder: String {
         switch self {
         case .launcher: "Search for apps and quick links…"
         case .defineWord: "Search word…"
+        case .settings: "Search settings…"
         case .wordEntry, .quickLinkForm: ""
         }
     }

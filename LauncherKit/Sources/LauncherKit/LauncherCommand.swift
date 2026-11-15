@@ -1,11 +1,13 @@
 public enum LauncherCommand: String, CaseIterable, Sendable {
     case defineWord
     case createQuickLink
+    case settings
 
     public var name: String {
         switch self {
         case .defineWord: "Define Word"
         case .createQuickLink: "Create Quick Link"
+        case .settings: "Settings"
         }
     }
 
@@ -13,6 +15,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         switch self {
         case .defineWord: "Dictionary"
         case .createQuickLink: "Quick Links"
+        case .settings: "Anvil"
         }
     }
 
@@ -20,6 +23,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         switch self {
         case .defineWord: "define"
         case .createQuickLink: "link"
+        case .settings: "settings"
         }
     }
 

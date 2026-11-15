@@ -16,7 +16,7 @@ struct ToolPage: View {
             }
             if tool.canBeTurnedOff {
                 Section {
-                    Toggle("Use \(tool.name)", isOn: $isOn)
+                    Toggle("Use \(tool.name)", isOn: Binding(get: { isOn }, set: { tool.setOn($0) }))
                 }
             }
             if tool == .windows {
@@ -45,11 +45,6 @@ struct ToolPage: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: isOn) {
-            if tool == .mouse { LogitechDevices.shared.applyMouseTool() }
-            guard tool == .keepAwake, !isOn else { return }
-            Task { await KeepAwake.shared.setActive(false) }
-        }
     }
 }
 

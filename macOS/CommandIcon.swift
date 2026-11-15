@@ -8,6 +8,7 @@ struct CommandIcon: View {
         switch command {
         case .defineWord: AppIcon(path: "/System/Applications/Dictionary.app")
         case .createQuickLink: SymbolIcon(symbol: "link", colour: .red)
+        case .settings: SymbolIcon(symbol: "gearshape.fill", colour: .gray)
         }
     }
 }

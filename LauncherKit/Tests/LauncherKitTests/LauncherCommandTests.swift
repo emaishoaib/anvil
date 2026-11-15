@@ -24,4 +24,9 @@ struct LauncherCommandTests {
         #expect(LauncherCommand.createQuickLink.match(for: "quick") == .wordPrefix)
         #expect(LauncherCommand.createQuickLink.match(for: "link") == .namePrefix)
     }
+
+    @Test func settingsMatchesItsKeyword() {
+        #expect(LauncherCommand.settings.match(for: "set") == .namePrefix)
+        #expect(LauncherCommand.settings.match(for: "settings") == .namePrefix)
+    }
 }
