@@ -339,7 +339,10 @@ import Observation
         Task {
             guard await review.moveTickedToTrash() else { return }
             SystemSounds.playMoveToTrash()
-            SearchBar.shared.hide(remembering: false)
+            AppCatalog.shared.reload()
+            guard self.review === review else { return }
+            _ = goBack()
+            query = ""
         }
         return true
     }

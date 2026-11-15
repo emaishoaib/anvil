@@ -22,7 +22,8 @@ import Observation
         watch()
     }
 
-    private func reload() {
+    /// Scans the app folders again. The folder watcher does this on its own after a short delay, so call it only when the list must be current right away, such as just after an app has gone to the Trash.
+    func reload() {
         let urls = Set(Self.folders.flatMap { AppScanner.apps(in: $0) } + [Self.finder])
         apps = urls.map(InstalledApp.init(url:)).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
