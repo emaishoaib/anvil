@@ -9,4 +9,19 @@ struct Setting: Identifiable {
     let row: SettingRow
 
     var id: String { entry.id }
+
+    /// Places settings under a subheader inside their tool's section.
+    static func subgroup(_ name: String, _ settings: [Setting]) -> [Setting] {
+        settings.map { $0.placed(in: name) }
+    }
+
+    private func placed(in subgroup: String) -> Setting {
+        Setting(
+            entry: SettingEntry(id: entry.id, title: entry.title, toolName: entry.toolName, keywords: entry.keywords, subgroup: subgroup),
+            subtitle: subtitle,
+            warning: warning,
+            isDisabled: isDisabled,
+            row: row
+        )
+    }
 }

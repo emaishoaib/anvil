@@ -5,12 +5,18 @@ import WindowKit
 /// The Windows tool's settings in the search bar, in the settings window's order: the shortcuts, then snapping. The snap zones can only be changed while snapping by dragging is on.
 enum WindowsCatalog {
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
-        shortcuts(systemShortcuts: systemShortcuts) + [
+        Setting.subgroup("Shortcuts", shortcuts(systemShortcuts: systemShortcuts))
+            + Setting.subgroup("Snapping", snapping)
+            + Setting.subgroup("Snap Zones", SnapZone.allCases.map(zoneChoice(for:)))
+    }
+
+    private static var snapping: [Setting] {
+        [
             toggle("Snap windows by dragging them to the screen edges", key: SnappingSettings.snapsByDraggingKey, isOn: SnappingSettings.snapsByDragging),
             toggle("Restore a window's size when dragged out of a snap", key: SnappingSettings.restoresSizeWhenUnsnappedKey, isOn: SnappingSettings.restoresSizeWhenUnsnapped),
             toggle("Maximize or restore a window by double-clicking its title bar", key: SnappingSettings.maximizesOnTitleBarDoubleClickKey, isOn: SnappingSettings.maximizesOnTitleBarDoubleClick, warning: doubleClickWarning),
             gap,
-        ] + SnapZone.allCases.map(zoneChoice(for:))
+        ]
     }
 
     private static var gap: Setting {
@@ -55,7 +61,6 @@ enum WindowsCatalog {
         let choices = zone.choices
         return Setting(
             entry: SettingEntry(id: key, title: zone.title, toolName: Tool.windows.name, keywords: ["snap zone"]),
-            subtitle: "Snap zone",
             isDisabled: !SnappingSettings.snapsByDragging,
             row: .choice(
                 selected: choices.firstIndex(of: SnappingSettings.choice(for: zone)) ?? 0,

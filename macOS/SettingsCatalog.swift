@@ -19,9 +19,9 @@ enum SettingsCatalog {
     }
 
     private static var switcherShortcuts: [Setting] {
-        Tool.switcher.shortcuts.map { shortcut in
+        Setting.subgroup("Shortcuts", Tool.switcher.shortcuts.map { shortcut in
             .info(shortcut.action, id: "switcher.\(shortcut.keys)", toolName: Tool.switcher.name, value: shortcut.keys, keywords: ["shortcut"])
-        }
+        })
     }
 
     private static func toolSwitch(for tool: Tool) -> Setting {

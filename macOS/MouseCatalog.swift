@@ -1,18 +1,29 @@
 import LauncherKit
 
-/// The Mouse tool's settings in the search bar, in the settings window's order: the wheel and scrolling, then the rows for Logitech devices.
+/// The Mouse tool's settings in the search bar, in the settings window's order: scrolling, the keys that change what the wheel does, then the rows for Logitech devices.
 enum MouseCatalog {
     static func settings() -> [Setting] {
+        Setting.subgroup("Scrolling", scrolling)
+            + Setting.subgroup("While Holding a Key", whileHoldingAKey)
+            + Setting.subgroup("Logitech", LogitechCatalog.settings())
+    }
+
+    private static var scrolling: [Setting] {
         [
             MouseSettingRows.toggle("Reverse the wheel's direction", id: "mouse.reversesWheel", \.reversesWheel),
             durationFrames,
             brakeFrame,
             MouseSettingRows.number("Distance of each wheel click", id: "mouse.pointsPerTick", \.pointsPerTick, in: ScrollingSettings.pointsPerTickRange, step: 5) { "\(Int($0)) pt" },
             MouseSettingRows.number("Acceleration", id: "mouse.acceleration", \.acceleration, in: ScrollingSettings.accelerationRange, step: 0.05) { "\(Int(($0 * 100).rounded()))%" },
+        ]
+    }
+
+    private static var whileHoldingAKey: [Setting] {
+        [
             .info("Shift scrolls sideways", id: "mouse.shiftScrollsSideways", toolName: Tool.mouse.name),
             .info("Control zooms in and out", id: "mouse.controlZooms", toolName: Tool.mouse.name),
             MouseSettingRows.choice("Scroll speed while holding Command", id: "mouse.commandScrollSpeed", \.commandScrollSpeed, among: CommandScrollSpeed.allCases) { "\($0.name) the speed" },
-        ] + LogitechCatalog.settings()
+        ]
     }
 
     private static var durationFrames: Setting {

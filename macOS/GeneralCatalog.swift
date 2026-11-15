@@ -3,7 +3,8 @@ enum GeneralCatalog {
     static let name = "General"
 
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
-        [searchBarShortcut(systemShortcuts: systemShortcuts)] + settingsFolder
+        Setting.subgroup("Search Bar", [searchBarShortcut(systemShortcuts: systemShortcuts)])
+            + Setting.subgroup("Settings Folder", settingsFolder)
     }
 
     private static func searchBarShortcut(systemShortcuts: Set<KeyCombo>) -> Setting {

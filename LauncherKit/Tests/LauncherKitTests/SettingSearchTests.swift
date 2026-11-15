@@ -56,4 +56,25 @@ struct SettingSearchTests {
         let groups = SettingSearch.matches(for: "speed", in: [animationSpeed, speed])
         #expect(groups.map(\.toolName) == ["Mouse", "Windows"])
     }
+
+    @Test func entriesOutsideASubgroupHaveNoSubgroupName() {
+        let snapping = SettingEntry(id: "windows.snapsByDragging", title: "Snap by Dragging", toolName: "Windows", subgroup: "Snapping")
+        let groups = SettingSearch.matches(for: "", in: [useWindows, snapping])
+        #expect(groups.first?.subgroups.map(\.name) == [nil, "Snapping"])
+    }
+
+    @Test func matchesInTheSameSubgroupStayTogether() {
+        let dragGap = SettingEntry(id: "windows.dragGap", title: "Dragging Gap", toolName: "Windows", subgroup: "Snapping")
+        let dragZone = SettingEntry(id: "windows.dragZone", title: "Zone for Dragging", toolName: "Windows", subgroup: "Snap Zones")
+        let snapByDragging = SettingEntry(id: "windows.snapsByDragging", title: "Snap by Dragging", toolName: "Windows", subgroup: "Snapping")
+        let groups = SettingSearch.matches(for: "drag", in: [dragGap, dragZone, snapByDragging])
+        #expect(groups.first?.subgroups.map { $0.entries.map(\.title) } == [["Dragging Gap", "Snap by Dragging"], ["Zone for Dragging"]])
+    }
+
+    @Test func theSubgroupWithTheBestMatchComesFirst() {
+        let snapByDragging = SettingEntry(id: "windows.snapsByDragging", title: "Snap by Dragging", toolName: "Windows", subgroup: "Snapping")
+        let dragZone = SettingEntry(id: "windows.dragZone", title: "Drag Zone", toolName: "Windows", subgroup: "Snap Zones")
+        let groups = SettingSearch.matches(for: "drag", in: [snapByDragging, dragZone])
+        #expect(groups.first?.subgroups.map(\.name) == ["Snap Zones", "Snapping"])
+    }
 }

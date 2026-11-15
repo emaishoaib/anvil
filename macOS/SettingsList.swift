@@ -1,11 +1,12 @@
 import LauncherKit
 import SwiftUI
 
-/// The settings that match the query in settings mode, under a header per tool. Only the rows on screen are built.
+/// The settings that match the query in settings mode, under a header per tool and a subheader per subgroup. A tool's rows are indented one step under its header, and a subgroup's rows one step under its subheader. Only the rows on screen are built.
 struct SettingsList: View {
     private static let rowHeight: CGFloat = 48
     private static let padding: CGFloat = 8
     private static let listHeight: CGFloat = 380
+    private static let indentStep: CGFloat = 14
 
     let model: SettingsBarModel
     let open: (Setting) -> Void
@@ -16,18 +17,12 @@ struct SettingsList: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(model.sections) { section in
                         SectionHeader(title: section.title)
-                        ForEach(section.settings) { setting in
-                            SettingRowView(
-                                setting: setting,
-                                isSelected: model.isSelected(setting),
-                                isRecording: model.isRecording(setting),
-                                adjustedValue: model.adjustedValue(of: setting),
-                                drag: { model.drag(setting, to: $0) },
-                                finishDragging: model.finishAdjusting
-                            )
-                            .frame(minHeight: Self.rowHeight)
-                            .id(setting.id)
-                            .onTapGesture { open(setting) }
+                        ForEach(section.subgroups) { subgroup in
+                            if let name = subgroup.name {
+                                SubgroupHeader(title: name)
+                                    .padding(.leading, Self.indentStep)
+                            }
+                            rows(of: subgroup)
                         }
                     }
                 }
@@ -38,6 +33,35 @@ struct SettingsList: View {
                 if let id = model.selectedSetting?.id { proxy.scrollTo(id) }
             }
         }
+    }
+
+    private func rows(of subgroup: SettingsBarModel.Subgroup) -> some View {
+        ForEach(subgroup.settings) { setting in
+            SettingRowView(
+                setting: setting,
+                isSelected: model.isSelected(setting),
+                isRecording: model.isRecording(setting),
+                adjustedValue: model.adjustedValue(of: setting),
+                drag: { model.drag(setting, to: $0) },
+                finishDragging: model.finishAdjusting
+            )
+            .frame(minHeight: Self.rowHeight)
+            .padding(.leading, subgroup.name == nil ? Self.indentStep : Self.indentStep * 2)
+            .id(setting.id)
+            .onTapGesture { open(setting) }
+        }
+    }
+}
+
+private struct SubgroupHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(.tertiary)
+            .padding(.leading, 8)
+            .frame(height: 24, alignment: .center)
     }
 }
 

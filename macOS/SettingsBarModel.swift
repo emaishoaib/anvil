@@ -7,9 +7,17 @@ import Observation
 @MainActor @Observable final class SettingsBarModel {
     struct Section: Identifiable {
         let title: String
-        let settings: [Setting]
+        let subgroups: [Subgroup]
 
         var id: String { title }
+        var settings: [Setting] { subgroups.flatMap(\.settings) }
+    }
+
+    struct Subgroup: Identifiable {
+        let name: String?
+        let settings: [Setting]
+
+        var id: String { name ?? "" }
     }
 
     struct Adjustment {
@@ -177,7 +185,9 @@ import Observation
     private func show(matching query: String) {
         let settingsByID = Dictionary(uniqueKeysWithValues: settings.map { ($0.id, $0) })
         sections = SettingSearch.matches(for: query, in: settings.map(\.entry)).map { group in
-            Section(title: group.toolName, settings: group.entries.compactMap { settingsByID[$0.id] })
+            Section(title: group.toolName, subgroups: group.subgroups.map { subgroup in
+                Subgroup(name: subgroup.name, settings: subgroup.entries.compactMap { settingsByID[$0.id] })
+            })
         }
         shown = sections.flatMap(\.settings)
     }
