@@ -76,6 +76,13 @@ struct RemovalPlanTests {
         #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.kind) == [.app])
     }
 
+    @Test func theAppAndLibraryLeftoversStartTicked() throws {
+        let library = try TemporaryLibrary("Caches/com.acme.example/cache.db", "Preferences/com.acme.example.plist")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
+        let items = RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [])
+        #expect(items.map(\.startsTicked) == [true, true, true])
+    }
+
     @Test func aMissingFileMeasuresZero() {
         #expect(DiskSize.bytes(at: URL(filePath: "/nonexistent/\(UUID().uuidString)")) == 0)
     }

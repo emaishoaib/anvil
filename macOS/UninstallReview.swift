@@ -3,7 +3,7 @@ import CleanerKit
 import LauncherKit
 import Observation
 
-/// The uninstall page for one app: the app and the files it left in the Library, each ticked to go to the Trash until it is unticked. The items are found and measured away from the main thread, because a large app takes a while to measure. The query narrows the rows by name, and the selection moves through the rows that are shown.
+/// The uninstall page for one app: the app and the files it left behind, each ticked to go to the Trash until it is unticked. An item that may hold the user's own files starts unticked instead. The items are found and measured away from the main thread, because a large app takes a while to measure. The query narrows the rows by name, and the selection moves through the rows that are shown.
 @Observable final class UninstallReview {
     enum State {
         case searching
@@ -28,6 +28,7 @@ import Observation
             (RemovalPlan.items(forAppAt: appURL, in: .current, otherAppURLs: otherAppURLs), FullDiskAccess.isGranted)
         }.value
         self.hasFullDiskAccess = hasFullDiskAccess
+        unticked = Set(items.filter { !$0.startsTicked }.map(\.url))
         state = .ready(items)
     }
 
