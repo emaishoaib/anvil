@@ -2,6 +2,7 @@ public enum HIDPPNotification: Equatable, Sendable {
     case controlsHeld(Set<UInt16>)
     case linkRestored
     case batteryChanged(BatteryStatus)
+    case thumbWheelTurned(ThumbWheelRotation)
 
     static let minimumLength = 7
     static let connectionSubID: UInt8 = 0x41
@@ -10,7 +11,7 @@ public enum HIDPPNotification: Equatable, Sendable {
     static let heldControlBytes = 4..<12
     static let parametersStart = 4
 
-    public init?(report: [UInt8], from device: UInt8, controlsFeature: UInt8?, wirelessStatusFeature: UInt8?, batteryFeature: UInt8? = nil) {
+    public init?(report: [UInt8], from device: UInt8, controlsFeature: UInt8?, wirelessStatusFeature: UInt8?, batteryFeature: UInt8? = nil, thumbWheelFeature: UInt8? = nil) {
         guard report.count >= Self.minimumLength, report[1] == device else { return nil }
         if report[2] == Self.connectionSubID {
             guard report[4] & Self.linkLostFlag == 0 else { return nil }
@@ -25,6 +26,11 @@ public enum HIDPPNotification: Equatable, Sendable {
         if report[2] == batteryFeature {
             guard let status = BatteryStatus(parameters: Array(report.dropFirst(Self.parametersStart))) else { return nil }
             self = .batteryChanged(status)
+            return
+        }
+        if report[2] == thumbWheelFeature {
+            guard let rotation = ThumbWheelRotation(parameters: Array(report.dropFirst(Self.parametersStart))) else { return nil }
+            self = .thumbWheelTurned(rotation)
             return
         }
         guard report[2] == controlsFeature else { return nil }

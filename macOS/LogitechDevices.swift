@@ -109,7 +109,7 @@ import Observation
             Task { if let device = await LogitechDiscovery.device(at: index, on: channel) { await use(device, on: channel) } }
         case .batteryChanged(let status):
             batteries[id] = status
-        case nil:
+        case .thumbWheelTurned, nil:
             return
         }
     }
