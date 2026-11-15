@@ -18,14 +18,21 @@ final class TemporaryLibrary {
         try Data(count: byteCount).write(to: file)
     }
 
-    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID when there is one.
-    func addApp(named name: String, bundleID: String?) throws -> URL {
+    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID when there is one. Each helper is a bundle at the given path inside the app's `Contents` folder, with the given bundle ID.
+    func addApp(named name: String, bundleID: String?, helpers: [String: String] = [:]) throws -> URL {
         let app = url.appending(path: "Applications/\(name).app", directoryHint: .isDirectory)
-        let info = app.appending(path: "Contents/Info.plist")
+        try writeInfo(bundleID: bundleID, inBundle: app)
+        for (path, helperBundleID) in helpers {
+            try writeInfo(bundleID: helperBundleID, inBundle: app.appending(path: "Contents/\(path)", directoryHint: .isDirectory))
+        }
+        return app
+    }
+
+    private func writeInfo(bundleID: String?, inBundle bundle: URL) throws {
+        let info = bundle.appending(path: "Contents/Info.plist")
         try FileManager.default.createDirectory(at: info.deletingLastPathComponent(), withIntermediateDirectories: true)
         let plist = bundleID.map { ["CFBundleIdentifier": $0] } ?? [:]
         try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0).write(to: info)
-        return app
     }
 
     deinit {

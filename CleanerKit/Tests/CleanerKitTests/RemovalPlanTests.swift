@@ -35,6 +35,47 @@ struct RemovalPlanTests {
         #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.kind) == [.app])
     }
 
+    @Test func filesOfAHelperDeepInsideTheAppAreFound() throws {
+        let library = try TemporaryLibrary("Preferences/com.acme.updater.plist", "LaunchAgents/com.acme.updater.wake.plist")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: [
+            "Frameworks/Example.framework/Versions/A/Helpers/Updater.app": "com.acme.updater",
+        ])
+        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.name) == [
+            "Example.app",
+            "com.acme.updater.plist",
+            "com.acme.updater.wake.plist",
+        ])
+    }
+
+    @Test func aHelperFromAnotherVendorIsLeftOut() throws {
+        let library = try TemporaryLibrary("Caches/org.sparkle-project.Sparkle/cache.db")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: ["XPCServices/Installer.xpc": "org.sparkle-project.Sparkle"])
+        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.kind) == [.app])
+    }
+
+    @Test func aHelperAnotherAppFromTheSameVendorAlsoCarriesIsLeftOut() throws {
+        let library = try TemporaryLibrary("Preferences/com.acme.errorreporting.plist", "Preferences/com.acme.updater.plist")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: [
+            "Helpers/Reporter.app": "com.acme.errorreporting",
+            "Helpers/Updater.app": "com.acme.updater",
+        ])
+        let otherApp = try library.addApp(named: "Other", bundleID: "com.acme.other", helpers: ["PlugIns/Reporter.appex": "com.acme.errorreporting"])
+        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.name) == ["Example.app", "com.acme.updater.plist"])
+    }
+
+    @Test func aHelperThatIsAnotherInstalledAppIsLeftOut() throws {
+        let library = try TemporaryLibrary("Preferences/com.acme.autoupdate.plist")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: ["Helpers/AutoUpdate.app": "com.acme.autoupdate"])
+        let otherApp = try library.addApp(named: "AutoUpdate", bundleID: "com.acme.autoupdate")
+        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.kind) == [.app])
+    }
+
+    @Test func helpersInsideApplesOwnAppsAreLeftOut() throws {
+        let library = try TemporaryLibrary("Preferences/com.apple.dt.helper.plist")
+        let app = try library.addApp(named: "Xcode", bundleID: "com.apple.dt.Xcode", helpers: ["Helpers/Helper.app": "com.apple.dt.helper"])
+        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.kind) == [.app])
+    }
+
     @Test func aMissingFileMeasuresZero() {
         #expect(DiskSize.bytes(at: URL(filePath: "/nonexistent/\(UUID().uuidString)")) == 0)
     }
