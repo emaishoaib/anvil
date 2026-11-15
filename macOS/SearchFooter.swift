@@ -10,6 +10,7 @@ struct SearchFooter: View {
     let toggleAnvilActions: () -> Void
     var settingAction: String? = nil
     var message: String? = nil
+    var performAction: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -63,9 +64,13 @@ struct SearchFooter: View {
                 }
                 Spacer()
                 if let action {
-                    Text(action)
-                        .fontWeight(.medium)
-                    KeyCaps(combo: KeyCombo(keyCode: kVK_Return, modifiers: actionUsesCommand ? .command : []))
+                    let label = ActionLabel(title: action, combo: KeyCombo(keyCode: kVK_Return, modifiers: actionUsesCommand ? .command : []))
+                    if let performAction {
+                        Button(action: performAction) { label }
+                            .buttonStyle(.plain)
+                    } else {
+                        label
+                    }
                 }
                 if hasActions {
                     Rectangle()
@@ -108,6 +113,20 @@ struct SearchFooter: View {
         case .word: "Show Details"
         case nil: nil
         }
+    }
+}
+
+private struct ActionLabel: View {
+    let title: String
+    let combo: KeyCombo
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .fontWeight(.medium)
+            KeyCaps(combo: combo)
+        }
+        .contentShape(.rect)
     }
 }
 

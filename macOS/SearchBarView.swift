@@ -35,7 +35,7 @@ struct SearchBarView: View {
             } else if case .uninstallReview = model.mode, let review = model.review {
                 Divider()
                 UninstallReviewList(review: review, query: model.query)
-                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })
