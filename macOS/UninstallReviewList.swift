@@ -43,6 +43,7 @@ struct UninstallReviewList: View {
                 }
                 .padding(Self.padding)
             }
+            .overlay { if review.items(matching: query).isEmpty { NoResults() } }
             .onChange(of: review.selected) { proxy.scrollTo(review.selected) }
         }
     }

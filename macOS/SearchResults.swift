@@ -20,6 +20,7 @@ struct SearchResults: View {
                 .padding(Self.padding)
             }
             .frame(height: Self.listHeight + Self.padding * 2)
+            .overlay { if model.results.isEmpty, !model.isQueryEmpty { NoResults() } }
             .onChange(of: model.selected) { proxy.scrollTo(model.selected) }
         }
     }

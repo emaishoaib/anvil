@@ -30,6 +30,7 @@ struct SettingsList: View {
                 .padding(Self.padding)
             }
             .frame(height: Self.listHeight + Self.padding * 2)
+            .overlay { if model.sections.isEmpty { NoResults() } }
             .onChange(of: model.selected) {
                 if let id = model.selectedSetting?.id { proxy.scrollTo(id) }
             }

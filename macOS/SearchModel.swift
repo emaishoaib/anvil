@@ -35,7 +35,7 @@ import Observation
         }
     }
 
-    private var isQueryEmpty: Bool {
+    var isQueryEmpty: Bool {
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
