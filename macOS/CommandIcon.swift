@@ -9,6 +9,7 @@ struct CommandIcon: View {
         case .defineWord: AppIcon(path: "/System/Applications/Dictionary.app")
         case .createQuickLink: SymbolIcon(symbol: "link", colour: .red)
         case .settings: SymbolIcon(symbol: "gearshape.fill", colour: .gray)
+        case .uninstallApp: SymbolIcon(symbol: "minus.circle.fill", colour: .red)
         }
     }
 }

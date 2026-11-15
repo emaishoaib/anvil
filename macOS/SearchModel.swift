@@ -29,6 +29,7 @@ import Observation
         switch (mode, isQueryEmpty) {
         case (.defineWord, true): "Recent Words"
         case (.launcher, true): "Suggestions"
+        case (.uninstallApp, _): "Apps"
         default: "Results"
         }
     }
@@ -90,6 +91,7 @@ import Observation
             copy(answer.copyText)
             SearchBar.shared.hide()
         case .app(let app):
+            guard mode != .uninstallApp else { return NSSound.beep() }
             launch(app)
             SearchBar.shared.hide()
         case .command(let command):
@@ -146,7 +148,7 @@ import Observation
         switch mode {
         case .launcher:
             return false
-        case .defineWord:
+        case .defineWord, .uninstallApp:
             mode = .launcher
             query = ""
         case .wordEntry(_, let wordQuery):
@@ -264,7 +266,10 @@ import Observation
         selected = 0
         switch mode {
         case .launcher:
-            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
+            results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, commands: availableCommands, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
+        case .uninstallApp:
+            let otherApps = AppCatalog.shared.apps.filter { $0.url != Bundle.main.bundleURL }
+            results = LauncherSearch.removableApps(matching: query, in: otherApps)
         case .defineWord:
             let candidates = isQueryEmpty ? SavedRecentWords.load().words : WordLookup.candidates(for: query)
             wordLookup = Task {
@@ -297,8 +302,14 @@ import Observation
         case .settings:
             settings.start()
             mode = .settings
+        case .uninstallApp:
+            mode = .uninstallApp
         }
         query = ""
+    }
+
+    private var availableCommands: [LauncherCommand] {
+        LauncherCommand.allCases.filter { $0 != .uninstallApp || Tool.uninstaller.isOn }
     }
 
     private func showForm(_ kind: QuickLinkFormKind, for link: QuickLink, returningTo previousQuery: String) {

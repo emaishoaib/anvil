@@ -3,6 +3,7 @@ import LauncherKit
 enum SearchMode: Equatable {
     case launcher
     case defineWord
+    case uninstallApp
     case wordEntry(Word, query: String)
     case quickLinkForm(QuickLinkFormKind, query: String)
     case settings
@@ -13,6 +14,7 @@ enum SearchMode: Equatable {
         switch self {
         case .launcher: "Search for apps and quick links…"
         case .defineWord: "Search word…"
+        case .uninstallApp: "Search apps to uninstall…"
         case .settings: "Search settings…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm: ""
         }

@@ -6,6 +6,8 @@ public struct InstalledApp: Identifiable, Hashable, Sendable {
 
     public var id: URL { url }
 
+    public var isRemovable: Bool { !url.path(percentEncoded: false).hasPrefix("/System/") }
+
     public init(url: URL) {
         self.url = url
         name = url.deletingPathExtension().lastPathComponent

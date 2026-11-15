@@ -24,6 +24,25 @@ struct LauncherSearchTests {
         #expect(results(for: "def") == [.command(.defineWord)])
     }
 
+    @Test func aCommandLeftOutOfTheGivenCommandsIsNotListed() {
+        let results = LauncherSearch.results(for: "uninstall", in: [safari], commands: [.defineWord, .settings], launchCounts: LaunchCounts(), locale: locale)
+        #expect(results.isEmpty)
+    }
+
+    @Test func everyRemovableAppIsListedForAnEmptyQuery() {
+        let notes = InstalledApp(url: URL(filePath: "/System/Applications/Notes.app"))
+        #expect(LauncherSearch.removableApps(matching: "", in: [tenByFourNotes, notes, safari]) == [.app(tenByFourNotes), .app(safari)])
+    }
+
+    @Test func removableAppsAreMatchedByName() {
+        #expect(LauncherSearch.removableApps(matching: "saf", in: [tenByFourNotes, safari]) == [.app(safari)])
+    }
+
+    @Test func appsThatComeWithMacOSAreNeverRemovable() {
+        let finder = InstalledApp(url: URL(filePath: "/System/Library/CoreServices/Finder.app"))
+        #expect(LauncherSearch.removableApps(matching: "finder", in: [finder]).isEmpty)
+    }
+
     @Test func aSumListsItsAnswerBeforeAnyApps() {
         let answer = Answer(input: "10x4", inputLabel: "Product", output: "40", outputLabel: "Forty", copyText: "40")
         #expect(results(for: "10x4") == [.answer(answer), .app(tenByFourNotes)])

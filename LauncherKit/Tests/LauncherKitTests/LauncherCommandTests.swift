@@ -25,6 +25,11 @@ struct LauncherCommandTests {
         #expect(LauncherCommand.createQuickLink.match(for: "link") == .namePrefix)
     }
 
+    @Test func uninstallAppMatchesItsNameAndKeyword() {
+        #expect(LauncherCommand.uninstallApp.match(for: "uninstall") == .namePrefix)
+        #expect(LauncherCommand.uninstallApp.match(for: "app") == .wordPrefix)
+    }
+
     @Test func settingsMatchesItsKeyword() {
         #expect(LauncherCommand.settings.match(for: "set") == .namePrefix)
         #expect(LauncherCommand.settings.match(for: "settings") == .namePrefix)
