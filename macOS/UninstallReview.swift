@@ -16,6 +16,7 @@ import Observation
     private(set) var unticked: Set<URL> = []
     private(set) var selected = 0
     private(set) var problem: String?
+    private(set) var failureReasons: [URL: String] = [:]
     private(set) var hasFullDiskAccess = true
 
     init(app: InstalledApp) {
@@ -63,15 +64,27 @@ import Observation
             problem = "\(app.name) didn't quit. Quit it, then try again"
             return false
         }
-        let failed = ticked.filter { (try? FileManager.default.trashItem(at: $0.url, resultingItemURL: nil)) == nil }
-        let moved = Set(ticked).subtracting(failed)
-        state = .ready(items.filter { !moved.contains($0) })
+        failureReasons = Self.moveToTrash(ticked)
+        state = .ready(items.filter { !isTicked($0) || failureReasons[$0.url] != nil })
         selected = 0
-        guard failed.isEmpty else {
-            problem = "Couldn't move \(failed.count) of \(ticked.count) items to the Trash"
+        guard failureReasons.isEmpty else {
+            problem = "Couldn't move \(failureReasons.count) of \(ticked.count) items to the Trash"
             return false
         }
         return true
+    }
+
+    /// Moves each item to the Trash, and gives the reason macOS gave for each one that could not be moved.
+    private static func moveToTrash(_ items: [RemovalItem]) -> [URL: String] {
+        var reasons: [URL: String] = [:]
+        for item in items {
+            do {
+                try FileManager.default.trashItem(at: item.url, resultingItemURL: nil)
+            } catch {
+                reasons[item.url] = error.localizedDescription
+            }
+        }
+        return reasons
     }
 
     func toggleSelected(matching query: String) {

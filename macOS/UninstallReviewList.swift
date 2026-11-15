@@ -2,7 +2,7 @@ import CleanerKit
 import LauncherKit
 import SwiftUI
 
-/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A row is ticked or unticked by clicking it. Without Full Disk Access, a notice above the rows says some leftovers may be missing. While the files are being found or moved to the Trash, a spinner stands in for the rows.
+/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A file that couldn't be moved to the Trash shows why in place of where it lives. A row is ticked or unticked by clicking it. Without Full Disk Access, a notice above the rows says some leftovers may be missing. While the files are being found or moved to the Trash, a spinner stands in for the rows.
 struct UninstallReviewList: View {
     private static let rowHeight: CGFloat = 40
     private static let padding: CGFloat = 8
@@ -32,7 +32,7 @@ struct UninstallReviewList: View {
                     if !review.hasFullDiskAccess { FullDiskAccessNotice() }
                     SectionHeader(title: review.app.name)
                     ForEach(Array(review.items(matching: query).enumerated()), id: \.element.id) { index, item in
-                        RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected)
+                        RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected, failureReason: review.failureReasons[item.url])
                             .frame(height: Self.rowHeight)
                             .id(index)
                             .onTapGesture {
@@ -68,6 +68,7 @@ private struct RemovalRow: View {
     let item: RemovalItem
     let isTicked: Bool
     let isSelected: Bool
+    let failureReason: String?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -75,7 +76,11 @@ private struct RemovalRow: View {
                 .foregroundStyle(isTicked ? Color.accentColor : .secondary)
             AppIcon(path: item.url.path(percentEncoded: false))
             Text(item.name).foregroundStyle(Color(nsColor: .textColor)).lineLimit(1)
-            Text(place).foregroundStyle(.secondary).lineLimit(1)
+            if let failureReason {
+                Text(failureReason).foregroundStyle(.red).lineLimit(1).help(failureReason)
+            } else {
+                Text(place).foregroundStyle(.secondary).lineLimit(1)
+            }
             Spacer()
             Text(item.sizeBytes.formatted(.byteCount(style: .file))).foregroundStyle(.secondary)
         }
