@@ -1,0 +1,62 @@
+import Testing
+@testable import CleanerKit
+
+struct LeftoverSearchTests {
+    @Test func filesNamedAfterTheBundleIDAreFoundInEachLibraryFolder() throws {
+        let library = try TemporaryLibrary(
+            "Application Support/com.example.app/data.db",
+            "Caches/com.example.app/cache.db",
+            "Preferences/com.example.app.plist",
+            "Preferences/ByHost/com.example.app.1A2B3C.plist",
+            "Containers/com.example.app/Data",
+            "Saved Application State/com.example.app.savedState/window.data",
+            "LaunchAgents/com.example.app.helper.plist"
+        )
+        #expect(library.leftoverPaths(of: "com.example.app") == [
+            "Application Support/com.example.app",
+            "Caches/com.example.app",
+            "Preferences/com.example.app.plist",
+            "Preferences/ByHost/com.example.app.1A2B3C.plist",
+            "Containers/com.example.app",
+            "Saved Application State/com.example.app.savedState",
+            "LaunchAgents/com.example.app.helper.plist",
+        ])
+    }
+
+    @Test func aNameThatOnlyStartsWithTheSameLettersIsLeftAlone() throws {
+        let library = try TemporaryLibrary("Caches/com.example.application/cache.db", "Preferences/com.example.apple.plist")
+        #expect(library.leftoverPaths(of: "com.example.app").isEmpty)
+    }
+
+    @Test func anotherAppsFilesAreLeftAlone() throws {
+        let library = try TemporaryLibrary("Preferences/com.other.app.plist", "Caches/com.example.app/cache.db")
+        #expect(library.leftoverPaths(of: "com.example.app") == ["Caches/com.example.app"])
+    }
+
+    @Test func groupContainersAreFoundAfterATeamOrGroupPrefix() throws {
+        let library = try TemporaryLibrary(
+            "Group Containers/group.com.example.app/data.db",
+            "Group Containers/ABCDE12345.com.example.app/data.db",
+            "Caches/group.com.example.app/cache.db"
+        )
+        #expect(library.leftoverPaths(of: "com.example.app") == [
+            "Group Containers/ABCDE12345.com.example.app",
+            "Group Containers/group.com.example.app",
+        ])
+    }
+
+    @Test func letterCaseIsIgnored() throws {
+        let library = try TemporaryLibrary("Preferences/COM.Example.App.plist")
+        #expect(library.leftoverPaths(of: "com.example.app") == ["Preferences/COM.Example.App.plist"])
+    }
+
+    @Test func missingLibraryFoldersAreSkipped() throws {
+        let library = try TemporaryLibrary()
+        #expect(library.leftoverPaths(of: "com.example.app").isEmpty)
+    }
+
+    @Test func anEmptyBundleIDFindsNothing() throws {
+        let library = try TemporaryLibrary("Caches/.hidden", "Preferences/com.example.app.plist")
+        #expect(library.leftoverPaths(of: "").isEmpty)
+    }
+}
