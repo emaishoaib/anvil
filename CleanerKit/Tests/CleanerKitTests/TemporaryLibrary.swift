@@ -1,11 +1,13 @@
 import Foundation
 @testable import CleanerKit
 
-/// A Library made in the temporary folder for one test. It holds an empty file at each path it is given, and is removed when the test lets go of it.
+/// A Library made in the temporary folder for one test. It holds an empty file at each path it is given, and is removed when the test lets go of it. Its `User Cache` and `User Temp` folders stand in for the per-user cache and temp folders under `/var/folders`.
 final class TemporaryLibrary {
     let url = URL.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
 
-    var roots: SearchRoots { SearchRoots(library: url) }
+    var roots: SearchRoots {
+        SearchRoots(library: url, userCache: url.appending(path: "User Cache", directoryHint: .isDirectory), userTemp: url.appending(path: "User Temp", directoryHint: .isDirectory))
+    }
 
     init(_ paths: String...) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)

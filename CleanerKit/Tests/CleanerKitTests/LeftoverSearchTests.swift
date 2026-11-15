@@ -71,6 +71,38 @@ struct LeftoverSearchTests {
         ])
     }
 
+    @Test func filesNamedAfterTheBundleIDAreFoundInThePerUserCacheAndTempFolders() throws {
+        let library = try TemporaryLibrary(
+            "User Cache/com.example.app/cache.db",
+            "User Cache/com.example.app.helper/cache.db",
+            "User Temp/com.example.app.url_fetcher.34cxsS/data",
+            "User Temp/com.example.application/data"
+        )
+        #expect(library.leftoverPaths(of: "com.example.app") == [
+            "User Cache/com.example.app",
+            "User Cache/com.example.app.helper",
+            "User Temp/com.example.app.url_fetcher.34cxsS",
+        ])
+    }
+
+    @Test func foldersNamedAfterTheAppAreNotLookedForInThePerUserFolders() throws {
+        let library = try TemporaryLibrary("User Cache/Example/cache.db", "User Temp/Example/data")
+        #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
+    }
+
+    @Test func aPerUserFolderThatCannotBeFoundIsSkipped() throws {
+        let library = try TemporaryLibrary("Caches/com.example.app/cache.db")
+        let roots = SearchRoots(library: library.url, userCache: nil, userTemp: nil)
+        let leftovers = LeftoverSearch.leftovers(of: AppIdentity(bundleID: "com.example.app", name: "Example"), in: roots, otherInstalledBundleIDs: [])
+        #expect(leftovers.map(\.folder) == [.caches])
+    }
+
+    @Test func theCurrentUsersPerUserFoldersAreFound() {
+        let roots = SearchRoots.current
+        #expect(roots.userCache?.path(percentEncoded: false).hasSuffix("/C/") == true)
+        #expect(roots.userTemp?.path(percentEncoded: false).hasSuffix("/T/") == true)
+    }
+
     @Test func letterCaseIsIgnored() throws {
         let library = try TemporaryLibrary("Preferences/COM.Example.App.plist")
         #expect(library.leftoverPaths(of: "com.example.app") == ["Preferences/COM.Example.App.plist"])

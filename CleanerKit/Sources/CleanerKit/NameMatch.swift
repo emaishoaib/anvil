@@ -1,4 +1,4 @@
-/// Whether a name in a Library folder belongs to an app because it is named after the app or its vendor, such as `Spotify` in Application Support.
+/// Whether a name in one of the search folders belongs to an app because it is named after the app or its vendor, such as `Spotify` in Application Support.
 ///
 /// Only the folders where apps make folders under plain names are checked this way. Names are compared ignoring letter case and spaces, so an app called `Visual Notes` also finds `VisualNotes`.
 ///

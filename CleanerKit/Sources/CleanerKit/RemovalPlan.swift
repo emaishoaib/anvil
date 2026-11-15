@@ -1,6 +1,6 @@
 import Foundation
 
-/// What uninstalling an app would move to the Trash: the app itself first, then each file it left in the Library, every one measured in bytes.
+/// What uninstalling an app would move to the Trash: the app itself first, then each file it left behind, every one measured in bytes.
 ///
 /// The app is looked through for the helpers it carries and the app groups it uses, so their files are found too. Apple's own apps are not looked through, because their helpers and groups are shared across the system. The other installed apps are read for their bundle IDs and app groups, so a vendor folder, a helper or a group one of them may share is left out. An app without a bundle ID has no leftovers that can be told apart from other apps' files, so only the app itself is listed.
 public enum RemovalPlan {
