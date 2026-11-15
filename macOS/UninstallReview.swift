@@ -108,10 +108,19 @@ import Observation
         (error as? CocoaError)?.code == .fileWriteNoPermission
     }
 
-    func toggleSelected(matching query: String) {
+    func selectedItem(matching query: String) -> RemovalItem? {
         let items = items(matching: query)
-        guard items.indices.contains(selected) else { return }
-        toggle(items[selected])
+        return items.indices.contains(selected) ? items[selected] : nil
+    }
+
+    func toggleSelected(matching query: String) {
+        guard let item = selectedItem(matching: query) else { return }
+        toggle(item)
+    }
+
+    /// Opens Finder with the item selected inside its folder.
+    func reveal(_ item: RemovalItem) {
+        NSWorkspace.shared.activateFileViewerSelecting([item.url])
     }
 
     func moveSelection(by offset: Int, matching query: String) {

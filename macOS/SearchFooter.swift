@@ -63,6 +63,12 @@ struct SearchFooter: View {
                     }
                 }
                 Spacer()
+                if case .uninstallReview = mode {
+                    Text("Show in Finder")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
+                    FooterDivider()
+                }
                 if let action {
                     let label = ActionLabel(title: action, combo: KeyCombo(keyCode: kVK_Return, modifiers: actionUsesCommand ? .command : []))
                     if let performAction {
@@ -73,9 +79,7 @@ struct SearchFooter: View {
                     }
                 }
                 if hasActions {
-                    Rectangle()
-                        .fill(.primary.opacity(0.15))
-                        .frame(width: 1, height: 16)
+                    FooterDivider()
                     Text("Actions")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_K, modifiers: .command))
@@ -113,6 +117,14 @@ struct SearchFooter: View {
         case .word: "Show Details"
         case nil: nil
         }
+    }
+}
+
+private struct FooterDivider: View {
+    var body: some View {
+        Rectangle()
+            .fill(.primary.opacity(0.15))
+            .frame(width: 1, height: 16)
     }
 }
 

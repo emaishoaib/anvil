@@ -354,6 +354,12 @@ import Observation
         return true
     }
 
+    func revealSelected() -> Bool {
+        guard case .uninstallReview = mode, let review, let item = review.selectedItem(matching: query) else { return false }
+        review.reveal(item)
+        return true
+    }
+
     private func showReview(of app: InstalledApp) {
         guard let index = LeftoverIndexStore.shared.index else { return NSSound.beep() }
         let review = UninstallReview(app: app)

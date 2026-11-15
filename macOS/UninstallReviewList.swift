@@ -37,7 +37,7 @@ struct UninstallReviewList: View {
                     }
                     SectionHeader(title: review.app.name)
                     ForEach(Array(review.items(matching: query).enumerated()), id: \.element.id) { index, item in
-                        RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected, failureReason: review.failureReasons[item.url])
+                        RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected, failureReason: review.failureReasons[item.url]) { review.reveal(item) }
                             .frame(height: Self.rowHeight)
                             .id(index)
                             .onTapGesture {
@@ -72,11 +72,27 @@ private struct PermissionNotice: View {
     }
 }
 
+private struct RevealButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+                .frame(width: 20, height: 20)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .help("Show in Finder")
+    }
+}
+
 private struct RemovalRow: View {
     let item: RemovalItem
     let isTicked: Bool
     let isSelected: Bool
     let failureReason: String?
+    let reveal: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
@@ -91,6 +107,9 @@ private struct RemovalRow: View {
             }
             Spacer()
             Text(item.sizeBytes.formatted(.byteCount(style: .file))).foregroundStyle(.secondary)
+            RevealButton(action: reveal)
+                .opacity(isSelected ? 1 : 0)
+                .disabled(!isSelected)
         }
         .padding(.horizontal, 8)
         .frame(maxHeight: .infinity)
