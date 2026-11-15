@@ -7,8 +7,17 @@
 /// - a vendor's folder only belongs to the app when no other installed app comes from the same vendor, because the folder may hold that app's files too
 /// - a bundle ID with fewer than three parts has no vendor to match
 /// - in the home folder only the app's file name counts, not its other names or its vendor, and the folders macOS makes there, such as Documents and Downloads, never match
+/// - in `~/Library` itself the folders macOS makes there, such as Fonts and Keychains, never match
 enum NameMatch {
     private static let standardHomeFolders: Set<String> = ["applications", "desktop", "documents", "downloads", "library", "movies", "music", "pictures", "public"]
+    private static let standardLibraryFolders: Set<String> = [
+        "accounts", "application scripts", "application support", "assistants", "audio", "autosave information", "caches", "calendars",
+        "colorpickers", "colors", "compositions", "containers", "cookies", "developer", "dictionaries", "favorites", "fontcollections", "fonts",
+        "group containers", "httpstorages", "input methods", "internet plug-ins", "keyboard layouts", "keychains", "launchagents", "logs", "mail",
+        "messages", "metadata", "mobile documents", "passes", "photos", "preferencepanes", "preferences", "printers", "quicklook", "safari",
+        "saved application state", "screen savers", "scripts", "services", "sharing", "shortcuts", "sounds", "spelling", "spotlight",
+        "suggestions", "translation", "webkit",
+    ]
 
     private static let maximumExtensionLength = 8
     private static let genericBundleIDEndings: Set<String> = ["app", "application", "client", "desktop", "main", "mac", "macos", "osx"]
@@ -18,7 +27,7 @@ enum NameMatch {
         guard !app.isApple, !name.lowercased().hasPrefix("com.apple.") else { return false }
         if folder.holdsFilesNamedAfterApps, let baseName = withoutExtension(name), app.allNames.contains(where: { squashed($0) == squashed(baseName) }) { return true }
         guard folder.holdsFoldersNamedAfterApps else { return false }
-        guard folder != .home || !standardHomeFolders.contains(name.lowercased()) else { return false }
+        guard !standardFolders(in: folder).contains(name.lowercased()) else { return false }
         let squashedName = squashed(name)
         let squashedAppName = squashed(app.name)
         guard folder != .home else {
@@ -31,6 +40,14 @@ enum NameMatch {
             squashedName == vendor && !isShared(vendor, by: otherInstalledBundleIDs, besides: app)
         } ?? false
         return isNamedAfterApp || isNamedAfterVendor
+    }
+
+    private static func standardFolders(in folder: SearchFolder) -> Set<String> {
+        switch folder {
+        case .home: standardHomeFolders
+        case .library: standardLibraryFolders
+        default: []
+        }
     }
 
     private static func isShared(_ vendor: String, by bundleIDs: Set<String>, besides app: AppIdentity) -> Bool {

@@ -1,6 +1,6 @@
 import Foundation
 
-/// The folders where apps keep their own files, each found from where the search starts. Most sit inside `~/Library`, one of them inside Application Support, two are the per-user cache and temp folders under `/var/folders`, and the last is the home folder. A folder whose root cannot be found has no URL.
+/// The folders where apps keep their own files, each found from where the search starts. Most sit inside `~/Library`, along with `~/Library` itself and two folders inside Application Support, two are the per-user cache and temp folders under `/var/folders`, and the last is the home folder. A folder whose root cannot be found has no URL.
 public enum SearchFolder: CaseIterable, Sendable {
     case applicationSupport
     case caches
@@ -11,16 +11,20 @@ public enum SearchFolder: CaseIterable, Sendable {
     case savedApplicationState
     case httpStorages
     case webKit
+    case cookies
     case logs
     case launchAgents
     case applicationScripts
     case crashReporter
+    case updaterCaches
+    case library
     case userCache
     case userTemp
     case home
 
     public func url(in roots: SearchRoots) -> URL? {
         switch self {
+        case .library: roots.library
         case .userCache: roots.userCache
         case .userTemp: roots.userTemp
         case .home: roots.home
@@ -30,7 +34,7 @@ public enum SearchFolder: CaseIterable, Sendable {
 
     var holdsFoldersNamedAfterApps: Bool {
         switch self {
-        case .applicationSupport, .caches, .logs, .home: true
+        case .applicationSupport, .caches, .logs, .updaterCaches, .library, .home: true
         default: false
         }
     }
@@ -43,14 +47,20 @@ public enum SearchFolder: CaseIterable, Sendable {
         }
     }
 
-    /// Whether a folder here may be named after the app's vendor rather than the app. The home folder is left out, because a folder there named after a company is more likely the user's own.
+    /// Whether a folder here may be named after the app's vendor rather than the app. The home folder and `~/Library` itself are left out, because a vendor's folder there, such as `~/Library/Google`, is shared by the vendor's apps or is the user's own.
     var holdsFoldersNamedAfterVendors: Bool {
-        holdsFoldersNamedAfterApps && self != .home
+        switch self {
+        case .applicationSupport, .caches, .logs: true
+        default: false
+        }
     }
 
-    /// Whether a leftover found here may hold the user's own files, such as a folder in the home folder named after the app, so it should only go to the Trash when the user ticks it.
+    /// Whether a leftover found here may hold the user's own files, so it should only go to the Trash when the user ticks it. A folder in the home folder named after the app may be the user's, and one directly in `~/Library`, such as `~/Library/TeXShop`, often holds templates the user made.
     var mayHoldUserFiles: Bool {
-        self == .home
+        switch self {
+        case .home, .library: true
+        default: false
+        }
     }
 
     private var pathInLibrary: String? {
@@ -64,11 +74,13 @@ public enum SearchFolder: CaseIterable, Sendable {
         case .savedApplicationState: "Saved Application State"
         case .httpStorages: "HTTPStorages"
         case .webKit: "WebKit"
+        case .cookies: "Cookies"
         case .logs: "Logs"
         case .launchAgents: "LaunchAgents"
         case .applicationScripts: "Application Scripts"
         case .crashReporter: "Application Support/CrashReporter"
-        case .userCache, .userTemp, .home: nil
+        case .updaterCaches: "Application Support/Caches"
+        case .library, .userCache, .userTemp, .home: nil
         }
     }
 }
