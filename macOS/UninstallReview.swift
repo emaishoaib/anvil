@@ -18,6 +18,7 @@ import Observation
     private(set) var problem: String?
     private(set) var failureReasons: [URL: String] = [:]
     private(set) var hasFullDiskAccess = true
+    private(set) var needsAppManagement = false
 
     init(app: InstalledApp) {
         self.app = app
@@ -64,7 +65,9 @@ import Observation
             problem = "\(app.name) didn't quit. Quit it, then try again"
             return false
         }
-        failureReasons = Self.moveToTrash(ticked)
+        let errors = await Self.moveToTrash(ticked)
+        failureReasons = errors.mapValues(\.localizedDescription)
+        needsAppManagement = ticked.contains { $0.kind == .app && Self.isPermissionDenied(errors[$0.url]) }
         state = .ready(items.filter { !isTicked($0) || failureReasons[$0.url] != nil })
         selected = 0
         guard failureReasons.isEmpty else {
@@ -74,17 +77,35 @@ import Observation
         return true
     }
 
-    /// Moves each item to the Trash, and gives the reason macOS gave for each one that could not be moved.
-    private static func moveToTrash(_ items: [RemovalItem]) -> [URL: String] {
-        var reasons: [URL: String] = [:]
-        for item in items {
+    /// Moves each item to the Trash, and gives the error for each one that could not be moved. Items owned by root go through Finder together, so the admin password is asked for once.
+    private static func moveToTrash(_ items: [RemovalItem]) async -> [URL: any Error] {
+        var errors: [URL: any Error] = [:]
+        for item in items where !isOwnedByRoot(item.url) {
             do {
                 try FileManager.default.trashItem(at: item.url, resultingItemURL: nil)
             } catch {
-                reasons[item.url] = error.localizedDescription
+                errors[item.url] = error
             }
         }
-        return reasons
+        let ownedByRoot = items.filter { isOwnedByRoot($0.url) }
+        guard !ownedByRoot.isEmpty else { return errors }
+        do {
+            try await FinderTrash.moveToTrash(ownedByRoot.map(\.url))
+        } catch {
+            for item in ownedByRoot where FileManager.default.fileExists(atPath: item.url.path(percentEncoded: false)) {
+                errors[item.url] = error
+            }
+        }
+        return errors
+    }
+
+    private static func isOwnedByRoot(_ url: URL) -> Bool {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path(percentEncoded: false))
+        return attributes?[.ownerAccountID] as? Int == 0
+    }
+
+    private static func isPermissionDenied(_ error: (any Error)?) -> Bool {
+        (error as? CocoaError)?.code == .fileWriteNoPermission
     }
 
     func toggleSelected(matching query: String) {

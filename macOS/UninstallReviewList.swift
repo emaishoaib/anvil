@@ -29,7 +29,12 @@ struct UninstallReviewList: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    if !review.hasFullDiskAccess { FullDiskAccessNotice() }
+                    if review.needsAppManagement {
+                        PermissionNotice(text: "macOS needs App Management to move apps to the Trash.", openSettings: AppManagement.openSettings)
+                    }
+                    if !review.hasFullDiskAccess {
+                        PermissionNotice(text: "Without Full Disk Access, some leftovers can't be found or moved.", openSettings: FullDiskAccess.openSettings)
+                    }
                     SectionHeader(title: review.app.name)
                     ForEach(Array(review.items(matching: query).enumerated()), id: \.element.id) { index, item in
                         RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected, failureReason: review.failureReasons[item.url])
@@ -49,15 +54,18 @@ struct UninstallReviewList: View {
     }
 }
 
-private struct FullDiskAccessNotice: View {
+private struct PermissionNotice: View {
+    let text: String
+    let openSettings: () -> Void
+
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.yellow)
-            Text("Without Full Disk Access, some leftovers can't be found or moved.")
+            Text(text)
                 .foregroundStyle(.secondary)
             Spacer()
-            Button("Open Settings", action: FullDiskAccess.openSettings)
+            Button("Open Settings", action: openSettings)
                 .controlSize(.small)
         }
         .padding(8)

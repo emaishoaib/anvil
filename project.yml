@@ -73,6 +73,7 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Anvil
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: Anvil asks Finder to move apps from the Mac App Store to the Trash because only Finder can ask for your password to do it.
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Anvil reads the battery levels of your AirPods to show them in the search bar.
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
       configs:
