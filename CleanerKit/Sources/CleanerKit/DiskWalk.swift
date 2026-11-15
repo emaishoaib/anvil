@@ -2,7 +2,7 @@ import Foundation
 
 /// Walks folders and everything under them, showing each file and folder to a visitor that decides whether to go inside a folder. It reads folders the way `find` does, through `fts`, and gives the visitor each name without building a URL for it, because a walk of the Mac passes millions of names and keeps only a few.
 ///
-/// The walk never goes inside a bundle, such as an app, a framework or an SDK, or inside another package, such as a Photos library, because what is inside one belongs to it rather than sitting beside it. It never goes into another volume mounted inside a folder either. A folder that cannot be read is skipped.
+/// The walk never goes inside a bundle, such as an app, a framework or an SDK, or inside another package, such as a Photos library, because what is inside one belongs to it rather than sitting beside it. It never goes inside a Trash folder, because what is there has already been thrown away. It never goes into another volume mounted inside a folder either. A folder that cannot be read is skipped.
 public enum DiskWalk {
     public enum Step: Sendable {
         case goInside
@@ -25,6 +25,7 @@ public enum DiskWalk {
     public static let macFolders = ["/Applications", "/Library", "/Users", "/private", "/opt", "/usr/local"].map { URL(filePath: $0, directoryHint: .isDirectory) }
 
     private static let bundleExtensions: Set<String> = ["app", "appex", "bundle", "framework", "kext", "plugin", "sdk", "xcframework", "xpc"]
+    private static let trashFolderName = ".Trash"
     private static let options = FTS_PHYSICAL | FTS_NOCHDIR | FTS_XDEV | FTS_NOSTAT
     private static let shareOutLevel = 3
 
@@ -50,7 +51,7 @@ public enum DiskWalk {
         defer { fts_close(stream) }
         while let entry = fts_read(stream) {
             guard let item = item(at: entry) else { continue }
-            let staysOutside = visit(item) == .stayOutside || (item.isFolder && isSealed(item))
+            let staysOutside = visit(item) == .stayOutside || (item.isFolder && (item.name == trashFolderName || isSealed(item)))
             let isStop = item.isFolder && item.level == stopLevel
             if isStop, !staysOutside { reachedStop(item.url) }
             if staysOutside || isStop { _ = fts_set(stream, entry, FTS_SKIP) }

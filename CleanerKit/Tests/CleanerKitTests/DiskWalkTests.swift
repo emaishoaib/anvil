@@ -19,6 +19,11 @@ struct DiskWalkTests {
         #expect(visitedPaths(in: library) == ["Pictures", "Pictures/Photos Library.photoslibrary"])
     }
 
+    @Test func aTrashFolderIsVisitedButNotWhatIsInsideIt() throws {
+        let library = try TemporaryLibrary("Users/me/.Trash/Example/data.db", "Users/me/notes.txt")
+        #expect(visitedPaths(in: library) == ["Users", "Users/me", "Users/me/.Trash", "Users/me/notes.txt"])
+    }
+
     @Test func aFolderTheVisitorStaysOutsideOfIsVisitedButNotWhatIsInsideIt() throws {
         let library = try TemporaryLibrary("Caches/Example/data.db", "Logs/Example.log")
         let visited = visitedPaths(in: library) { $0 == "Caches" ? .stayOutside : .goInside }
