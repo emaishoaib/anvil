@@ -1,6 +1,6 @@
 import Foundation
 
-/// The folders where apps keep their own files, each found from where the search starts. Most sit inside `~/Library`, and the last two are the per-user cache and temp folders under `/var/folders`. A folder whose root cannot be found has no URL.
+/// The folders where apps keep their own files, each found from where the search starts. Most sit inside `~/Library`, one of them inside Application Support, and the last two are the per-user cache and temp folders under `/var/folders`. A folder whose root cannot be found has no URL.
 public enum SearchFolder: CaseIterable, Sendable {
     case applicationSupport
     case caches
@@ -14,6 +14,7 @@ public enum SearchFolder: CaseIterable, Sendable {
     case logs
     case launchAgents
     case applicationScripts
+    case crashReporter
     case userCache
     case userTemp
 
@@ -46,6 +47,7 @@ public enum SearchFolder: CaseIterable, Sendable {
         case .logs: "Logs"
         case .launchAgents: "LaunchAgents"
         case .applicationScripts: "Application Scripts"
+        case .crashReporter: "Application Support/CrashReporter"
         case .userCache, .userTemp: nil
         }
     }

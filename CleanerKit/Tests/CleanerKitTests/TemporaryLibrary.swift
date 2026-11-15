@@ -22,31 +22,40 @@ final class TemporaryLibrary {
         try Data(count: byteCount).write(to: file)
     }
 
-    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID when there is one. Each helper is a bundle at the given path inside the app's `Contents` folder, with the given bundle ID.
-    func addApp(named name: String, bundleID: String?, helpers: [String: String] = [:]) throws -> URL {
+    /// Writes a browser's native messaging file at the given path, naming the given program as the one the browser runs.
+    func writeHostFile(to path: String, program: URL) throws {
+        let file = url.appending(path: path)
+        try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try JSONSerialization.data(withJSONObject: ["name": file.deletingPathExtension().lastPathComponent, "path": program.path(percentEncoded: false)]).write(to: file)
+    }
+
+    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID and the executable's name when there are ones. Each helper is a bundle at the given path inside the app's `Contents` folder, with the given bundle ID.
+    func addApp(named name: String, bundleID: String?, executableName: String? = nil, helpers: [String: String] = [:]) throws -> URL {
         let app = url.appending(path: "Applications/\(name).app", directoryHint: .isDirectory)
-        try writeInfo(bundleID: bundleID, inBundle: app)
+        try writeInfo(["CFBundleIdentifier": bundleID, "CFBundleExecutable": executableName], inBundle: app)
         for (path, helperBundleID) in helpers {
-            try writeInfo(bundleID: helperBundleID, inBundle: app.appending(path: "Contents/\(path)", directoryHint: .isDirectory))
+            try writeInfo(["CFBundleIdentifier": helperBundleID], inBundle: app.appending(path: "Contents/\(path)", directoryHint: .isDirectory))
         }
         return app
     }
 
-    private func writeInfo(bundleID: String?, inBundle bundle: URL) throws {
+    /// The path of a file inside this Library, such as `Caches/com.example.app`.
+    func relativePath(of file: URL) -> String {
+        String(file.path(percentEncoded: false).dropFirst(url.path(percentEncoded: false).count))
+    }
+
+    private func writeInfo(_ keys: [String: String?], inBundle bundle: URL) throws {
         let info = bundle.appending(path: "Contents/Info.plist")
         try FileManager.default.createDirectory(at: info.deletingLastPathComponent(), withIntermediateDirectories: true)
-        let plist = bundleID.map { ["CFBundleIdentifier": $0] } ?? [:]
-        try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0).write(to: info)
+        try PropertyListSerialization.data(fromPropertyList: keys.compactMapValues { $0 }, format: .xml, options: 0).write(to: info)
     }
 
     deinit {
         try? FileManager.default.removeItem(at: url)
     }
 
-    func leftoverPaths(of bundleID: String, named name: String = "Example", appGroups: Set<String> = [], otherInstalledBundleIDs: Set<String> = []) -> [String] {
-        let app = AppIdentity(bundleID: bundleID, name: name, appGroups: appGroups)
-        let libraryPath = url.path(percentEncoded: false)
-        return LeftoverSearch.leftovers(of: app, in: roots, otherInstalledBundleIDs: otherInstalledBundleIDs)
-            .map { String($0.url.path(percentEncoded: false).dropFirst(libraryPath.count)) }
+    func leftoverPaths(of bundleID: String, named name: String = "Example", executableName: String? = nil, appGroups: Set<String> = [], otherInstalledBundleIDs: Set<String> = []) -> [String] {
+        let app = AppIdentity(bundleID: bundleID, name: name, executableName: executableName, appGroups: appGroups)
+        return LeftoverSearch.leftovers(of: app, in: roots, otherInstalledBundleIDs: otherInstalledBundleIDs).map { relativePath(of: $0.url) }
     }
 }
