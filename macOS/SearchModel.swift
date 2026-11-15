@@ -345,13 +345,13 @@ import Observation
     }
 
     private func showReview(of app: InstalledApp) {
-        guard !LeftoverIndexStore.shared.isSearching else { return NSSound.beep() }
+        guard let index = LeftoverIndexStore.shared.index else { return NSSound.beep() }
         let review = UninstallReview(app: app)
         self.review = review
         mode = .uninstallReview(query: query)
         query = ""
         let otherAppURLs = AppCatalog.shared.apps.map(\.url).filter { $0 != app.url }
-        Task { await review.load(otherAppURLs: otherAppURLs) }
+        Task { await review.load(otherAppURLs: otherAppURLs, index: index) }
     }
 
     private var availableCommands: [LauncherCommand] {
