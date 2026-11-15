@@ -145,15 +145,30 @@ final class SearchBar {
         return true
     }
 
+    /// Builds the search bar's view and window once, invisibly, so the first time it opens is as quick as every time after. It does nothing once the bar has been built, such as when it was opened before this ran.
+    func warmUp() {
+        guard content.superview == nil else { return }
+        attachContent()
+        content.layoutSubtreeIfNeeded()
+        panel.setContentSize(content.fittingSize)
+        panel.alphaValue = 0
+        panel.orderFrontRegardless()
+        panel.display()
+        panel.orderOut(nil)
+    }
+
+    private func attachContent() {
+        guard content.superview == nil, let background = panel.contentView else { return }
+        content.frame = background.bounds
+        content.autoresizingMask = [.width, .height]
+        background.addSubview(content)
+    }
+
     private func show() {
-        guard let screen = NSScreen.main, let background = panel.contentView else { return }
+        guard let screen = NSScreen.main else { return }
         CurrencyRatesStore.shared.refreshIfStale()
         if remembersLastState { model.reopen() } else { model.reset() }
-        if content.superview == nil {
-            content.frame = background.bounds
-            content.autoresizingMask = [.width, .height]
-            background.addSubview(content)
-        }
+        attachContent()
         content.layoutSubtreeIfNeeded()
         let size = content.fittingSize
         let top = screen.frame.maxY - screen.frame.height * Self.topShare
