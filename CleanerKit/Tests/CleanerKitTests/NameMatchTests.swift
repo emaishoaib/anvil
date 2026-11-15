@@ -71,4 +71,35 @@ struct NameMatchTests {
         #expect(library.leftoverPaths(of: "com.acme.documents", named: "Documents").isEmpty)
         #expect(library.leftoverPaths(of: "com.acme.downloads", named: "Downloads").isEmpty)
     }
+
+    @Test func aFileNamedAfterTheAppWithAnExtensionIsFound() throws {
+        let library = try TemporaryLibrary(
+            "Logs/Example.log",
+            "Preferences/Example.plist",
+            "Caches/example.db",
+            "Application Support/Example.json"
+        )
+        #expect(library.leftoverPaths(of: "com.acme.example") == [
+            "Application Support/Example.json",
+            "Caches/example.db",
+            "Preferences/Example.plist",
+            "Logs/Example.log",
+        ])
+    }
+
+    @Test func aFileNamedAfterAnotherOfTheAppsNamesWithAnExtensionIsFound() throws {
+        let library = try TemporaryLibrary("Preferences/Code.plist")
+        #expect(library.leftoverPaths(of: "com.acme.code", named: "Visual Studio Code", otherNames: ["Code"]) == ["Preferences/Code.plist"])
+    }
+
+    @Test func aFileWithAnExtensionIsLeftAloneWhenTheRestIsNotTheAppsName() throws {
+        let library = try TemporaryLibrary(
+            "Preferences/Example Helper.plist",
+            "Preferences/Example.backup.plist",
+            "Preferences/Example.not-an-extension",
+            "Containers/Example.plist",
+            "Home/Example.txt"
+        )
+        #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
+    }
 }

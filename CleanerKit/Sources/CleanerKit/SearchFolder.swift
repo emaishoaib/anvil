@@ -35,6 +35,14 @@ public enum SearchFolder: CaseIterable, Sendable {
         }
     }
 
+    /// Whether a file here may be named after the app followed by a file extension, such as `Folx.log` in Logs or `TeXShop.plist` in Preferences. The home folder is left out, because a file there named after an app is more likely the user's own.
+    var holdsFilesNamedAfterApps: Bool {
+        switch self {
+        case .applicationSupport, .caches, .logs, .preferences: true
+        default: false
+        }
+    }
+
     /// Whether a folder here may be named after the app's vendor rather than the app. The home folder is left out, because a folder there named after a company is more likely the user's own.
     var holdsFoldersNamedAfterVendors: Bool {
         holdsFoldersNamedAfterApps && self != .home
