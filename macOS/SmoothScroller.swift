@@ -48,7 +48,7 @@ final class SmoothScroller: NSObject {
     @objc private func frame(_ link: CADisplayLink) {
         let down = vertical.points(atSeconds: link.targetTimestamp)
         let across = horizontal.points(atSeconds: link.targetTimestamp)
-        if down != 0 || across != 0 { send(down: down, across: across) }
+        if down != 0 || across != 0 { Self.send(down: down, across: across) }
         pinch(zoom.points(atSeconds: link.targetTimestamp))
         guard !isScrolling else { return }
         link.invalidate()
@@ -66,7 +66,7 @@ final class SmoothScroller: NSObject {
         isPinching = false
     }
 
-    private func send(down: Int, across: Int) {
+    static func send(down: Int, across: Int) {
         guard let event = CGEvent(
             scrollWheelEvent2Source: nil,
             units: .pixel,

@@ -49,6 +49,7 @@ import Observation
         await GestureButton.takeOver(device, on: channel)
         await WheelResolution.shared.apply(to: device, on: channel)
         await WheelRatchet.apply(to: device, on: channel)
+        await ThumbWheel.shared.apply(to: device, on: channel)
         dpis[device.id] = await MouseDPI.shared.apply(to: device, on: channel)
     }
 
@@ -98,7 +99,8 @@ import Observation
             from: index,
             controlsFeature: known?.controlsFeature,
             wirelessStatusFeature: known?.wirelessStatusFeature,
-            batteryFeature: known?.batteryFeature
+            batteryFeature: known?.batteryFeature,
+            thumbWheelFeature: known?.thumbWheelFeature
         ) {
         case .controlsHeld(let held):
             let isDown = held.contains(HIDPPRequest.buttonBehindWheelControl)
@@ -109,7 +111,9 @@ import Observation
             Task { if let device = await LogitechDiscovery.device(at: index, on: channel) { await use(device, on: channel) } }
         case .batteryChanged(let status):
             batteries[id] = status
-        case .thumbWheelTurned, nil:
+        case .thumbWheelTurned(let rotation):
+            ThumbWheelScroller.scroll(rotation)
+        case nil:
             return
         }
     }

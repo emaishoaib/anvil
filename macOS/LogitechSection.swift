@@ -19,6 +19,9 @@ struct LogitechSection: View {
                 if device.kind == .mouse, device.smartShiftFeature != nil {
                     DisengageRow()
                 }
+                if device.kind == .mouse, device.thumbWheelFeature != nil {
+                    ThumbWheelRows()
+                }
             } header: {
                 DeviceHeader(device: device, battery: logitech.batteries[device.id])
             }
