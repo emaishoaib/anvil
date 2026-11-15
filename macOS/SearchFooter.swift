@@ -25,8 +25,12 @@ struct SearchFooter: View {
                         .foregroundStyle(.secondary)
                 case .uninstallApp:
                     CommandIcon(command: .uninstallApp)
-                    Text(LauncherCommand.uninstallApp.name)
-                        .foregroundStyle(.secondary)
+                    if LeftoverIndexStore.shared.isSearching {
+                        SearchingTheMac()
+                    } else {
+                        Text(LauncherCommand.uninstallApp.name)
+                            .foregroundStyle(.secondary)
+                    }
                 case .uninstallReview:
                     CommandIcon(command: .uninstallApp)
                     Text(message ?? LauncherCommand.uninstallApp.name)
@@ -90,7 +94,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
-        if mode == .uninstallApp { return selected == nil ? nil : "Review Files" }
+        if mode == .uninstallApp { return selected == nil || LeftoverIndexStore.shared.isSearching ? nil : "Review Files" }
         if case .uninstallReview = mode { return "Move to Trash" }
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
@@ -104,6 +108,15 @@ struct SearchFooter: View {
         case .word: "Show Details"
         case nil: nil
         }
+    }
+}
+
+private struct SearchingTheMac: View {
+    var body: some View {
+        ProgressView()
+            .controlSize(.small)
+        Text("Searching the Mac for leftovers…")
+            .foregroundStyle(.secondary)
     }
 }
 

@@ -325,6 +325,7 @@ import Observation
         case .uninstallApp:
             mode = .uninstallApp
             AppSizes.shared.measure(appsOtherThanAnvil.filter(\.isRemovable).map(\.url))
+            LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url))
         }
         query = ""
     }
@@ -344,6 +345,7 @@ import Observation
     }
 
     private func showReview(of app: InstalledApp) {
+        guard !LeftoverIndexStore.shared.isSearching else { return NSSound.beep() }
         let review = UninstallReview(app: app)
         self.review = review
         mode = .uninstallReview(query: query)
