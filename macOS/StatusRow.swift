@@ -1,14 +1,19 @@
 import SwiftUI
 
-/// The small status items beside the Anvil button in the search bar's footer, such as whether Keep Awake is holding the Mac awake. The row and its divider only show when at least one item has something to show.
+/// The small status items beside the Anvil button in the search bar's footer, such as whether Keep Awake is holding the Mac awake and how full each Logitech mouse and keyboard battery is. The row and its divider only show when at least one item has something to show.
 struct StatusRow: View {
     var body: some View {
-        if Tool.keepAwake.isOn {
+        let showsKeepAwake = Tool.keepAwake.isOn
+        let batteries = LogitechBatteryStatus.all()
+        if showsKeepAwake || !batteries.isEmpty {
             HStack(spacing: 12) {
                 Rectangle()
                     .fill(.primary.opacity(0.15))
                     .frame(width: 1, height: 16)
-                KeepAwakeStatus(state: KeepAwake.shared.state)
+                if showsKeepAwake {
+                    KeepAwakeStatus(state: KeepAwake.shared.state)
+                }
+                ForEach(batteries) { $0 }
             }
         }
     }
@@ -18,7 +23,7 @@ private struct KeepAwakeStatus: View {
     let state: KeepAwake.State
 
     var body: some View {
-        StatusItem(symbol: symbol, title: title, isHighlighted: isAwake)
+        StatusItem(symbol: symbol, title: title, emphasis: isAwake ? .active : .quiet)
             .help(help)
     }
 
@@ -45,21 +50,5 @@ private struct KeepAwakeStatus: View {
         case .off: "Keep Awake is off, so your Mac sleeps as usual"
         case .awake(_, let withLidClosed): withLidClosed ? "Keep Awake is keeping your Mac awake, even with the lid closed" : "Keep Awake is keeping your Mac awake"
         }
-    }
-}
-
-private struct StatusItem: View {
-    let symbol: String
-    let title: String
-    let isHighlighted: Bool
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: symbol)
-                .foregroundStyle(isHighlighted ? .primary : .secondary)
-            Text(title)
-                .foregroundStyle(.secondary)
-        }
-        .font(.callout)
     }
 }
