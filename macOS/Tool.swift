@@ -8,6 +8,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
     case rules
     case mouse
     case dockWidgets
+    case uninstaller
 
     var id: Self { self }
 
@@ -32,6 +33,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .rules: "Rules"
         case .mouse: "Mouse"
         case .dockWidgets: "Dock Widgets"
+        case .uninstaller: "Uninstaller"
         }
     }
 
@@ -44,6 +46,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .rules: "Remap keys in specific apps and react to system events."
         case .mouse: "Scroll smoothly with a mouse wheel."
         case .dockWidgets: "Show your next meeting in the space beside the Dock."
+        case .uninstaller: "Remove apps along with the files they leave in your Library."
         }
     }
 
