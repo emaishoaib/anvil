@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import LauncherKit
 import Observation
 
-/// Settings mode in the search bar: the settings that match the query, grouped by tool, which one is selected, and the number being adjusted or the shortcut being recorded, if any. Shortcut clashes with macOS are worked out against the system shortcuts read once when settings mode opens.
+/// Settings mode in the search bar: with nothing typed, the page being looked at, and otherwise the settings that match the query, grouped by tool. It also holds which row is selected, and the number being adjusted or the shortcut being recorded, if any. Shortcut clashes with macOS are worked out against the system shortcuts read once when settings mode opens.
 @MainActor @Observable final class SettingsBarModel {
     struct Section: Identifiable {
         let title: String
@@ -32,6 +32,7 @@ import Observation
     private(set) var selected = 0
     private(set) var adjustment: Adjustment?
     private(set) var message: String?
+    private(set) var page = SettingsBarPage.tools
     private var shown: [Setting] = []
     @ObservationIgnored private var settings: [Setting] = []
     @ObservationIgnored private var query = ""
@@ -59,6 +60,11 @@ import Observation
     func adjustedValue(of setting: Setting) -> Double? {
         guard let adjustment, adjustment.settingID == setting.id else { return nil }
         return adjustment.value
+    }
+
+    func start() {
+        page = .tools
+        reload()
     }
 
     func reload() {
@@ -96,9 +102,26 @@ import Observation
         case .action(_, let run):
             message = run()
             refresh()
+        case .page(let page):
+            open(page)
         case .choice, .info, .rule:
             break
         }
+    }
+
+    func open(_ page: SettingsBarPage) {
+        self.page = page
+        show(matching: query)
+        selected = 0
+    }
+
+    func goUp() -> Bool {
+        guard let parent = page.parent else { return false }
+        let left = page
+        page = parent
+        show(matching: query)
+        selected = shown.firstIndex { $0.id == left.id } ?? 0
+        return true
     }
 
     func dismissMessage() {
@@ -183,7 +206,30 @@ import Observation
         selected = shown.firstIndex { $0.id == selectedID } ?? min(selected, max(shown.count - 1, 0))
     }
 
+    private func rows(on page: SettingsBarPage) -> [Setting] {
+        switch page {
+        case .tools:
+            return Self.inOrder(settings.map(\.entry.toolName)).map { Setting.page(.tool($0)) }
+        case .tool(let tool):
+            let toolSettings = settings.filter { $0.entry.toolName == tool }
+            let subgroups = Self.inOrder(toolSettings.compactMap(\.entry.subgroup))
+            return toolSettings.filter { $0.entry.subgroup == nil } + subgroups.map { Setting.page(.subgroup(tool: tool, name: $0)) }
+        case .subgroup(let tool, let name):
+            return settings.filter { $0.entry.toolName == tool && $0.entry.subgroup == name }
+        }
+    }
+
+    private static func inOrder(_ names: [String]) -> [String] {
+        var seen = Set<String>()
+        return names.filter { seen.insert($0).inserted }
+    }
+
     private func show(matching query: String) {
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+            sections = [Section(title: page.breadcrumb, subgroups: [Subgroup(name: nil, settings: rows(on: page))])]
+            shown = sections.flatMap(\.settings)
+            return
+        }
         let settingsByID = Dictionary(uniqueKeysWithValues: settings.map { ($0.id, $0) })
         sections = SettingSearch.matches(for: query, in: settings.map(\.entry)).map { group in
             Section(title: group.toolName, subgroups: group.subgroups.map { subgroup in

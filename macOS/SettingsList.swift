@@ -2,7 +2,7 @@ import LauncherKit
 import RulesKit
 import SwiftUI
 
-/// The settings that match the query in settings mode, under a header per tool and a subheader per subgroup. A tool's rows are indented one step under its header, and a subgroup's rows one step under its subheader. Only the rows on screen are built.
+/// The rows of settings mode: with nothing typed, the page being looked at under its breadcrumb, and otherwise the settings that match the query, under a header per tool and a subheader per subgroup. A section's rows are indented one step under its header, and a subgroup's rows one step under its subheader. Only the rows on screen are built.
 struct SettingsList: View {
     private static let rowHeight: CGFloat = 48
     private static let padding: CGFloat = 8
@@ -103,6 +103,10 @@ private struct SettingRowView: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
+            case .page:
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
             case .action, .rule:
                 EmptyView()
             }

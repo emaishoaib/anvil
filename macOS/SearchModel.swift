@@ -157,6 +157,11 @@ import Observation
             query = previousQuery
         case .settings:
             settings.finishEditing()
+            if !query.isEmpty {
+                query = ""
+                return true
+            }
+            if settings.goUp() { return true }
             mode = .launcher
             query = ""
         case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery):
@@ -290,7 +295,7 @@ import Observation
         case .createQuickLink:
             showForm(.create, for: QuickLink(), returningTo: "")
         case .settings:
-            settings.reload()
+            settings.start()
             mode = .settings
         }
         query = ""

@@ -9,6 +9,7 @@ enum SettingRow {
     case action(title: String, run: @MainActor () -> String?)
     case info(value: String?)
     case rule(Rule)
+    case page(SettingsBarPage)
 
     var actionTitle: String? {
         switch self {
@@ -19,6 +20,7 @@ enum SettingRow {
         case .action(let title, _): title
         case .info: nil
         case .rule: "Show Actions"
+        case .page: "Open"
         }
     }
 }
