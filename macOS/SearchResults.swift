@@ -11,12 +11,11 @@ struct SearchResults: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
+                LazyVStack(alignment: .leading, spacing: 0) {
                     if !answers.isEmpty {
                         SectionHeader(title: "Calculator")
                         ForEach(answers, id: \.index) { item in
                             AnswerCard(answer: item.answer, isSelected: item.index == model.selected)
-                                .id(item.index)
                                 .onTapGesture { model.open(.answer(item.answer)) }
                         }
                     }
@@ -25,7 +24,6 @@ struct SearchResults: View {
                         ForEach(others, id: \.index) { item in
                             ResultRow(result: item.result, isSelected: item.index == model.selected)
                                 .frame(height: Self.rowHeight)
-                                .id(item.index)
                                 .onTapGesture { model.open(item.result) }
                         }
                     }
