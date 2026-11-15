@@ -10,7 +10,7 @@ struct ThumbWheelRows: View {
     var body: some View {
         Picker("Thumb wheel", selection: $library.settings.thumbWheelEffect) {
             ForEach(WheelEffect.allCases, id: \.self) { effect in
-                Text(Self.name(of: effect)).tag(effect)
+                Text(effect.name).tag(effect)
             }
         }
         LabeledContent("Thumb wheel speed") {
@@ -22,13 +22,5 @@ struct ThumbWheelRows: View {
             }
         }
         Toggle("Invert the thumb wheel", isOn: $library.settings.reversesThumbWheel)
-    }
-
-    private static func name(of effect: WheelEffect) -> String {
-        switch effect {
-        case .scrollHorizontally: "Scrolls sideways"
-        case .scrollVertically: "Scrolls up and down"
-        case .zoom: "Zooms in and out"
-        }
     }
 }

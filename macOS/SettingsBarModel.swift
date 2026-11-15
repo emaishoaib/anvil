@@ -45,16 +45,24 @@ import Observation
         selected = min(max(selected + offset, 0), shown.count - 1)
     }
 
-    func activateSelected() {
-        guard let selectedSetting else { return }
-        activate(selectedSetting)
+    func select(_ setting: Setting) {
+        selected = shown.firstIndex { $0.id == setting.id } ?? selected
     }
 
     func activate(_ setting: Setting) {
         guard !setting.isDisabled else { return NSSound.beep() }
-        switch setting.row {
-        case .toggle(let isOn, let set): set(!isOn)
-        }
+        guard case .toggle(let isOn, let set) = setting.row else { return }
+        set(!isOn)
+        refresh(keeping: setting)
+    }
+
+    func pick(_ index: Int, for setting: Setting) {
+        guard case .choice(_, _, let pick) = setting.row else { return }
+        pick(index)
+        refresh(keeping: setting)
+    }
+
+    private func refresh(keeping setting: Setting) {
         reload()
         show(matching: query)
         selected = shown.firstIndex { $0.id == setting.id } ?? 0

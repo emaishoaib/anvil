@@ -79,6 +79,8 @@ final class SearchBar {
             }
         case .quickLink, nil:
             if let action = QuickLinkAction.forShortcut(combo) { return model.run(action) }
+        case .settingChoices:
+            break
         }
         switch keyCode {
         case kVK_UpArrow: model.actionPanel?.moveSelection(by: -1)

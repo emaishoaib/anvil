@@ -8,6 +8,7 @@ struct SettingsList: View {
     private static let listHeight: CGFloat = 380
 
     let model: SettingsBarModel
+    let open: (Setting) -> Void
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -19,7 +20,7 @@ struct SettingsList: View {
                             SettingRowView(setting: setting, isSelected: model.isSelected(setting))
                                 .frame(minHeight: Self.rowHeight)
                                 .id(setting.id)
-                                .onTapGesture { model.activate(setting) }
+                                .onTapGesture { open(setting) }
                         }
                     }
                 }
@@ -92,6 +93,22 @@ private struct SettingControl: View {
                 .labelsHidden()
                 .controlSize(.small)
                 .allowsHitTesting(false)
+        case .choice(let selected, let options, _):
+            ChosenOption(title: options[selected])
         }
+    }
+}
+
+private struct ChosenOption: View {
+    let title: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(title)
+                .lineLimit(1)
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.system(size: 10, weight: .semibold))
+        }
+        .foregroundStyle(.secondary)
     }
 }

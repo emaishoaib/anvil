@@ -67,7 +67,10 @@ import Observation
     }
 
     func openSelected() {
-        if mode == .settings { return settings.activateSelected() }
+        if mode == .settings {
+            if let setting = settings.selectedSetting { open(setting) }
+            return
+        }
         if case .wordEntry(let word, _) = mode {
             WordLookup.openInDictionary(word)
             return SearchBar.shared.hide()
@@ -103,6 +106,13 @@ import Observation
             mode = .wordEntry(word, query: query)
             query = ""
         }
+    }
+
+    func open(_ setting: Setting) {
+        settings.select(setting)
+        guard case .choice = setting.row, !setting.isDisabled else { return settings.activate(setting) }
+        actionPanel = ActionPanel(subject: .settingChoices(setting))
+        field = .actionFilter
     }
 
     func goBack() -> Bool {

@@ -36,6 +36,7 @@ struct ActionRow: View {
         case .confirmDelete: Symbol(name: "trash", isDestructive: true)
         case .cancel: Symbol(name: "xmark", isDestructive: false)
         case .anvil(let action): Symbol(name: action.symbol, isDestructive: false)
+        case .choice(_, _, let isCurrent): if isCurrent { Symbol(name: "checkmark", isDestructive: false) }
         }
     }
 
@@ -46,6 +47,7 @@ struct ActionRow: View {
         case .confirmDelete: QuickLinkAction.delete.name(openingIn: nil)
         case .cancel: "Cancel"
         case .anvil(let action): action.name
+        case .choice(_, let title, _): title
         }
     }
 
@@ -53,7 +55,7 @@ struct ActionRow: View {
         switch item {
         case .action(let action): action.isDestructive
         case .confirmDelete: true
-        case .app, .cancel, .anvil: false
+        case .app, .cancel, .anvil, .choice: false
         }
     }
 
@@ -63,7 +65,7 @@ struct ActionRow: View {
         case .confirmDelete: KeyCombo(keyCode: kVK_Return, modifiers: [])
         case .cancel: KeyCombo(keyCode: kVK_Escape, modifiers: [])
         case .anvil(let action): action.shortcut
-        case .app: nil
+        case .app, .choice: nil
         }
     }
 }

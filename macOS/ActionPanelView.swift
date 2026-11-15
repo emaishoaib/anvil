@@ -39,7 +39,7 @@ struct ActionPanelView: View {
             }
             if panel.page != .confirmDelete {
                 Divider()
-                TextField(panel.page == .openWith ? "Search for apps…" : "Search for actions…", text: $panel.filter)
+                TextField(panel.filterPlaceholder, text: $panel.filter)
                     .textFieldStyle(.plain)
                     .focused(focus, equals: .actionFilter)
                     .padding(.horizontal, 14)

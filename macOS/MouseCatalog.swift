@@ -9,6 +9,8 @@ enum MouseCatalog {
         let dpi = logitech.devices.lazy.compactMap { logitech.dpis[$0.id] }.first
         return [
             toggle("Reverse the wheel's direction", id: "mouse.reversesWheel", \.reversesWheel),
+            choice("Scroll speed while holding Command", id: "mouse.commandScrollSpeed", \.commandScrollSpeed, among: CommandScrollSpeed.allCases) { "\($0.name) the speed" },
+            hasThumbWheel ? choice("Thumb wheel", id: "mouse.thumbWheelEffect", \.thumbWheelEffect, among: WheelEffect.allCases, named: \.name) : nil,
             hasThumbWheel ? toggle("Invert the thumb wheel", id: "mouse.reversesThumbWheel", \.reversesThumbWheel) : nil,
             dpi.map(dpiSwitch(for:)),
         ].compactMap { $0 }
@@ -20,6 +22,19 @@ enum MouseCatalog {
             entry: SettingEntry(id: id, title: title, toolName: Tool.mouse.name),
             warning: library.loadProblem,
             row: .toggle(isOn: library.settings[keyPath: value], set: { library.settings[keyPath: value] = $0 })
+        )
+    }
+
+    private static func choice<Value: Equatable>(_ title: String, id: String, _ value: WritableKeyPath<MouseSettings, Value>, among values: [Value], named name: (Value) -> String) -> Setting {
+        let library = MouseSettingsLibrary.shared
+        return Setting(
+            entry: SettingEntry(id: id, title: title, toolName: Tool.mouse.name),
+            warning: library.loadProblem,
+            row: .choice(
+                selected: values.firstIndex(of: library.settings[keyPath: value]) ?? 0,
+                options: values.map(name),
+                pick: { library.settings[keyPath: value] = values[$0] }
+            )
         )
     }
 

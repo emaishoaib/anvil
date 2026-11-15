@@ -1,10 +1,6 @@
 import AppKit
 import MouseKit
 
-nonisolated enum WheelEffect: String, Codable, CaseIterable {
-    case scrollVertically, scrollHorizontally, zoom
-}
-
 final class SmoothScroller: NSObject {
     static let shared = SmoothScroller()
 

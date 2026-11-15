@@ -54,6 +54,10 @@ extension SearchModel {
         case .anvil(let action):
             closeActions()
             run(action)
+        case .choice(let index, _, _):
+            guard case .settingChoices(let setting) = actionPanel?.subject else { return }
+            closeActions()
+            settings.pick(index, for: setting)
         }
     }
 

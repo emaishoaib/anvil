@@ -6,6 +6,7 @@ import Observation
     enum Subject {
         case quickLink(QuickLink)
         case anvil
+        case settingChoices(Setting)
 
         var link: QuickLink? {
             if case .quickLink(let link) = self { link } else { nil }
@@ -22,6 +23,7 @@ import Observation
         case confirmDelete
         case cancel
         case anvil(AnvilAction)
+        case choice(index: Int, title: String, isCurrent: Bool)
     }
 
     private static let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
@@ -36,6 +38,7 @@ import Observation
     init(subject: Subject, page: Page = .actions) {
         self.subject = subject
         self.page = page
+        if case .settingChoices(let setting) = subject, case .choice(let current, _, _) = setting.row { selected = current }
     }
 
     var link: QuickLink? { subject.link }
@@ -44,6 +47,15 @@ import Observation
         switch subject {
         case .quickLink(let link): page == .confirmDelete ? "Delete \(link.name)?" : link.name
         case .anvil: "Anvil v\(Self.version)"
+        case .settingChoices(let setting): setting.entry.title
+        }
+    }
+
+    var filterPlaceholder: String {
+        switch (subject, page) {
+        case (_, .openWith): "Search for apps…"
+        case (.settingChoices, _): "Search for choices…"
+        default: "Search for actions…"
         }
     }
 
@@ -57,6 +69,8 @@ import Observation
             link.appChoices.filter { filter.isEmpty || $0.appName.localizedStandardContains(filter) }.map(Item.app)
         case (.quickLink, .confirmDelete):
             [.confirmDelete, .cancel]
+        case (.settingChoices(let setting), _):
+            Self.choices(of: setting, matching: filter)
         }
     }
 
@@ -72,5 +86,12 @@ import Observation
     func show(_ page: Page) {
         self.page = page
         filter = ""
+    }
+
+    private static func choices(of setting: Setting, matching filter: String) -> [Item] {
+        guard case .choice(let current, let options, _) = setting.row else { return [] }
+        return options.enumerated()
+            .filter { filter.isEmpty || $0.element.localizedStandardContains(filter) }
+            .map { Item.choice(index: $0.offset, title: $0.element, isCurrent: $0.offset == current) }
     }
 }

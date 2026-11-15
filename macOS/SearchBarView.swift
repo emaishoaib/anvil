@@ -26,17 +26,13 @@ struct SearchBarView: View {
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else if model.mode == .settings {
                 Divider()
-                SettingsList(model: model.settings)
+                SettingsList(model: model.settings, open: { model.open($0) })
+                    .overlay(alignment: actionPanelAlignment) { actionPanel }
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle)
             } else {
                 Divider()
                 SearchResults(model: model)
-                    .overlay(alignment: actionPanelAlignment) {
-                        if let panel = model.actionPanel {
-                            ActionPanelView(panel: panel, focus: $focus, perform: model.perform)
-                                .padding(Self.actionPanelPadding)
-                        }
-                    }
+                    .overlay(alignment: actionPanelAlignment) { actionPanel }
                 SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
             }
         }
@@ -48,6 +44,13 @@ struct SearchBarView: View {
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }
         .onChange(of: focus) { if let focus { model.field = focus } }
+    }
+
+    @ViewBuilder private var actionPanel: some View {
+        if let panel = model.actionPanel {
+            ActionPanelView(panel: panel, focus: $focus, perform: model.perform)
+                .padding(Self.actionPanelPadding)
+        }
     }
 
     private var actionPanelAlignment: Alignment {
