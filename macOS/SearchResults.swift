@@ -2,7 +2,6 @@ import LauncherKit
 import SwiftUI
 
 struct SearchResults: View {
-    private static let rowHeight: CGFloat = 40
     private static let padding: CGFloat = 8
     private static let listHeight: CGFloat = 380
 
@@ -12,19 +11,9 @@ struct SearchResults: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    if !answers.isEmpty {
-                        SectionHeader(title: "Calculator")
-                        ForEach(answers, id: \.index) { item in
-                            AnswerCard(answer: item.answer, isSelected: item.index == model.selected)
-                                .onTapGesture { model.open(.answer(item.answer)) }
-                        }
-                    }
-                    if !others.isEmpty {
-                        SectionHeader(title: model.resultsTitle)
-                        ForEach(others, id: \.index) { item in
-                            ResultRow(result: item.result, isSelected: item.index == model.selected)
-                                .frame(height: Self.rowHeight)
-                                .onTapGesture { model.open(item.result) }
+                    ForEach(items, id: \.index) { item in
+                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected) {
+                            model.open(item.result)
                         }
                     }
                 }
@@ -35,17 +24,44 @@ struct SearchResults: View {
         }
     }
 
-    private var answers: [(index: Int, answer: Answer)] {
-        model.results.enumerated().compactMap { index, result in
-            guard case .answer(let answer) = result else { return nil }
-            return (index, answer)
+    private var items: [(index: Int, result: SearchResult, header: String?)] {
+        let firstAnswer = model.results.firstIndex { $0.isAnswer }
+        let firstOther = model.results.firstIndex { !$0.isAnswer }
+        return model.results.enumerated().map { index, result in
+            let header: String? = if index == firstAnswer { "Calculator" } else if index == firstOther { model.resultsTitle } else { nil }
+            return (index, result, header)
+        }
+    }
+}
+
+private struct ResultItem: View {
+    private static let rowHeight: CGFloat = 40
+
+    let result: SearchResult
+    let header: String?
+    let isSelected: Bool
+    let open: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let header { SectionHeader(title: header) }
+            content.onTapGesture(perform: open)
         }
     }
 
-    private var others: [(index: Int, result: SearchResult)] {
-        model.results.enumerated().compactMap { index, result in
-            if case .answer = result { return nil }
-            return (index, result)
+    @ViewBuilder private var content: some View {
+        switch result {
+        case .answer(let answer):
+            AnswerCard(answer: answer, isSelected: isSelected)
+        default:
+            ResultRow(result: result, isSelected: isSelected)
+                .frame(height: Self.rowHeight)
         }
+    }
+}
+
+private extension SearchResult {
+    var isAnswer: Bool {
+        if case .answer = self { true } else { false }
     }
 }
