@@ -1,10 +1,10 @@
 import Foundation
 
-/// One thing an uninstall would move to the Trash: the app itself, or a file it left in a Library folder, with its size in bytes.
+/// One thing an uninstall would move to the Trash: the app itself, or a file it left behind, with its size in bytes.
 public struct RemovalItem: Hashable, Identifiable, Sendable {
     public enum Kind: Hashable, Sendable {
         case app
-        case leftover(LibraryFolder)
+        case leftover(SearchFolder)
     }
 
     public let url: URL

@@ -7,7 +7,7 @@
 /// - a vendor's folder only belongs to the app when no other installed app comes from the same vendor, because the folder may hold that app's files too
 /// - a bundle ID with fewer than three parts has no vendor to match
 enum NameMatch {
-    static func name(_ name: String, belongsTo app: AppIdentity, in folder: LibraryFolder, otherInstalledBundleIDs: Set<String>) -> Bool {
+    static func name(_ name: String, belongsTo app: AppIdentity, in folder: SearchFolder, otherInstalledBundleIDs: Set<String>) -> Bool {
         guard folder.holdsFoldersNamedAfterApps, !app.isApple, !name.lowercased().hasPrefix("com.apple.") else { return false }
         let squashedName = squashed(name)
         let isNamedAfterApp = squashedName == squashed(app.name)

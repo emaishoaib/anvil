@@ -25,7 +25,7 @@ import Observation
     func load(otherAppURLs: [URL]) async {
         let appURL = app.url
         let (items, hasFullDiskAccess) = await Task.detached {
-            (RemovalPlan.items(forAppAt: appURL, inLibrary: .libraryDirectory, otherAppURLs: otherAppURLs), FullDiskAccess.isGranted)
+            (RemovalPlan.items(forAppAt: appURL, in: .current, otherAppURLs: otherAppURLs), FullDiskAccess.isGranted)
         }.value
         self.hasFullDiskAccess = hasFullDiskAccess
         state = .ready(items)

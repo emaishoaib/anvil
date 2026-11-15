@@ -4,12 +4,12 @@ import Foundation
 ///
 /// The app is looked through for the helpers it carries and the app groups it uses, so their files are found too. Apple's own apps are not looked through, because their helpers and groups are shared across the system. The other installed apps are read for their bundle IDs and app groups, so a vendor folder, a helper or a group one of them may share is left out. An app without a bundle ID has no leftovers that can be told apart from other apps' files, so only the app itself is listed.
 public enum RemovalPlan {
-    public static func items(forAppAt appURL: URL, inLibrary library: URL, otherAppURLs: [URL]) -> [RemovalItem] {
+    public static func items(forAppAt appURL: URL, in roots: SearchRoots, otherAppURLs: [URL]) -> [RemovalItem] {
         let appItem = RemovalItem(url: appURL, kind: .app, sizeBytes: DiskSize.bytes(at: appURL))
         guard let identity = AppIdentity(appAt: appURL) else { return [appItem] }
         let app = identity.isApple ? identity : withContents(of: identity, at: appURL, otherAppURLs: otherAppURLs)
         let otherBundleIDs = Set(otherAppURLs.compactMap { AppIdentity(appAt: $0)?.bundleID })
-        let leftovers = LeftoverSearch.leftovers(of: app, inLibrary: library, otherInstalledBundleIDs: otherBundleIDs).map { leftover in
+        let leftovers = LeftoverSearch.leftovers(of: app, in: roots, otherInstalledBundleIDs: otherBundleIDs).map { leftover in
             RemovalItem(url: leftover.url, kind: .leftover(leftover.folder), sizeBytes: DiskSize.bytes(at: leftover.url))
         }
         return [appItem] + leftovers

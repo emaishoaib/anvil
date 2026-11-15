@@ -6,7 +6,7 @@ struct RemovalPlanTests {
     @Test func theAppComesFirstFollowedByItsLeftovers() throws {
         let library = try TemporaryLibrary("Caches/com.acme.example/cache.db", "Preferences/com.acme.example.plist")
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
-        let items = RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [])
+        let items = RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [])
         #expect(items.map(\.name) == ["Example.app", "com.acme.example", "com.acme.example.plist"])
         #expect(items.map(\.kind) == [.app, .leftover(.caches), .leftover(.preferences)])
     }
@@ -17,7 +17,7 @@ struct RemovalPlanTests {
         try library.write(byteCount: 200, to: "Caches/com.acme.example/inner/two.db")
         try library.write(byteCount: 40, to: "Preferences/com.acme.example.plist")
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
-        let sizes = RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.sizeBytes)
+        let sizes = RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.sizeBytes)
         #expect(sizes.dropFirst() == [500, 40])
         #expect(sizes[0] > 0)
     }
@@ -25,14 +25,14 @@ struct RemovalPlanTests {
     @Test func anAppWithoutABundleIDListsOnlyItself() throws {
         let library = try TemporaryLibrary("Caches/Example/cache.db")
         let app = try library.addApp(named: "Example", bundleID: nil)
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.kind) == [.app])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.kind) == [.app])
     }
 
     @Test func aVendorFolderAnotherInstalledAppMayShareIsLeftOut() throws {
         let library = try TemporaryLibrary("Application Support/Acme/data.db")
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
         let otherApp = try library.addApp(named: "Other", bundleID: "com.acme.other")
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.kind) == [.app])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [otherApp]).map(\.kind) == [.app])
     }
 
     @Test func filesOfAHelperDeepInsideTheAppAreFound() throws {
@@ -40,7 +40,7 @@ struct RemovalPlanTests {
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: [
             "Frameworks/Example.framework/Versions/A/Helpers/Updater.app": "com.acme.updater",
         ])
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.name) == [
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.name) == [
             "Example.app",
             "com.acme.updater.plist",
             "com.acme.updater.wake.plist",
@@ -50,7 +50,7 @@ struct RemovalPlanTests {
     @Test func aHelperFromAnotherVendorIsLeftOut() throws {
         let library = try TemporaryLibrary("Caches/org.sparkle-project.Sparkle/cache.db")
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: ["XPCServices/Installer.xpc": "org.sparkle-project.Sparkle"])
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.kind) == [.app])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.kind) == [.app])
     }
 
     @Test func aHelperAnotherAppFromTheSameVendorAlsoCarriesIsLeftOut() throws {
@@ -60,20 +60,20 @@ struct RemovalPlanTests {
             "Helpers/Updater.app": "com.acme.updater",
         ])
         let otherApp = try library.addApp(named: "Other", bundleID: "com.acme.other", helpers: ["PlugIns/Reporter.appex": "com.acme.errorreporting"])
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.name) == ["Example.app", "com.acme.updater.plist"])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [otherApp]).map(\.name) == ["Example.app", "com.acme.updater.plist"])
     }
 
     @Test func aHelperThatIsAnotherInstalledAppIsLeftOut() throws {
         let library = try TemporaryLibrary("Preferences/com.acme.autoupdate.plist")
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example", helpers: ["Helpers/AutoUpdate.app": "com.acme.autoupdate"])
         let otherApp = try library.addApp(named: "AutoUpdate", bundleID: "com.acme.autoupdate")
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: [otherApp]).map(\.kind) == [.app])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [otherApp]).map(\.kind) == [.app])
     }
 
     @Test func helpersInsideApplesOwnAppsAreLeftOut() throws {
         let library = try TemporaryLibrary("Preferences/com.apple.dt.helper.plist")
         let app = try library.addApp(named: "Xcode", bundleID: "com.apple.dt.Xcode", helpers: ["Helpers/Helper.app": "com.apple.dt.helper"])
-        #expect(RemovalPlan.items(forAppAt: app, inLibrary: library.url, otherAppURLs: []).map(\.kind) == [.app])
+        #expect(RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: []).map(\.kind) == [.app])
     }
 
     @Test func aMissingFileMeasuresZero() {

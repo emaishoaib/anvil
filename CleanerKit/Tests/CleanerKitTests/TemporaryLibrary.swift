@@ -5,6 +5,8 @@ import Foundation
 final class TemporaryLibrary {
     let url = URL.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
 
+    var roots: SearchRoots { SearchRoots(library: url) }
+
     init(_ paths: String...) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         for path in paths {
@@ -41,7 +43,8 @@ final class TemporaryLibrary {
 
     func leftoverPaths(of bundleID: String, named name: String = "Example", appGroups: Set<String> = [], otherInstalledBundleIDs: Set<String> = []) -> [String] {
         let app = AppIdentity(bundleID: bundleID, name: name, appGroups: appGroups)
-        return LeftoverSearch.leftovers(of: app, inLibrary: url, otherInstalledBundleIDs: otherInstalledBundleIDs)
-            .map { "\($0.folder.rawValue)/\($0.url.lastPathComponent)" }
+        let libraryPath = url.path(percentEncoded: false)
+        return LeftoverSearch.leftovers(of: app, in: roots, otherInstalledBundleIDs: otherInstalledBundleIDs)
+            .map { String($0.url.path(percentEncoded: false).dropFirst(libraryPath.count)) }
     }
 }
