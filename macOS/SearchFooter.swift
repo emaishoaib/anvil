@@ -18,6 +18,7 @@ struct SearchFooter: View {
                 switch mode {
                 case .launcher:
                     AnvilMenuButton(action: toggleAnvilActions)
+                    StatusRow()
                 case .defineWord:
                     CommandIcon(command: .defineWord)
                     Text(LauncherCommand.defineWord.name)
