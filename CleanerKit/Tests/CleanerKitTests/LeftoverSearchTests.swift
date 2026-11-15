@@ -45,6 +45,32 @@ struct LeftoverSearchTests {
         ])
     }
 
+    @Test func scriptsAndContainersAreFoundAfterATeamPrefixButPreferencesAreNot() throws {
+        let library = try TemporaryLibrary(
+            "Application Scripts/ABCDE12345.com.example.app/script.sh",
+            "Containers/ABCDE12345.com.example.app/Data",
+            "Preferences/ABCDE12345.com.example.app.plist"
+        )
+        #expect(library.leftoverPaths(of: "com.example.app") == [
+            "Containers/ABCDE12345.com.example.app",
+            "Application Scripts/ABCDE12345.com.example.app",
+        ])
+    }
+
+    @Test func filesNamedAfterAnAppGroupAreFoundInAnyFolder() throws {
+        let library = try TemporaryLibrary(
+            "Group Containers/group.com.acme.shared/data.db",
+            "Application Scripts/ABCDE12345.com.acme/script.sh",
+            "Preferences/group.com.acme.shared.plist",
+            "Group Containers/group.com.acme.sharedother/data.db"
+        )
+        #expect(library.leftoverPaths(of: "com.acme.example", appGroups: ["group.com.acme.shared", "abcde12345.com.acme"]) == [
+            "Preferences/group.com.acme.shared.plist",
+            "Group Containers/group.com.acme.shared",
+            "Application Scripts/ABCDE12345.com.acme",
+        ])
+    }
+
     @Test func letterCaseIsIgnored() throws {
         let library = try TemporaryLibrary("Preferences/COM.Example.App.plist")
         #expect(library.leftoverPaths(of: "com.example.app") == ["Preferences/COM.Example.App.plist"])

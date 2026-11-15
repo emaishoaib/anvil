@@ -2,7 +2,7 @@ import Foundation
 
 /// Finds the files and folders an app has left in a Library, by looking one level deep in each Library folder for names that belong to the app.
 ///
-/// A name belongs when it matches the app's bundle ID or the bundle ID of a helper inside it, or when it is named after the app or its vendor. The other installed apps are needed for the second kind, so a vendor's folder that another app may share is left alone.
+/// A name belongs when it matches the app's bundle ID, the bundle ID of a helper inside it or one of its app groups, or when it is named after the app or its vendor. The other installed apps are needed for the second kind, so a vendor's folder that another app may share is left alone.
 ///
 /// A folder that is missing or cannot be read is skipped, so a Library that Anvil can only partly read still gives back what it can. Leftovers come back in the order of `LibraryFolder`, and by name within each folder.
 public enum LeftoverSearch {
@@ -11,7 +11,7 @@ public enum LeftoverSearch {
             let folderURL = folder.url(inLibrary: library)
             return names(in: folderURL)
                 .filter { name in
-                    app.bundleIDs.contains { BundleIDMatch.name(name, belongsTo: $0, in: folder) }
+                    app.identifiers.contains { BundleIDMatch.name(name, belongsTo: $0, in: folder) }
                         || NameMatch.name(name, belongsTo: app, in: folder, otherInstalledBundleIDs: otherInstalledBundleIDs)
                 }
                 .sorted()
