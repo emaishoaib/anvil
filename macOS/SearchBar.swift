@@ -28,6 +28,10 @@ final class SearchBar {
         model.showRuleForm(draft, in: group, isNew: isNew)
     }
 
+    func refreshSettings() {
+        model.settings.refresh()
+    }
+
     func showKeySwapForm() {
         model.showKeySwapForm()
     }
