@@ -13,6 +13,9 @@ struct LogitechSection: View {
         ForEach(logitech.devices) { device in
             Section {
                 LabeledContent("Connection", value: Self.connection(of: device))
+                if let dpi = logitech.dpis[device.id] {
+                    DPIRow(dpi: dpi)
+                }
             } header: {
                 DeviceHeader(device: device, battery: logitech.batteries[device.id])
             }
@@ -22,6 +25,20 @@ struct LogitechSection: View {
     private static func connection(of device: LogitechDevice) -> String {
         let kind = device.kind?.name ?? "Device"
         return device.isOnAReceiver ? "\(kind), through a receiver" : "\(kind), connected directly"
+    }
+}
+
+private struct DPIRow: View {
+    let dpi: SensorDPI
+
+    var body: some View {
+        LabeledContent {
+            Text(dpi.current, format: .number)
+                .monospacedDigit()
+        } label: {
+            Text("DPI")
+            Text("Accepts \(dpi.lowest) to \(dpi.highest)")
+        }
     }
 }
 

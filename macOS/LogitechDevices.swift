@@ -13,6 +13,7 @@ import Observation
 
     private(set) var devices: [LogitechDevice] = []
     private(set) var batteries: [String: BatteryStatus] = [:]
+    private(set) var dpis: [String: SensorDPI] = [:]
     @ObservationIgnored private var channels: [HIDPPChannel] = []
     @ObservationIgnored private var heldGestureButtons: Set<String> = []
     @ObservationIgnored private let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
@@ -68,6 +69,7 @@ import Observation
         channels.removeAll { CFEqual($0.device, device) }
         devices.removeAll { found in gone.contains { found.id.hasPrefix($0.id) } }
         batteries = batteries.filter { id, _ in devices.contains { $0.id == id } }
+        dpis = dpis.filter { id, _ in devices.contains { $0.id == id } }
     }
 
     private func use(_ device: LogitechDevice, on channel: HIDPPChannel) async {
@@ -75,7 +77,16 @@ import Observation
         devices.removeAll { $0.id == device.id }
         devices.append(device)
         await readBattery(of: device, on: channel)
+        await readDPI(of: device, on: channel)
         await Self.applyMouseTool(to: device, on: channel)
+    }
+
+    private func readDPI(of device: LogitechDevice, on channel: HIDPPChannel) async {
+        guard let dpiFeature = device.dpiFeature,
+              let list = await channel.send(.dpiList(of: device.deviceIndex, dpiFeature: dpiFeature))?.parameters,
+              let current = await channel.send(.dpi(of: device.deviceIndex, dpiFeature: dpiFeature))?.parameters
+        else { return }
+        dpis[device.id] = SensorDPI(current: current, list: list)
     }
 
     private func readBattery(of device: LogitechDevice, on channel: HIDPPChannel) async {

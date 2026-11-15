@@ -30,7 +30,8 @@ enum LogitechDiscovery {
             wheelFeature: await featureIndex(of: HIDPPRequest.wheelFeature, at: index, on: channel),
             wirelessStatusFeature: await featureIndex(of: HIDPPRequest.wirelessStatusFeature, at: index, on: channel),
             smartShiftFeature: await smartShiftFeature(at: index, on: channel),
-            batteryFeature: await featureIndex(of: HIDPPRequest.unifiedBatteryFeature, at: index, on: channel)
+            batteryFeature: await featureIndex(of: HIDPPRequest.unifiedBatteryFeature, at: index, on: channel),
+            dpiFeature: await featureIndex(of: HIDPPRequest.adjustableDPIFeature, at: index, on: channel)
         )
     }
 

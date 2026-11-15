@@ -8,6 +8,8 @@ public struct HIDPPRequest: Hashable, Sendable {
     public static let wheelFeature: UInt16 = 0x2121
     public static let wirelessStatusFeature: UInt16 = 0x1D4B
     public static let unifiedBatteryFeature: UInt16 = 0x1004
+    public static let adjustableDPIFeature: UInt16 = 0x2201
+    static let firstSensor: UInt8 = 0
     static let divertedReporting: UInt8 = 0x03
     static let undivertedReporting: UInt8 = 0x02
     static let longReportID: UInt8 = 0x11
@@ -74,6 +76,14 @@ public struct HIDPPRequest: Hashable, Sendable {
 
     public static func batteryStatus(of device: UInt8, batteryFeature: UInt8) -> HIDPPRequest {
         HIDPPRequest(deviceIndex: device, featureIndex: batteryFeature, function: 1)
+    }
+
+    public static func dpiList(of device: UInt8, dpiFeature: UInt8) -> HIDPPRequest {
+        HIDPPRequest(deviceIndex: device, featureIndex: dpiFeature, function: 1, parameters: [firstSensor])
+    }
+
+    public static func dpi(of device: UInt8, dpiFeature: UInt8) -> HIDPPRequest {
+        HIDPPRequest(deviceIndex: device, featureIndex: dpiFeature, function: 2, parameters: [firstSensor])
     }
 
     public static func reporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8, diverted: Bool) -> HIDPPRequest {
