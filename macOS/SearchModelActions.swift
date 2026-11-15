@@ -81,6 +81,8 @@ extension SearchModel {
 
     private func run(_ action: AnvilAction) {
         switch action {
+        case .pin:
+            togglePin()
         case .settings:
             open(.command(.settings))
         case .checkForUpdates:

@@ -14,13 +14,17 @@ final class SearchBar {
     private var isPresentingModal = false
     private var hiddenAt: ContinuousClock.Instant?
 
+    var isPinned: Bool { model.isPinned }
+
+    /// Shows the search bar, or hides it when it is showing. A pinned search bar cannot be hidden, so it takes the keyboard back instead.
     func toggle() {
-        panel.isVisible ? hide() : show()
+        guard panel.isVisible else { return show() }
+        model.isPinned ? panel.makeKeyAndOrderFront(nil) : hide()
     }
 
-    /// Hides the search bar. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows.
+    /// Hides the search bar, unless it is pinned. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows.
     func hide(remembering: Bool = true) {
-        guard panel.isVisible, !isPresentingModal else { return }
+        guard panel.isVisible, !isPresentingModal, !model.isPinned else { return }
         model.settings.finishEditing()
         hiddenAt = remembering ? .now : nil
         panel.orderOut(nil)
@@ -66,6 +70,10 @@ final class SearchBar {
 
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         model.settings.dismissMessage()
+        if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_P {
+            model.togglePin()
+            return true
+        }
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }

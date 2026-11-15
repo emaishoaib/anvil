@@ -18,6 +18,7 @@ import Observation
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var timesOpened = 0
+    private(set) var isPinned = false
     let settings = SettingsBarModel()
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
@@ -230,6 +231,11 @@ import Observation
         if case .anvil = actionPanel?.subject { return closeActions() }
         actionPanel = ActionPanel(subject: .anvil)
         field = .actionFilter
+    }
+
+    /// Pins or unpins the search bar. While pinned, nothing hides it: not clicking elsewhere, not Escape, and not opening what was searched for.
+    func togglePin() {
+        isPinned.toggle()
     }
 
     private func saveRuleDraft() {
