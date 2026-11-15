@@ -10,14 +10,14 @@ struct LogitechBatteryStatus: View, Identifiable {
     let kind: LogitechDeviceKind
     let battery: BatteryStatus
 
-    /// One item for each connected Logitech mouse and keyboard whose battery Anvil has read, mice first.
+    /// One item for each connected Logitech mouse and keyboard whose battery Anvil has read, keyboards first.
     static func all(in logitech: LogitechDevices = .shared) -> [LogitechBatteryStatus] {
         logitech.devices
             .compactMap { device in
                 guard let kind = device.kind, kind == .mouse || kind == .keyboard, let battery = logitech.batteries[device.id] else { return nil }
                 return LogitechBatteryStatus(id: device.id, name: device.name, kind: kind, battery: battery)
             }
-            .sorted { $0.kind == .mouse && $1.kind != .mouse }
+            .sorted { $0.kind == .keyboard && $1.kind != .keyboard }
     }
 
     var body: some View {
