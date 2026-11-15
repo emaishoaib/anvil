@@ -29,10 +29,10 @@ final class TemporaryLibrary {
         try JSONSerialization.data(withJSONObject: ["name": file.deletingPathExtension().lastPathComponent, "path": program.path(percentEncoded: false)]).write(to: file)
     }
 
-    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID and the executable's name when there are ones. Each helper is a bundle at the given path inside the app's `Contents` folder, with the given bundle ID.
-    func addApp(named name: String, bundleID: String?, executableName: String? = nil, helpers: [String: String] = [:]) throws -> URL {
+    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID, the bundle name and the executable's name when there are ones. Each helper is a bundle at the given path inside the app's `Contents` folder, with the given bundle ID.
+    func addApp(named name: String, bundleID: String?, bundleName: String? = nil, executableName: String? = nil, helpers: [String: String] = [:]) throws -> URL {
         let app = url.appending(path: "Applications/\(name).app", directoryHint: .isDirectory)
-        try writeInfo(["CFBundleIdentifier": bundleID, "CFBundleExecutable": executableName], inBundle: app)
+        try writeInfo(["CFBundleIdentifier": bundleID, "CFBundleName": bundleName, "CFBundleExecutable": executableName], inBundle: app)
         for (path, helperBundleID) in helpers {
             try writeInfo(["CFBundleIdentifier": helperBundleID], inBundle: app.appending(path: "Contents/\(path)", directoryHint: .isDirectory))
         }
@@ -54,8 +54,8 @@ final class TemporaryLibrary {
         try? FileManager.default.removeItem(at: url)
     }
 
-    func leftoverPaths(of bundleID: String, named name: String = "Example", executableName: String? = nil, appGroups: Set<String> = [], otherInstalledBundleIDs: Set<String> = []) -> [String] {
-        let app = AppIdentity(bundleID: bundleID, name: name, executableName: executableName, appGroups: appGroups)
+    func leftoverPaths(of bundleID: String, named name: String = "Example", otherNames: Set<String> = [], appGroups: Set<String> = [], otherInstalledBundleIDs: Set<String> = []) -> [String] {
+        let app = AppIdentity(bundleID: bundleID, name: name, otherNames: otherNames, appGroups: appGroups)
         return LeftoverSearch.leftovers(of: app, in: roots, otherInstalledBundleIDs: otherInstalledBundleIDs).map { relativePath(of: $0.url) }
     }
 }

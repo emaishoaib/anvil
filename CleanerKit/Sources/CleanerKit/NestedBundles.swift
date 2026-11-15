@@ -10,4 +10,12 @@ enum NestedBundles {
             .compactMap { $0 as? URL }
             .filter { bundleExtensions.contains($0.pathExtension.lowercased()) } ?? []
     }
+
+    /// The names of the apps among the bundles whose name starts with one of the given names, such as `Docker Desktop` for `Docker`. Helper apps, such as `Code Helper (GPU)`, count as well.
+    static func appNames(in bundles: [URL], startingWithAnyOf names: [String]) -> [String] {
+        bundles
+            .filter { $0.pathExtension.lowercased() == "app" }
+            .map { $0.deletingPathExtension().lastPathComponent }
+            .filter { appName in names.contains { appName.lowercased().hasPrefix($0.lowercased()) } }
+    }
 }

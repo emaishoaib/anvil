@@ -1,4 +1,4 @@
-/// Whether a name in one of the search folders belongs to an app because it is named after the app or its vendor, such as `Spotify` in Application Support.
+/// Whether a name in one of the search folders belongs to an app because it is named after the app or its vendor, such as `Spotify` in Application Support. Any of the app's names counts, so Visual Studio Code also finds `Code`.
 ///
 /// Only the folders where apps make folders under plain names are checked this way. Names are compared ignoring letter case and spaces, so an app called `Visual Notes` also finds `VisualNotes`. In the home folder the name may also start with a dot, as in `.docker`, because apps often hide their folders there.
 ///
@@ -6,7 +6,7 @@
 /// - Apple's own apps are never matched this way, and no name starting with `com.apple.` ever is
 /// - a vendor's folder only belongs to the app when no other installed app comes from the same vendor, because the folder may hold that app's files too
 /// - a bundle ID with fewer than three parts has no vendor to match
-/// - in the home folder only the app's own name counts, and the folders macOS makes there, such as Documents and Downloads, never match
+/// - in the home folder only the app's file name counts, not its other names or its vendor, and the folders macOS makes there, such as Documents and Downloads, never match
 enum NameMatch {
     private static let standardHomeFolders: Set<String> = ["applications", "desktop", "documents", "downloads", "library", "movies", "music", "pictures", "public"]
 
@@ -15,8 +15,9 @@ enum NameMatch {
         guard folder != .home || !standardHomeFolders.contains(name.lowercased()) else { return false }
         let squashedName = squashed(name)
         let squashedAppName = squashed(app.name)
-        let isNamedAfterApp = squashedName == squashedAppName
-        guard folder.holdsFoldersNamedAfterVendors else { return isNamedAfterApp || (folder == .home && squashedName == "." + squashedAppName) }
+        guard folder != .home else { return squashedName == squashedAppName || squashedName == "." + squashedAppName }
+        let isNamedAfterApp = app.allNames.contains { squashed($0) == squashedName }
+        guard folder.holdsFoldersNamedAfterVendors else { return isNamedAfterApp }
         let isNamedAfterVendor = app.vendor.map { vendor in
             squashedName == vendor && !isShared(vendor, by: otherInstalledBundleIDs, besides: app)
         } ?? false

@@ -18,15 +18,17 @@ public enum RemovalPlan {
         return [appItem] + leftovers
     }
 
-    /// The app's executable name is dropped when another installed app is named or runs under the same name, because a file named after it could be that app's.
+    /// The app's other names include the names of the apps nested inside it that start with one of its names, such as `Docker Desktop` inside Docker. An other name is dropped when another installed app goes by the same name, because a file named after it could be that app's.
     private static func withContents(of identity: AppIdentity, at appURL: URL, otherAppURLs: [URL], others: [AppIdentity]) -> AppIdentity {
-        let otherProgramNames = Set(others.flatMap { [$0.name, $0.executableName].compactMap { $0?.lowercased() } })
-        let executableName = identity.executableName.flatMap { otherProgramNames.contains($0.lowercased()) ? nil : $0 }
-        guard !identity.isApple else { return identity.with(executableName: executableName, helperBundleIDs: [], appGroups: .none) }
+        let namesOfOtherApps = Set(others.flatMap(\.allNames).map { $0.lowercased() })
+        let unshared = { (names: Set<String>) in names.filter { !namesOfOtherApps.contains($0.lowercased()) } }
+        guard !identity.isApple else { return identity.with(otherNames: unshared(identity.otherNames), helperBundleIDs: [], appGroups: .none) }
         let nestedBundles = NestedBundles.urls(inAppAt: appURL)
+        let nestedAppNames = NestedBundles.appNames(in: nestedBundles, startingWithAnyOf: identity.allNames)
+        let otherNames = unshared(identity.otherNames.union(AppIdentity.names(nestedAppNames, besides: identity.name)))
         let teamID = CodeSignature(bundleAt: appURL).teamID
         let helpers = HelperBundleIDs.of(identity, nestedBundles: nestedBundles, teamID: teamID, otherAppURLs: otherAppURLs)
         let groups = AppGroups.of(bundles: [appURL] + nestedBundles, otherAppURLs: otherAppURLs)
-        return identity.with(executableName: executableName, helperBundleIDs: helpers, appGroups: groups)
+        return identity.with(otherNames: otherNames, helperBundleIDs: helpers, appGroups: groups)
     }
 }

@@ -4,12 +4,12 @@ import Testing
 struct CrashReportMatchTests {
     let hardwareID = "ADC4BFBE-B5AB-502B-BE84-8760F2526795"
 
-    @Test func theFileNamedAfterTheAppOrItsExecutableIsFound() throws {
+    @Test func theFileNamedAfterTheAppOrOneOfItsOtherNamesIsFound() throws {
         let library = try TemporaryLibrary(
             "Application Support/CrashReporter/Visual Studio Code_\(hardwareID).plist",
             "Application Support/CrashReporter/code_\(hardwareID).plist"
         )
-        #expect(library.leftoverPaths(of: "com.acme.code", named: "Visual Studio Code", executableName: "Code") == [
+        #expect(library.leftoverPaths(of: "com.acme.code", named: "Visual Studio Code", otherNames: ["Code"]) == [
             "Application Support/CrashReporter/Visual Studio Code_\(hardwareID).plist",
             "Application Support/CrashReporter/code_\(hardwareID).plist",
         ])
@@ -24,7 +24,7 @@ struct CrashReportMatchTests {
         #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
     }
 
-    @Test func anExecutableNameAnotherInstalledAppGoesByIsLeftToThatApp() throws {
+    @Test func anOtherNameAnotherInstalledAppGoesByIsLeftToThatApp() throws {
         let library = try TemporaryLibrary("Application Support/CrashReporter/Claude_\(hardwareID).plist")
         let handler = try library.addApp(named: "Claude Code URL Handler", bundleID: "com.acme.handler", executableName: "claude")
         let app = try library.addApp(named: "Claude", bundleID: "com.acme.claude", executableName: "Claude")
