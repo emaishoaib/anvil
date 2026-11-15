@@ -29,9 +29,7 @@ struct QueryRow: View {
                 }
                 Spacer(minLength: 0)
             }
-            if model.isPinned {
-                UnpinButton(action: model.togglePin)
-            }
+            PinButton(isPinned: model.isPinned, action: model.togglePin)
         }
     }
 
@@ -76,19 +74,20 @@ private struct ArgumentField: View {
     }
 }
 
-private struct UnpinButton: View {
+private struct PinButton: View {
+    let isPinned: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "pin.fill")
+            Image(systemName: isPinned ? "pin.fill" : "pin")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(isPinned ? Color.accentColor : .secondary)
                 .frame(width: 28, height: 28)
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .help("Unpin")
+        .help(isPinned ? "Unpin" : "Pin")
     }
 }
 
