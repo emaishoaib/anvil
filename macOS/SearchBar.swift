@@ -16,6 +16,11 @@ final class SearchBar {
 
     var isPinned: Bool { model.isPinned }
 
+    /// Catches up with changes made while the search bar did not have keyboard focus, such as files deleted in Finder.
+    func tookFocus() {
+        model.review?.dropMissingItems()
+    }
+
     /// Shows the search bar, or hides it when it is showing. A pinned search bar cannot be hidden, so it takes the keyboard back instead.
     func toggle() {
         guard panel.isVisible else { return show() }

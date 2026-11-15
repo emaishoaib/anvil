@@ -34,6 +34,12 @@ struct FoundByNameTests {
         #expect(items.dropFirst().map { library.relativePath(of: $0.url) } == ["Application Support/Example"])
     }
 
+    @Test func aNameThatHasGoneSinceTheWalkIsLeftOut() throws {
+        let library = try TemporaryLibrary("User Cache/Example/state")
+        let items = try plan(in: library, foundByName: ["User Cache/Example", "User Cache/Example Gone"])
+        #expect(items.dropFirst().map { library.relativePath(of: $0.url) } == ["User Cache/Example"])
+    }
+
     private func plan(in library: TemporaryLibrary, foundByName paths: [String]) throws -> [RemovalItem] {
         let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
         return RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [], foundByName: paths.map { library.url.appending(path: $0) })

@@ -27,6 +27,7 @@ final class SearchPanel: NSPanel {
     override func becomeKey() {
         super.becomeKey()
         RuleKeys.shared.searchBarFocusChanged(true)
+        SearchBar.shared.tookFocus()
     }
 
     override func resignKey() {

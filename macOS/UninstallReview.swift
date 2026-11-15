@@ -123,6 +123,15 @@ import Observation
         NSWorkspace.shared.activateFileViewerSelecting([item.url])
     }
 
+    /// Drops the rows whose files are no longer on disk, such as after they were deleted in Finder.
+    func dropMissingItems() {
+        guard case .ready(let items) = state else { return }
+        let remaining = items.filter { RemovalPlan.exists($0.url) }
+        guard remaining.count != items.count else { return }
+        state = .ready(remaining)
+        selected = min(selected, max(remaining.count - 1, 0))
+    }
+
     func moveSelection(by offset: Int, matching query: String) {
         let count = items(matching: query).count
         guard count > 0 else { return }
