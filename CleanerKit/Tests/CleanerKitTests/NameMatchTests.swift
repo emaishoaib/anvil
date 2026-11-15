@@ -61,6 +61,17 @@ struct NameMatchTests {
         #expect(library.leftoverPaths(of: "com.acme.example") == ["Home/.example"])
     }
 
+    @Test func aHiddenFolderInTheHomeFolderNamedAfterTheBundleIDsLastPartIsFound() throws {
+        let library = try TemporaryLibrary("Home/.vscode/extensions.json", "Home/vscode/notes.txt")
+        #expect(library.leftoverPaths(of: "com.microsoft.VSCode", named: "Visual Studio Code") == ["Home/.vscode"])
+    }
+
+    @Test func aGenericBundleIDEndingNeverNamesAHiddenFolder() throws {
+        let library = try TemporaryLibrary("Home/.mac/settings", "Home/.app/settings")
+        #expect(library.leftoverPaths(of: "com.postmanlabs.mac", named: "Postman").isEmpty)
+        #expect(library.leftoverPaths(of: "com.acme.app", named: "Acme Tool").isEmpty)
+    }
+
     @Test func aFolderInTheHomeFolderNamedAfterTheVendorIsLeftAlone() throws {
         let library = try TemporaryLibrary("Home/Acme/data.db")
         #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
