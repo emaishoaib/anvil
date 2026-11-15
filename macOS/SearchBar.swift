@@ -160,5 +160,6 @@ final class SearchBar {
         panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
+        MenuBarItem.shared.strike()
     }
 }

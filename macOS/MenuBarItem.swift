@@ -12,7 +12,14 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
         let icon = NSImage(resource: .menuBarIcon)
         icon.accessibilityDescription = "Anvil"
         button.image = icon
+        button.wantsLayer = true
         item.menu = makeMenu()
+    }
+
+    /// Plays the strike on the icon, as the search bar opens.
+    func strike() {
+        guard let button = item.button else { return }
+        StrikeAnimation.play(on: button)
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
