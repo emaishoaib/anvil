@@ -28,7 +28,7 @@ struct KeySwapsSection: View {
         } header: {
             Text("Key Swaps")
         } footer: {
-            Text("Swaps two keys on the Mac's built-in keyboard. External keyboards are left alone.")
+            Text(KeySwapsCatalog.explanation)
                 .foregroundStyle(.secondary)
         }
         .sheet(isPresented: $isAdding) {
@@ -64,19 +64,5 @@ private struct KeySwapEditor: View {
             .padding([.horizontal, .bottom], 20)
         }
         .frame(width: 420)
-    }
-}
-
-private struct KeyPicker: View {
-    let title: String
-    @Binding var selection: Int?
-
-    var body: some View {
-        Picker(title, selection: $selection) {
-            Text("Choose a Key").tag(Int?.none)
-            ForEach(HIDKeys.all, id: \.usage) { key in
-                Text(key.name).tag(Int?.some(key.usage))
-            }
-        }
     }
 }

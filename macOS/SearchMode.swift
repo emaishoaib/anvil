@@ -7,19 +7,20 @@ enum SearchMode: Equatable {
     case quickLinkForm(QuickLinkFormKind, query: String)
     case settings
     case ruleForm(RuleGroup, isNew: Bool, query: String)
+    case keySwapForm(query: String)
 
     var placeholder: String {
         switch self {
         case .launcher: "Search for apps and quick links…"
         case .defineWord: "Search word…"
         case .settings: "Search settings…"
-        case .wordEntry, .quickLinkForm, .ruleForm: ""
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm: ""
         }
     }
 
     var hasSearchField: Bool {
         switch self {
-        case .quickLinkForm, .ruleForm: false
+        case .quickLinkForm, .ruleForm, .keySwapForm: false
         default: true
         }
     }

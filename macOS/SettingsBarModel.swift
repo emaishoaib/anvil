@@ -93,7 +93,7 @@ import Observation
             adjustment = Adjustment(settingID: setting.id, value: number.value)
         case .shortcut:
             recording.start(for: setting.id) { [weak self] combo in self?.typed(combo) }
-        case .action(let run):
+        case .action(_, let run):
             message = run()
             refresh()
         case .choice, .info, .rule:
@@ -180,7 +180,7 @@ import Observation
         let selectedID = selectedSetting?.id
         rebuild()
         show(matching: query)
-        selected = shown.firstIndex { $0.id == selectedID } ?? 0
+        selected = shown.firstIndex { $0.id == selectedID } ?? min(selected, max(shown.count - 1, 0))
     }
 
     private func show(matching query: String) {

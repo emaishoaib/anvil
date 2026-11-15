@@ -13,7 +13,9 @@ enum SettingsCatalog {
         case .switcher: switcherShortcuts
         case .launcher: LauncherCatalog.settings()
         case .windows: WindowsCatalog.settings(systemShortcuts: systemShortcuts)
-        case .rules: Setting.subgroup(RuleGroup.keysAndApps.title, RulesCatalog.settings(for: .keysAndApps, systemShortcuts: systemShortcuts))
+        case .rules:
+            Setting.subgroup(RuleGroup.keysAndApps.title, RulesCatalog.settings(for: .keysAndApps, systemShortcuts: systemShortcuts))
+                + Setting.subgroup("Key Swaps", KeySwapsCatalog.settings())
         case .mouse: MouseCatalog.settings(systemShortcuts: systemShortcuts)
         default: []
         }

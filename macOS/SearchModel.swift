@@ -14,6 +14,7 @@ import Observation
     var arguments = LinkArguments()
     var draft = QuickLink()
     var ruleDraft = RuleDraft()
+    var keySwapDraft = KeySwapDraft()
     private(set) var actionPanel: ActionPanel?
     private(set) var timesOpened = 0
     let settings = SettingsBarModel()
@@ -43,6 +44,7 @@ import Observation
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
+        keySwapDraft = KeySwapDraft()
         entryPage = ""
         field = .query
         mode = .launcher
@@ -129,6 +131,13 @@ import Observation
         query = ""
     }
 
+    func showKeySwapForm() {
+        settings.finishEditing()
+        keySwapDraft = KeySwapDraft()
+        mode = .keySwapForm(query: query)
+        query = ""
+    }
+
     func clearSelectedShortcut() -> Bool {
         mode == .settings && settings.clearSelectedShortcut()
     }
@@ -150,7 +159,7 @@ import Observation
             settings.finishEditing()
             mode = .launcher
             query = ""
-        case .ruleForm(_, _, let previousQuery):
+        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery):
             settings.reload()
             mode = .settings
             query = previousQuery
@@ -172,6 +181,7 @@ import Observation
 
     func saveDraft() {
         if case .ruleForm = mode { return saveRuleDraft() }
+        if case .keySwapForm = mode { return saveKeySwapDraft() }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
         _ = goBack()
@@ -200,6 +210,12 @@ import Observation
     private func saveRuleDraft() {
         guard let rule = ruleDraft.rule else { return NSSound.beep() }
         RuleLibrary.shared.save(rule)
+        _ = goBack()
+    }
+
+    private func saveKeySwapDraft() {
+        guard let keySwap = keySwapDraft.keySwap else { return NSSound.beep() }
+        KeySwapLibrary.shared.add(keySwap)
         _ = goBack()
     }
 
@@ -255,7 +271,7 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm:
             results = []
         }
         showArguments()

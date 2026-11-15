@@ -28,6 +28,10 @@ struct SearchBarView: View {
                 Divider()
                 RuleForm(draft: $model.ruleDraft, group: group)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
+            } else if case .keySwapForm = model.mode {
+                Divider()
+                KeySwapForm(draft: $model.keySwapDraft)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })

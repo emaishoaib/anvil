@@ -28,6 +28,10 @@ final class SearchBar {
         model.showRuleForm(draft, in: group, isNew: isNew)
     }
 
+    func showKeySwapForm() {
+        model.showKeySwapForm()
+    }
+
     func presentModal<Result>(_ present: () -> Result) -> Result {
         isPresentingModal = true
         panel.level = .floating
