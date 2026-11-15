@@ -40,7 +40,7 @@ struct SearchBarView: View {
         .fixedSize(horizontal: false, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor).opacity(Self.tintOpacity))
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { SearchBar.shared.fit(height: $0) }
-        .onAppear { focus = .query }
+        .onChange(of: model.timesOpened, initial: true) { focus = .query }
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }
         .onChange(of: focus) { if let focus { model.field = focus } }

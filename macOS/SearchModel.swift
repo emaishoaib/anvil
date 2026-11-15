@@ -14,6 +14,7 @@ import Observation
     var arguments = LinkArguments()
     var draft = QuickLink()
     private(set) var actionPanel: ActionPanel?
+    private(set) var timesOpened = 0
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 
@@ -42,6 +43,7 @@ import Observation
         field = .query
         mode = .launcher
         query = ""
+        timesOpened += 1
     }
 
     func moveSelection(by offset: Int) {

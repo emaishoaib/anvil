@@ -107,14 +107,14 @@ final class SearchBar {
         guard let screen = NSScreen.main, let background = panel.contentView else { return }
         CurrencyRatesStore.shared.refreshIfStale()
         model.reset()
-        let size = content.fittingSize
-        let top = screen.frame.maxY - screen.frame.height * Self.topShare
-        panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
         if content.superview == nil {
             content.frame = background.bounds
             content.autoresizingMask = [.width, .height]
             background.addSubview(content)
         }
+        let size = content.fittingSize
+        let top = screen.frame.maxY - screen.frame.height * Self.topShare
+        panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
     }
