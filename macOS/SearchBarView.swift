@@ -27,7 +27,7 @@ struct SearchBarView: View {
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings)
-                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedSetting?.row.actionTitle)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle)
             } else {
                 Divider()
                 SearchResults(model: model)

@@ -17,7 +17,7 @@ struct SettingsList: View {
                         SectionHeader(title: section.title)
                         ForEach(section.settings) { setting in
                             SettingRowView(setting: setting, isSelected: model.isSelected(setting))
-                                .frame(height: Self.rowHeight)
+                                .frame(minHeight: Self.rowHeight)
                                 .id(setting.id)
                                 .onTapGesture { model.activate(setting) }
                         }
@@ -34,16 +34,20 @@ struct SettingsList: View {
 }
 
 private struct SettingRowView: View {
+    private static let disabledOpacity = 0.4
+
     let setting: Setting
     let isSelected: Bool
 
     var body: some View {
         HStack(spacing: 10) {
-            SettingTitle(title: setting.entry.title, subtitle: setting.subtitle)
+            SettingTitle(title: setting.entry.title, subtitle: setting.subtitle, warning: setting.warning)
             Spacer()
             SettingControl(row: setting.row)
         }
+        .opacity(setting.isDisabled ? Self.disabledOpacity : 1)
         .padding(.horizontal, 8)
+        .padding(.vertical, 6)
         .frame(maxHeight: .infinity)
         .background {
             if isSelected { RoundedRectangle(cornerRadius: SearchStyle.cornerRadius).fill(.primary.opacity(SearchStyle.selectionOpacity)) }
@@ -55,6 +59,7 @@ private struct SettingRowView: View {
 private struct SettingTitle: View {
     let title: String
     let subtitle: String?
+    let warning: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -65,6 +70,12 @@ private struct SettingTitle: View {
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+            }
+            if let warning {
+                Label(warning, systemImage: "exclamationmark.triangle.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }

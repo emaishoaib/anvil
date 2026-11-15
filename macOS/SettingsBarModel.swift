@@ -1,3 +1,4 @@
+import AppKit
 import LauncherKit
 import Observation
 
@@ -18,6 +19,11 @@ import Observation
 
     var selectedSetting: Setting? {
         shown.indices.contains(selected) ? shown[selected] : nil
+    }
+
+    var selectedActionTitle: String? {
+        guard let selectedSetting, !selectedSetting.isDisabled else { return nil }
+        return selectedSetting.row.actionTitle
     }
 
     func isSelected(_ setting: Setting) -> Bool {
@@ -45,6 +51,7 @@ import Observation
     }
 
     func activate(_ setting: Setting) {
+        guard !setting.isDisabled else { return NSSound.beep() }
         switch setting.row {
         case .toggle(let isOn, let set): set(!isOn)
         }

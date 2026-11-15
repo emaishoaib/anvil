@@ -7,6 +7,7 @@ enum SnappingSettings {
     static let maximizesOnTitleBarDoubleClickKey = "windows.maximizesOnTitleBarDoubleClick"
     static let gapKey = "windows.gap"
     static let gapRange = 0.0...50
+    static let macOSDoubleClickWarning = "macOS also acts on this double-click. Set \u{201C}Double-click a window\u{2019}s title bar to\u{201D} to Do Nothing in Desktop & Dock settings."
     private static let macOSTitleBarDoubleClickKey = "AppleActionOnDoubleClick"
     private static let macOSDoesNothingOnDoubleClick = "None"
 
@@ -37,7 +38,7 @@ struct SnappingSection: View {
             Toggle(isOn: $maximizesOnTitleBarDoubleClick) {
                 Text("Maximize or restore a window by double-clicking its title bar")
                 if maximizesOnTitleBarDoubleClick && SnappingSettings.macOSActsOnTitleBarDoubleClick {
-                    Label("macOS also acts on this double-click. Set \u{201C}Double-click a window\u{2019}s title bar to\u{201D} to Do Nothing in Desktop & Dock settings.", systemImage: "exclamationmark.triangle.fill")
+                    Label(SnappingSettings.macOSDoubleClickWarning, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
                 }
             }

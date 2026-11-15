@@ -1,9 +1,11 @@
 import LauncherKit
 
-/// One setting in the search bar: the entry it is found by, the line under its title, and its kind of row.
+/// One setting in the search bar: the entry it is found by, the lines under its title, whether it can be changed right now, and its kind of row.
 struct Setting: Identifiable {
     let entry: SettingEntry
-    let subtitle: String?
+    var subtitle: String? = nil
+    var warning: String? = nil
+    var isDisabled = false
     let row: SettingRow
 
     var id: String { entry.id }
