@@ -16,7 +16,7 @@ struct AnvilMenu: View {
 
 struct AnvilMenuIcon: View {
     var body: some View {
-        Image(KeepAwake.shared.isActive ? .menuBarIconAwake : .menuBarIcon)
+        Image(.menuBarIcon)
             .accessibilityLabel("Anvil")
     }
 }
