@@ -12,6 +12,7 @@ import Observation
     ]
 
     private(set) var devices: [LogitechDevice] = []
+    private(set) var batteries: [String: BatteryStatus] = [:]
     @ObservationIgnored private var channels: [HIDPPChannel] = []
     @ObservationIgnored private var heldGestureButtons: Set<String> = []
     @ObservationIgnored private let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
@@ -66,13 +67,22 @@ import Observation
         gone.forEach { $0.stop() }
         channels.removeAll { CFEqual($0.device, device) }
         devices.removeAll { found in gone.contains { found.id.hasPrefix($0.id) } }
+        batteries = batteries.filter { id, _ in devices.contains { $0.id == id } }
     }
 
     private func use(_ device: LogitechDevice, on channel: HIDPPChannel) async {
         guard channels.contains(where: { $0 === channel }) else { return }
         devices.removeAll { $0.id == device.id }
         devices.append(device)
+        await readBattery(of: device, on: channel)
         await Self.applyMouseTool(to: device, on: channel)
+    }
+
+    private func readBattery(of device: LogitechDevice, on channel: HIDPPChannel) async {
+        guard let batteryFeature = device.batteryFeature,
+              let parameters = await channel.send(.batteryStatus(of: device.deviceIndex, batteryFeature: batteryFeature))?.parameters
+        else { return }
+        batteries[device.id] = BatteryStatus(parameters: parameters)
     }
 
     private func notified(_ report: [UInt8], on channel: HIDPPChannel) {
@@ -84,7 +94,8 @@ import Observation
             report: report,
             from: index,
             controlsFeature: known?.controlsFeature,
-            wirelessStatusFeature: known?.wirelessStatusFeature
+            wirelessStatusFeature: known?.wirelessStatusFeature,
+            batteryFeature: known?.batteryFeature
         ) {
         case .controlsHeld(let held):
             let isDown = held.contains(HIDPPRequest.buttonBehindWheelControl)
@@ -93,6 +104,8 @@ import Observation
             GestureButton.send(isDown: isDown)
         case .linkRestored:
             Task { if let device = await LogitechDiscovery.device(at: index, on: channel) { await use(device, on: channel) } }
+        case .batteryChanged(let status):
+            batteries[id] = status
         case nil:
             return
         }
