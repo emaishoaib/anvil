@@ -28,20 +28,6 @@ struct LogitechSection: View {
     }
 }
 
-private struct DPIRow: View {
-    let dpi: SensorDPI
-
-    var body: some View {
-        LabeledContent {
-            Text(dpi.current, format: .number)
-                .monospacedDigit()
-        } label: {
-            Text("DPI")
-            Text("Accepts \(dpi.lowest) to \(dpi.highest)")
-        }
-    }
-}
-
 private struct DeviceHeader: View {
     let device: LogitechDevice
     let battery: BatteryStatus?

@@ -41,14 +41,15 @@ import Observation
     func applyMouseTool() {
         for channel in channels {
             let onChannel = devices.filter { $0.id.hasPrefix(channel.id) }
-            Task { for device in onChannel { await Self.applyMouseTool(to: device, on: channel) } }
+            Task { for device in onChannel { await applyMouseTool(to: device, on: channel) } }
         }
     }
 
-    private static func applyMouseTool(to device: LogitechDevice, on channel: HIDPPChannel) async {
+    private func applyMouseTool(to device: LogitechDevice, on channel: HIDPPChannel) async {
         await GestureButton.takeOver(device, on: channel)
         await WheelResolution.shared.apply(to: device, on: channel)
         await WheelRatchet.apply(to: device, on: channel)
+        dpis[device.id] = await MouseDPI.shared.apply(to: device, on: channel)
     }
 
     private func added(_ device: IOHIDDevice) {
@@ -77,16 +78,7 @@ import Observation
         devices.removeAll { $0.id == device.id }
         devices.append(device)
         await readBattery(of: device, on: channel)
-        await readDPI(of: device, on: channel)
-        await Self.applyMouseTool(to: device, on: channel)
-    }
-
-    private func readDPI(of device: LogitechDevice, on channel: HIDPPChannel) async {
-        guard let dpiFeature = device.dpiFeature,
-              let list = await channel.send(.dpiList(of: device.deviceIndex, dpiFeature: dpiFeature))?.parameters,
-              let current = await channel.send(.dpi(of: device.deviceIndex, dpiFeature: dpiFeature))?.parameters
-        else { return }
-        dpis[device.id] = SensorDPI(current: current, list: list)
+        await applyMouseTool(to: device, on: channel)
     }
 
     private func readBattery(of device: LogitechDevice, on channel: HIDPPChannel) async {

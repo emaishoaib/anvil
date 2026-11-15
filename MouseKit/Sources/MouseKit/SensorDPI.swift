@@ -24,6 +24,14 @@ public struct SensorDPI: Equatable, Sendable {
     public var lowest: Int { choices.first ?? current }
     public var highest: Int { choices.last ?? current }
 
+    public func nearestIndex(to dpi: Int) -> Int {
+        choices.indices.min { abs(choices[$0] - dpi) < abs(choices[$1] - dpi) } ?? 0
+    }
+
+    public func nearestChoice(to dpi: Int) -> Int {
+        choices.isEmpty ? current : choices[nearestIndex(to: dpi)]
+    }
+
     private static func choices(from parameters: [UInt8]) -> [Int] {
         let values = stride(from: 1, to: parameters.count - 1, by: 2).map {
             UInt16(parameters[$0]) << 8 | UInt16(parameters[$0 + 1])

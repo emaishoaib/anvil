@@ -33,6 +33,19 @@ struct SensorDPITests {
         #expect(SensorDPI(current: current, list: list)?.choices == [400, 800, 1600])
     }
 
+    @Test func settingTheDPISendsItToTheFirstSensorAsTwoBytes() {
+        let report = HIDPPRequest.setDPI(2000, of: 0xFF, dpiFeature: 0x0A).report
+        #expect(Array(report.prefix(7)) == [0x11, 0xFF, 0x0A, 0x3B, 0x00, 0x07, 0xD0])
+    }
+
+    @Test func aWantedDPIIsMovedToTheNearestOneTheMouseAccepts() {
+        let dpi = SensorDPI(current: 800, choices: [400, 800, 1600])
+        #expect(dpi.nearestChoice(to: 1000) == 800)
+        #expect(dpi.nearestChoice(to: 1500) == 1600)
+        #expect(dpi.nearestChoice(to: 9000) == 1600)
+        #expect(dpi.nearestIndex(to: 100) == 0)
+    }
+
     @Test func noCurrentDPIOrNoAcceptedDPIsGivesNothing() {
         #expect(SensorDPI(current: [0x00, 0x00, 0x00], list: [0x00, 0x01, 0x90]) == nil)
         #expect(SensorDPI(current: current, list: [0x00, 0x00, 0x00]) == nil)

@@ -86,6 +86,11 @@ public struct HIDPPRequest: Hashable, Sendable {
         HIDPPRequest(deviceIndex: device, featureIndex: dpiFeature, function: 2, parameters: [firstSensor])
     }
 
+    public static func setDPI(_ dpi: Int, of device: UInt8, dpiFeature: UInt8) -> HIDPPRequest {
+        let value = UInt16(clamping: dpi)
+        return HIDPPRequest(deviceIndex: device, featureIndex: dpiFeature, function: 3, parameters: [firstSensor, UInt8(value >> 8), UInt8(value & 0xFF)])
+    }
+
     public static func reporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8, diverted: Bool) -> HIDPPRequest {
         HIDPPRequest(
             deviceIndex: device,
