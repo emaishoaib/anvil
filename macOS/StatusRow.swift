@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// The small status items beside the Anvil button in the search bar's footer, such as whether Keep Awake is holding the Mac awake and how full each Logitech mouse and keyboard battery is. The row and its divider only show when at least one item has something to show.
+/// The small status items beside the Anvil button in the search bar's footer, such as whether Keep Awake is holding the Mac awake, how full each Logitech mouse and keyboard battery is, and each AirPod's battery. The row and its divider only show when at least one item has something to show.
 struct StatusRow: View {
     var body: some View {
         let showsKeepAwake = Tool.keepAwake.isOn
         let batteries = LogitechBatteryStatus.all()
-        if showsKeepAwake || !batteries.isEmpty {
+        let earbuds = AirPodsBatteries.shared.earbuds
+        if showsKeepAwake || !batteries.isEmpty || !earbuds.isEmpty {
             HStack(spacing: 12) {
                 Rectangle()
                     .fill(.primary.opacity(0.15))
@@ -14,6 +15,7 @@ struct StatusRow: View {
                     KeepAwakeStatus(state: KeepAwake.shared.state)
                 }
                 ForEach(batteries) { $0 }
+                ForEach(earbuds) { EarbudBatteryStatus(earbud: $0) }
             }
         }
     }

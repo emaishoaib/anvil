@@ -176,5 +176,6 @@ final class SearchBar {
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
         MenuBarItem.shared.strike()
+        AirPodsBatteries.shared.refresh()
     }
 }

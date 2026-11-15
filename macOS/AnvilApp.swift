@@ -21,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppUpdater.shared.start()
         EntryWebView.warmUp()
         Task { SearchBar.shared.warmUp() }
+        AirPodsBatteries.shared.refresh()
         #if !DEBUG
         LoginItem.addOnFirstLaunch()
         #endif
