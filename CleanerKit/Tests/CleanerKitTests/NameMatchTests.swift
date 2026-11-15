@@ -1,0 +1,53 @@
+import Testing
+@testable import CleanerKit
+
+struct NameMatchTests {
+    @Test func foldersNamedAfterTheAppAreFoundInSupportCachesAndLogs() throws {
+        let library = try TemporaryLibrary("Application Support/Example/data.db", "Caches/Example/cache.db", "Logs/Example/today.log")
+        #expect(library.leftoverPaths(of: "com.acme.example") == [
+            "Application Support/Example",
+            "Caches/Example",
+            "Logs/Example",
+        ])
+    }
+
+    @Test func foldersNamedAfterTheAppAreNotLookedForElsewhere() throws {
+        let library = try TemporaryLibrary("Preferences/Example", "Containers/Example/Data", "LaunchAgents/Example")
+        #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
+    }
+
+    @Test func spacesAndLetterCaseInTheAppNameAreIgnored() throws {
+        let library = try TemporaryLibrary("Application Support/visualnotes/data.db")
+        #expect(library.leftoverPaths(of: "com.acme.notes", named: "Visual Notes") == ["Application Support/visualnotes"])
+    }
+
+    @Test func theVendorsFolderIsFoundWhenNoOtherAppComesFromTheVendor() throws {
+        let library = try TemporaryLibrary("Application Support/Acme/data.db")
+        #expect(library.leftoverPaths(of: "com.acme.example", otherInstalledBundleIDs: ["com.other.app"]) == ["Application Support/Acme"])
+    }
+
+    @Test func theVendorsFolderIsLeftAloneWhenAnotherAppComesFromTheVendor() throws {
+        let library = try TemporaryLibrary("Application Support/Acme/data.db")
+        #expect(library.leftoverPaths(of: "com.acme.example", otherInstalledBundleIDs: ["com.acme.other"]).isEmpty)
+    }
+
+    @Test func theAppItselfAmongTheInstalledAppsDoesNotShareItsVendor() throws {
+        let library = try TemporaryLibrary("Application Support/Acme/data.db")
+        #expect(library.leftoverPaths(of: "com.acme.example", otherInstalledBundleIDs: ["com.acme.example"]) == ["Application Support/Acme"])
+    }
+
+    @Test func aBundleIDWithTwoPartsHasNoVendorFolder() throws {
+        let library = try TemporaryLibrary("Application Support/acme/data.db")
+        #expect(library.leftoverPaths(of: "acme.example", named: "Something").isEmpty)
+    }
+
+    @Test func applesOwnAppsAreOnlyFoundByTheirBundleID() throws {
+        let library = try TemporaryLibrary("Application Support/Notes/data.db", "Application Support/Apple/data.db", "Containers/com.apple.Notes/Data")
+        #expect(library.leftoverPaths(of: "com.apple.Notes", named: "Notes") == ["Containers/com.apple.Notes"])
+    }
+
+    @Test func applesFilesAreNeverFoundByName() throws {
+        let library = try TemporaryLibrary("Application Support/com.apple.sharedfilelist/data")
+        #expect(library.leftoverPaths(of: "com.acme.example", named: "com.apple.sharedfilelist").isEmpty)
+    }
+}

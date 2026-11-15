@@ -18,7 +18,9 @@ final class TemporaryLibrary {
         try? FileManager.default.removeItem(at: url)
     }
 
-    func leftoverPaths(of bundleID: String) -> [String] {
-        LeftoverSearch.leftovers(of: bundleID, inLibrary: url).map { "\($0.folder.rawValue)/\($0.url.lastPathComponent)" }
+    func leftoverPaths(of bundleID: String, named name: String = "Example", otherInstalledBundleIDs: Set<String> = []) -> [String] {
+        let app = AppIdentity(bundleID: bundleID, name: name)
+        return LeftoverSearch.leftovers(of: app, inLibrary: url, otherInstalledBundleIDs: otherInstalledBundleIDs)
+            .map { "\($0.folder.rawValue)/\($0.url.lastPathComponent)" }
     }
 }

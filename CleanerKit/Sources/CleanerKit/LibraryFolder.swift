@@ -18,4 +18,11 @@ public enum LibraryFolder: String, CaseIterable, Sendable {
     public func url(inLibrary library: URL) -> URL {
         library.appending(path: rawValue, directoryHint: .isDirectory)
     }
+
+    var holdsFoldersNamedAfterApps: Bool {
+        switch self {
+        case .applicationSupport, .caches, .logs: true
+        default: false
+        }
+    }
 }
