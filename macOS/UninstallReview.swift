@@ -16,6 +16,7 @@ import Observation
     private(set) var unticked: Set<URL> = []
     private(set) var selected = 0
     private(set) var problem: String?
+    private(set) var hasFullDiskAccess = true
 
     init(app: InstalledApp) {
         self.app = app
@@ -23,9 +24,10 @@ import Observation
 
     func load(otherAppURLs: [URL]) async {
         let appURL = app.url
-        let items = await Task.detached {
-            RemovalPlan.items(forAppAt: appURL, inLibrary: .libraryDirectory, otherAppURLs: otherAppURLs)
+        let (items, hasFullDiskAccess) = await Task.detached {
+            (RemovalPlan.items(forAppAt: appURL, inLibrary: .libraryDirectory, otherAppURLs: otherAppURLs), FullDiskAccess.isGranted)
         }.value
+        self.hasFullDiskAccess = hasFullDiskAccess
         state = .ready(items)
     }
 

@@ -18,6 +18,7 @@ enum SettingsCatalog {
             Setting.subgroup(RuleGroup.keysAndApps.title, RulesCatalog.settings(for: .keysAndApps, systemShortcuts: systemShortcuts))
                 + Setting.subgroup("Key Swaps", KeySwapsCatalog.settings())
         case .mouse: MouseCatalog.settings(systemShortcuts: systemShortcuts)
+        case .uninstaller: UninstallerCatalog.settings()
         default: []
         }
     }

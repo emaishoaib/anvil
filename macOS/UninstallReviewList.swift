@@ -2,7 +2,7 @@ import CleanerKit
 import LauncherKit
 import SwiftUI
 
-/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A row is ticked or unticked by clicking it. While the files are being found or moved to the Trash, a spinner stands in for the rows.
+/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A row is ticked or unticked by clicking it. Without Full Disk Access, a notice above the rows says some leftovers may be missing. While the files are being found or moved to the Trash, a spinner stands in for the rows.
 struct UninstallReviewList: View {
     private static let rowHeight: CGFloat = 40
     private static let padding: CGFloat = 8
@@ -29,6 +29,7 @@ struct UninstallReviewList: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
+                    if !review.hasFullDiskAccess { FullDiskAccessNotice() }
                     SectionHeader(title: review.app.name)
                     ForEach(Array(review.items(matching: query).enumerated()), id: \.element.id) { index, item in
                         RemovalRow(item: item, isTicked: review.isTicked(item), isSelected: index == review.selected)
@@ -44,6 +45,21 @@ struct UninstallReviewList: View {
             }
             .onChange(of: review.selected) { proxy.scrollTo(review.selected) }
         }
+    }
+}
+
+private struct FullDiskAccessNotice: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.yellow)
+            Text("Without Full Disk Access, some leftovers can't be found or moved.")
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button("Open Settings", action: FullDiskAccess.openSettings)
+                .controlSize(.small)
+        }
+        .padding(8)
     }
 }
 
