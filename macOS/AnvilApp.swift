@@ -5,10 +5,8 @@ struct AnvilApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            AnvilMenu()
-        } label: {
-            AnvilMenuIcon()
+        Settings {
+            EmptyView()
         }
     }
 }
@@ -16,6 +14,7 @@ struct AnvilApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         Tool.registerDefaults()
+        MenuBarItem.shared.start()
         KeepAwake.shared.restore()
         AppCatalog.shared.start()
         CurrencyRatesStore.shared.start()
