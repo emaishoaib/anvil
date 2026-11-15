@@ -1,6 +1,6 @@
 /// Whether a name in one of the search folders belongs to an app because it is named after the app or its vendor, such as `Spotify` in Application Support.
 ///
-/// Only the folders where apps make folders under plain names are checked this way. Names are compared ignoring letter case and spaces, so an app called `Visual Notes` also finds `VisualNotes`.
+/// Only the folders where apps make folders under plain names are checked this way. Names are compared ignoring letter case and spaces, so an app called `Visual Notes` also finds `VisualNotes`. In the home folder the name may also start with a dot, as in `.docker`, because apps often hide their folders there.
 ///
 /// Four rules keep this from catching another app's files or the user's own:
 /// - Apple's own apps are never matched this way, and no name starting with `com.apple.` ever is
@@ -14,8 +14,9 @@ enum NameMatch {
         guard folder.holdsFoldersNamedAfterApps, !app.isApple, !name.lowercased().hasPrefix("com.apple.") else { return false }
         guard folder != .home || !standardHomeFolders.contains(name.lowercased()) else { return false }
         let squashedName = squashed(name)
-        let isNamedAfterApp = squashedName == squashed(app.name)
-        guard folder.holdsFoldersNamedAfterVendors else { return isNamedAfterApp }
+        let squashedAppName = squashed(app.name)
+        let isNamedAfterApp = squashedName == squashedAppName
+        guard folder.holdsFoldersNamedAfterVendors else { return isNamedAfterApp || (folder == .home && squashedName == "." + squashedAppName) }
         let isNamedAfterVendor = app.vendor.map { vendor in
             squashedName == vendor && !isShared(vendor, by: otherInstalledBundleIDs, besides: app)
         } ?? false

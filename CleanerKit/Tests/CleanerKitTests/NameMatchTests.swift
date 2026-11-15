@@ -56,6 +56,11 @@ struct NameMatchTests {
         #expect(library.leftoverPaths(of: "com.acme.notes", named: "VisualNotes") == ["Home/Visual Notes"])
     }
 
+    @Test func aHiddenFolderInTheHomeFolderNamedAfterTheAppIsFoundButNotElsewhere() throws {
+        let library = try TemporaryLibrary("Home/.example/config.json", "Home/..example/config.json", "Application Support/.example/data")
+        #expect(library.leftoverPaths(of: "com.acme.example") == ["Home/.example"])
+    }
+
     @Test func aFolderInTheHomeFolderNamedAfterTheVendorIsLeftAlone() throws {
         let library = try TemporaryLibrary("Home/Acme/data.db")
         #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
