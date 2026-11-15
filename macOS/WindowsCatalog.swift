@@ -2,10 +2,10 @@ import Foundation
 import LauncherKit
 import WindowKit
 
-/// The Windows tool's settings in the search bar. The snap zones can only be changed while snapping by dragging is on.
+/// The Windows tool's settings in the search bar, in the settings window's order: the shortcuts, then snapping. The snap zones can only be changed while snapping by dragging is on.
 enum WindowsCatalog {
-    static func settings() -> [Setting] {
-        [
+    static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
+        shortcuts(systemShortcuts: systemShortcuts) + [
             toggle("Snap windows by dragging them to the screen edges", key: SnappingSettings.snapsByDraggingKey, isOn: SnappingSettings.snapsByDragging),
             toggle("Restore a window's size when dragged out of a snap", key: SnappingSettings.restoresSizeWhenUnsnappedKey, isOn: SnappingSettings.restoresSizeWhenUnsnapped),
             toggle("Maximize or restore a window by double-clicking its title bar", key: SnappingSettings.maximizesOnTitleBarDoubleClickKey, isOn: SnappingSettings.maximizesOnTitleBarDoubleClick, warning: doubleClickWarning),
@@ -24,6 +24,17 @@ enum WindowsCatalog {
                 set: { UserDefaults.standard.set($0, forKey: SnappingSettings.gapKey) }
             ))
         )
+    }
+
+    private static func shortcuts(systemShortcuts: Set<KeyCombo>) -> [Setting] {
+        let combos = WindowShortcuts.shared.all
+        return WindowCommand.allCases.map { command in
+            let combo = combos[command]
+            let clashes = combo.map { Tool.windows.clashes(with: Shortcut(combo: $0, action: command.title), systemShortcuts: systemShortcuts) } ?? []
+            return .shortcut(command.title, id: command.savedKey, toolName: Tool.windows.name, combo: combo, canClear: true, clashes: clashes) { combo in
+                WindowShortcuts.shared.set(combo, for: command)
+            }
+        }
     }
 
     private static var doubleClickWarning: String? {

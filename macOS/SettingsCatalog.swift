@@ -1,16 +1,16 @@
 import LauncherKit
 
-/// Every setting the search bar can show, in the order of the settings window's sidebar, read afresh each time so every row holds its current value.
+/// Every setting the search bar can show, in the order of the settings window's sidebar, read afresh each time so every row holds its current value. Shortcuts are checked for clashes against the system shortcuts passed in, so macOS is asked only once.
 enum SettingsCatalog {
-    static func settings() -> [Setting] {
-        Tool.allCases.flatMap { tool in
-            (tool.canBeTurnedOff ? [toolSwitch(for: tool)] : []) + settings(of: tool)
+    static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
+        GeneralCatalog.settings(systemShortcuts: systemShortcuts) + Tool.allCases.flatMap { tool in
+            (tool.canBeTurnedOff ? [toolSwitch(for: tool)] : []) + settings(of: tool, systemShortcuts: systemShortcuts)
         }
     }
 
-    private static func settings(of tool: Tool) -> [Setting] {
+    private static func settings(of tool: Tool, systemShortcuts: Set<KeyCombo>) -> [Setting] {
         switch tool {
-        case .windows: WindowsCatalog.settings()
+        case .windows: WindowsCatalog.settings(systemShortcuts: systemShortcuts)
         case .mouse: MouseCatalog.settings()
         default: []
         }

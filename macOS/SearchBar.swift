@@ -19,6 +19,7 @@ final class SearchBar {
 
     func hide() {
         guard panel.isVisible, !isPresentingModal else { return }
+        model.settings.finishEditing()
         panel.orderOut(nil)
         if NSApp.isActive, NSApp.activationPolicy() == .accessory { NSApp.hide(nil) }
     }
@@ -55,7 +56,7 @@ final class SearchBar {
         case kVK_DownArrow: model.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.openSelected()
         case kVK_Escape: if !model.leaveArguments(), !model.goBack() { hide() }
-        case kVK_Delete: guard model.field == .query, model.query.isEmpty, model.goBack() else { return false }
+        case kVK_Delete: guard model.field == .query, model.query.isEmpty, model.clearSelectedShortcut() || model.goBack() else { return false }
         default: return false
         }
         return true

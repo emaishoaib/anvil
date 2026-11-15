@@ -20,6 +20,7 @@ struct SettingsList: View {
                             SettingRowView(
                                 setting: setting,
                                 isSelected: model.isSelected(setting),
+                                isRecording: model.isRecording(setting),
                                 adjustedValue: model.adjustedValue(of: setting),
                                 drag: { model.drag(setting, to: $0) },
                                 finishDragging: model.finishAdjusting
@@ -45,6 +46,7 @@ private struct SettingRowView: View {
 
     let setting: Setting
     let isSelected: Bool
+    let isRecording: Bool
     let adjustedValue: Double?
     let drag: @MainActor (Double) -> Void
     let finishDragging: @MainActor () -> Void
@@ -61,6 +63,8 @@ private struct SettingRowView: View {
             case .number(let number):
                 NumberControl(number: number, adjustedValue: adjustedValue, drag: drag, finishDragging: finishDragging)
                     .disabled(setting.isDisabled)
+            case .shortcut(let combo, _, _):
+                ShortcutControl(combo: combo, isRecording: isRecording)
             }
         }
         .opacity(setting.isDisabled ? Self.disabledOpacity : 1)
@@ -122,6 +126,23 @@ private struct ChosenOption: View {
                 .font(.system(size: 10, weight: .semibold))
         }
         .foregroundStyle(.secondary)
+    }
+}
+
+private struct ShortcutControl: View {
+    let combo: KeyCombo?
+    let isRecording: Bool
+
+    var body: some View {
+        if isRecording {
+            Text("Type a shortcut…")
+                .foregroundStyle(.tint)
+        } else if let combo {
+            KeyCaps(combo: combo)
+        } else {
+            Text("Record Shortcut")
+                .foregroundStyle(.secondary)
+        }
     }
 }
 

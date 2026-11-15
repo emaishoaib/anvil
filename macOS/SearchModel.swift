@@ -36,7 +36,7 @@ import Observation
     }
 
     func reset() {
-        settings.finishAdjusting()
+        settings.finishEditing()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         arguments = LinkArguments()
@@ -110,11 +110,15 @@ import Observation
     }
 
     func open(_ setting: Setting) {
-        settings.finishAdjusting()
+        settings.finishEditing()
         settings.select(setting)
         guard case .choice = setting.row, !setting.isDisabled else { return settings.activate(setting) }
         actionPanel = ActionPanel(subject: .settingChoices(setting))
         field = .actionFilter
+    }
+
+    func clearSelectedShortcut() -> Bool {
+        mode == .settings && settings.clearSelectedShortcut()
     }
 
     func goBack() -> Bool {
@@ -131,7 +135,7 @@ import Observation
             mode = .launcher
             query = previousQuery
         case .settings:
-            settings.finishAdjusting()
+            settings.finishEditing()
             mode = .launcher
             query = ""
         }
