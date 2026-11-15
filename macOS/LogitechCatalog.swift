@@ -10,9 +10,15 @@ enum LogitechCatalog {
         let dpi = logitech.devices.lazy.compactMap { logitech.dpis[$0.id] }.first
         let hasRatchet = mice.contains { $0.smartShiftFeature != nil }
         let hasThumbWheel = mice.contains { $0.thumbWheelFeature != nil }
-        return (dpi.map(dpiSettings(for:)) ?? [])
+        return logitech.devices.map { device in deviceInfo(for: device, battery: logitech.batteries[device.id]) }
+            + (dpi.map(dpiSettings(for:)) ?? [])
             + (hasRatchet ? [disengageSpeed] : [])
             + (hasThumbWheel ? thumbWheel : [])
+    }
+
+    private static func deviceInfo(for device: LogitechDevice, battery: BatteryStatus?) -> Setting {
+        let charge = battery.map { $0.isPluggedIn ? "\($0.percentage)%, charging" : "\($0.percentage)%" }
+        return .info(device.name, id: "logitech.\(device.id)", toolName: Tool.mouse.name, subtitle: device.connection, value: charge, keywords: ["battery", "logitech"])
     }
 
     private static func dpiSettings(for dpi: SensorDPI) -> [Setting] {

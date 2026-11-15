@@ -28,7 +28,7 @@ struct SearchBarView: View {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })
                     .overlay(alignment: actionPanelAlignment) { actionPanel }
-                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
             } else {
                 Divider()
                 SearchResults(model: model)

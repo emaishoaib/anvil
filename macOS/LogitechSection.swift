@@ -12,7 +12,7 @@ struct LogitechSection: View {
         }
         ForEach(logitech.devices) { device in
             Section {
-                LabeledContent("Connection", value: Self.connection(of: device))
+                LabeledContent("Connection", value: device.connection)
                 if let dpi = logitech.dpis[device.id] {
                     DPIRow(dpi: dpi)
                 }
@@ -26,11 +26,6 @@ struct LogitechSection: View {
                 DeviceHeader(device: device, battery: logitech.batteries[device.id])
             }
         }
-    }
-
-    private static func connection(of device: LogitechDevice) -> String {
-        let kind = device.kind?.name ?? "Device"
-        return device.isOnAReceiver ? "\(kind), through a receiver" : "\(kind), connected directly"
     }
 }
 

@@ -23,6 +23,7 @@ import Observation
     private(set) var sections: [Section] = []
     private(set) var selected = 0
     private(set) var adjustment: Adjustment?
+    private(set) var message: String?
     private var shown: [Setting] = []
     @ObservationIgnored private var settings: [Setting] = []
     @ObservationIgnored private var query = ""
@@ -53,6 +54,7 @@ import Observation
     }
 
     func reload() {
+        message = nil
         systemShortcuts = SystemShortcuts.enabled()
         rebuild()
     }
@@ -83,9 +85,16 @@ import Observation
             adjustment = Adjustment(settingID: setting.id, value: number.value)
         case .shortcut:
             recording.start(for: setting.id) { [weak self] combo in self?.typed(combo) }
-        case .choice:
+        case .action(let run):
+            message = run()
+            refresh()
+        case .choice, .info:
             break
         }
+    }
+
+    func dismissMessage() {
+        if message != nil { message = nil }
     }
 
     func clearSelectedShortcut() -> Bool {

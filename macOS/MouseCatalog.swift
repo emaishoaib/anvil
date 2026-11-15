@@ -9,6 +9,8 @@ enum MouseCatalog {
             brakeFrame,
             MouseSettingRows.number("Distance of each wheel click", id: "mouse.pointsPerTick", \.pointsPerTick, in: ScrollingSettings.pointsPerTickRange, step: 5) { "\(Int($0)) pt" },
             MouseSettingRows.number("Acceleration", id: "mouse.acceleration", \.acceleration, in: ScrollingSettings.accelerationRange, step: 0.05) { "\(Int(($0 * 100).rounded()))%" },
+            .info("Shift scrolls sideways", id: "mouse.shiftScrollsSideways", toolName: Tool.mouse.name),
+            .info("Control zooms in and out", id: "mouse.controlZooms", toolName: Tool.mouse.name),
             MouseSettingRows.choice("Scroll speed while holding Command", id: "mouse.commandScrollSpeed", \.commandScrollSpeed, among: CommandScrollSpeed.allCases) { "\($0.name) the speed" },
         ] + LogitechCatalog.settings()
     }

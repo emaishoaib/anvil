@@ -10,9 +10,17 @@ enum SettingsCatalog {
 
     private static func settings(of tool: Tool, systemShortcuts: Set<KeyCombo>) -> [Setting] {
         switch tool {
+        case .switcher: switcherShortcuts
+        case .launcher: LauncherCatalog.settings()
         case .windows: WindowsCatalog.settings(systemShortcuts: systemShortcuts)
         case .mouse: MouseCatalog.settings()
         default: []
+        }
+    }
+
+    private static var switcherShortcuts: [Setting] {
+        Tool.switcher.shortcuts.map { shortcut in
+            .info(shortcut.action, id: "switcher.\(shortcut.keys)", toolName: Tool.switcher.name, value: shortcut.keys, keywords: ["shortcut"])
         }
     }
 

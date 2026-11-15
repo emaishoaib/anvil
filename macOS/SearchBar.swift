@@ -45,6 +45,7 @@ final class SearchBar {
     }
 
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        model.settings.dismissMessage()
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }

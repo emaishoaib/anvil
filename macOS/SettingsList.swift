@@ -65,6 +65,15 @@ private struct SettingRowView: View {
                     .disabled(setting.isDisabled)
             case .shortcut(let combo, _, _):
                 ShortcutControl(combo: combo, isRecording: isRecording)
+            case .info(let value):
+                if let value {
+                    Text(value)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            case .action:
+                EmptyView()
             }
         }
         .opacity(setting.isDisabled ? Self.disabledOpacity : 1)
