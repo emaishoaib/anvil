@@ -12,16 +12,24 @@ final class SearchBar {
     private let model = SearchModel()
     private lazy var content = NSHostingView(rootView: SearchBarView(model: model))
     private var isPresentingModal = false
+    private var hiddenAt: ContinuousClock.Instant?
 
     func toggle() {
         panel.isVisible ? hide() : show()
     }
 
-    func hide() {
+    /// Hides the search bar. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows.
+    func hide(remembering: Bool = true) {
         guard panel.isVisible, !isPresentingModal else { return }
         model.settings.finishEditing()
+        hiddenAt = remembering ? .now : nil
         panel.orderOut(nil)
         if NSApp.isActive { NSApp.hide(nil) }
+    }
+
+    private var remembersLastState: Bool {
+        guard let hiddenAt else { return false }
+        return ContinuousClock.now - hiddenAt < SearchMemory.current.duration
     }
 
     func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {
@@ -140,7 +148,7 @@ final class SearchBar {
     private func show() {
         guard let screen = NSScreen.main, let background = panel.contentView else { return }
         CurrencyRatesStore.shared.refreshIfStale()
-        model.reset()
+        if remembersLastState { model.reopen() } else { model.reset() }
         if content.superview == nil {
             content.frame = background.bounds
             content.autoresizingMask = [.width, .height]

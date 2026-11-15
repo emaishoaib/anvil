@@ -55,6 +55,10 @@ import Observation
         timesOpened += 1
     }
 
+    func reopen() {
+        timesOpened += 1
+    }
+
     func moveSelection(by offset: Int) {
         if mode == .settings { return settings.moveSelection(by: offset) }
         if case .uninstallReview = mode {
@@ -334,7 +338,7 @@ import Observation
         Task {
             guard await review.moveTickedToTrash() else { return }
             SystemSounds.playMoveToTrash()
-            SearchBar.shared.hide()
+            SearchBar.shared.hide(remembering: false)
         }
         return true
     }

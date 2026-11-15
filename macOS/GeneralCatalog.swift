@@ -1,9 +1,11 @@
-/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General", as in the settings window's sidebar. The folder panel opens through the search bar, which stays open behind it.
+import LauncherKit
+
+/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General", as in the settings window's sidebar. The search bar's own settings are its shortcut and how long it remembers where you left it. The folder panel opens through the search bar, which stays open behind it.
 enum GeneralCatalog {
     static let name = "General"
 
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
-        Setting.subgroup("Search Bar", [searchBarShortcut(systemShortcuts: systemShortcuts)])
+        Setting.subgroup("Search Bar", [searchBarShortcut(systemShortcuts: systemShortcuts), searchMemory])
             + Setting.subgroup("Settings Folder", settingsFolder)
     }
 
@@ -13,6 +15,14 @@ enum GeneralCatalog {
         return .shortcut("Open the search bar", id: "launcher.shortcut", toolName: name, combo: combo, canClear: false, clashes: clashes) { combo in
             if let combo { LauncherKeys.shared.setOpenSearchBarCombo(combo) }
         }
+    }
+
+    private static var searchMemory: Setting {
+        let choices = SearchMemory.allCases
+        return Setting(
+            entry: SettingEntry(id: "launcher.searchMemory", title: "Remember where you left off for", toolName: name, keywords: ["restore", "last search"]),
+            row: .choice(selected: choices.firstIndex(of: .current) ?? 0, options: choices.map(\.name), pick: { SearchMemory.current = choices[$0] })
+        )
     }
 
     private static var settingsFolder: [Setting] {
