@@ -15,7 +15,9 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
 
     var isOnByDefault: Bool { self == .switcher || self == .launcher }
 
-    var isOn: Bool { UserDefaults.standard.bool(forKey: isOnKey) }
+    var canBeTurnedOff: Bool { self != .launcher }
+
+    var isOn: Bool { !canBeTurnedOff || UserDefaults.standard.bool(forKey: isOnKey) }
 
     static func registerDefaults() {
         UserDefaults.standard.register(defaults: Dictionary(uniqueKeysWithValues: allCases.map { ($0.isOnKey, $0.isOnByDefault) }))

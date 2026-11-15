@@ -14,8 +14,10 @@ struct ToolPage: View {
             Section {
                 ToolHeader(tool: tool)
             }
-            Section {
-                Toggle("Use \(tool.name)", isOn: $isOn)
+            if tool.canBeTurnedOff {
+                Section {
+                    Toggle("Use \(tool.name)", isOn: $isOn)
+                }
             }
             if tool == .windows {
                 WindowShortcutsSection()
