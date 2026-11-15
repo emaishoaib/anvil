@@ -4,6 +4,7 @@ enum SearchMode: Equatable {
     case launcher
     case defineWord
     case uninstallApp
+    case uninstallReview(query: String)
     case wordEntry(Word, query: String)
     case quickLinkForm(QuickLinkFormKind, query: String)
     case settings
@@ -15,6 +16,7 @@ enum SearchMode: Equatable {
         case .launcher: "Search for apps and quick links…"
         case .defineWord: "Search word…"
         case .uninstallApp: "Search apps to uninstall…"
+        case .uninstallReview: "Search files…"
         case .settings: "Search settings…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm: ""
         }

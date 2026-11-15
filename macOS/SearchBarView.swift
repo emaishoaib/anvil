@@ -32,6 +32,10 @@ struct SearchBarView: View {
                 Divider()
                 KeySwapForm(draft: $model.keySwapDraft)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
+            } else if case .uninstallReview = model.mode, let review = model.review {
+                Divider()
+                UninstallReviewList(review: review, query: model.query)
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary)
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })

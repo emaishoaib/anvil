@@ -16,6 +16,7 @@ import Observation
     var ruleDraft = RuleDraft()
     var keySwapDraft = KeySwapDraft()
     private(set) var actionPanel: ActionPanel?
+    private(set) var review: UninstallReview?
     private(set) var timesOpened = 0
     let settings = SettingsBarModel()
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
@@ -42,6 +43,7 @@ import Observation
         settings.finishEditing()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
+        review = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -55,6 +57,10 @@ import Observation
 
     func moveSelection(by offset: Int) {
         if mode == .settings { return settings.moveSelection(by: offset) }
+        if case .uninstallReview = mode {
+            review?.moveSelection(by: offset, matching: query)
+            return
+        }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -81,6 +87,10 @@ import Observation
             WordLookup.openInDictionary(word)
             return SearchBar.shared.hide()
         }
+        if case .uninstallReview = mode {
+            review?.toggleSelected(matching: query)
+            return
+        }
         guard results.indices.contains(selected) else { return }
         open(results[selected])
     }
@@ -91,7 +101,7 @@ import Observation
             copy(answer.copyText)
             SearchBar.shared.hide()
         case .app(let app):
-            guard mode != .uninstallApp else { return NSSound.beep() }
+            guard mode != .uninstallApp else { return showReview(of: app) }
             launch(app)
             SearchBar.shared.hide()
         case .command(let command):
@@ -151,6 +161,10 @@ import Observation
         case .defineWord, .uninstallApp:
             mode = .launcher
             query = ""
+        case .uninstallReview(let previousQuery):
+            review = nil
+            mode = .uninstallApp
+            query = previousQuery
         case .wordEntry(_, let wordQuery):
             mode = .defineWord
             query = wordQuery
@@ -270,6 +284,9 @@ import Observation
         case .uninstallApp:
             let otherApps = AppCatalog.shared.apps.filter { $0.url != Bundle.main.bundleURL }
             results = LauncherSearch.removableApps(matching: query, in: otherApps)
+        case .uninstallReview:
+            results = []
+            review?.select(0)
         case .defineWord:
             let candidates = isQueryEmpty ? SavedRecentWords.load().words : WordLookup.candidates(for: query)
             wordLookup = Task {
@@ -306,6 +323,15 @@ import Observation
             mode = .uninstallApp
         }
         query = ""
+    }
+
+    private func showReview(of app: InstalledApp) {
+        let review = UninstallReview(app: app)
+        self.review = review
+        mode = .uninstallReview(query: query)
+        query = ""
+        let otherAppURLs = AppCatalog.shared.apps.map(\.url).filter { $0 != app.url }
+        Task { await review.load(otherAppURLs: otherAppURLs) }
     }
 
     private var availableCommands: [LauncherCommand] {

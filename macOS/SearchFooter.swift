@@ -26,6 +26,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .uninstallApp)
                     Text(LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
+                case .uninstallReview:
+                    CommandIcon(command: .uninstallApp)
+                    Text(message ?? LauncherCommand.uninstallApp.name)
+                        .foregroundStyle(.secondary)
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)
                     Text(word.text)
@@ -80,7 +84,8 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
-        if mode == .uninstallApp { return nil }
+        if mode == .uninstallApp { return selected == nil ? nil : "Review Files" }
+        if case .uninstallReview = mode { return "Tick or Untick" }
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         if case .keySwapForm = mode { return "Add Key Swap" }

@@ -8,10 +8,24 @@ final class TemporaryLibrary {
     init(_ paths: String...) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         for path in paths {
-            let file = url.appending(path: path)
-            try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-            FileManager.default.createFile(atPath: file.path(percentEncoded: false), contents: nil)
+            try write(byteCount: 0, to: path)
         }
+    }
+
+    func write(byteCount: Int, to path: String) throws {
+        let file = url.appending(path: path)
+        try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(count: byteCount).write(to: file)
+    }
+
+    /// Makes an app bundle in an `Applications` folder beside the Library folders, with an Info.plist holding the bundle ID when there is one.
+    func addApp(named name: String, bundleID: String?) throws -> URL {
+        let app = url.appending(path: "Applications/\(name).app", directoryHint: .isDirectory)
+        let info = app.appending(path: "Contents/Info.plist")
+        try FileManager.default.createDirectory(at: info.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let plist = bundleID.map { ["CFBundleIdentifier": $0] } ?? [:]
+        try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0).write(to: info)
+        return app
     }
 
     deinit {
