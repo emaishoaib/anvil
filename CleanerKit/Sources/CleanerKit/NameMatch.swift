@@ -2,15 +2,20 @@
 ///
 /// Only the folders where apps make folders under plain names are checked this way. Names are compared ignoring letter case and spaces, so an app called `Visual Notes` also finds `VisualNotes`.
 ///
-/// Three rules keep this from catching another app's files:
+/// Four rules keep this from catching another app's files or the user's own:
 /// - Apple's own apps are never matched this way, and no name starting with `com.apple.` ever is
 /// - a vendor's folder only belongs to the app when no other installed app comes from the same vendor, because the folder may hold that app's files too
 /// - a bundle ID with fewer than three parts has no vendor to match
+/// - in the home folder only the app's own name counts, and the folders macOS makes there, such as Documents and Downloads, never match
 enum NameMatch {
+    private static let standardHomeFolders: Set<String> = ["applications", "desktop", "documents", "downloads", "library", "movies", "music", "pictures", "public"]
+
     static func name(_ name: String, belongsTo app: AppIdentity, in folder: SearchFolder, otherInstalledBundleIDs: Set<String>) -> Bool {
         guard folder.holdsFoldersNamedAfterApps, !app.isApple, !name.lowercased().hasPrefix("com.apple.") else { return false }
+        guard folder != .home || !standardHomeFolders.contains(name.lowercased()) else { return false }
         let squashedName = squashed(name)
         let isNamedAfterApp = squashedName == squashed(app.name)
+        guard folder.holdsFoldersNamedAfterVendors else { return isNamedAfterApp }
         let isNamedAfterVendor = app.vendor.map { vendor in
             squashedName == vendor && !isShared(vendor, by: otherInstalledBundleIDs, besides: app)
         } ?? false

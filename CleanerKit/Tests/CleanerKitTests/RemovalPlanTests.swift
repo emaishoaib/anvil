@@ -83,6 +83,14 @@ struct RemovalPlanTests {
         #expect(items.map(\.startsTicked) == [true, true, true])
     }
 
+    @Test func aLeftoverInTheHomeFolderStartsUnticked() throws {
+        let library = try TemporaryLibrary("Caches/com.acme.example/cache.db", "Home/Example/files/readme")
+        let app = try library.addApp(named: "Example", bundleID: "com.acme.example")
+        let items = RemovalPlan.items(forAppAt: app, in: library.roots, otherAppURLs: [])
+        #expect(items.map { library.relativePath(of: $0.url) }.dropFirst() == ["Caches/com.acme.example", "Home/Example"])
+        #expect(items.map(\.startsTicked) == [true, true, false])
+    }
+
     @Test func aMissingFileMeasuresZero() {
         #expect(DiskSize.bytes(at: URL(filePath: "/nonexistent/\(UUID().uuidString)")) == 0)
     }

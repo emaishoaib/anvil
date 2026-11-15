@@ -50,4 +50,20 @@ struct NameMatchTests {
         let library = try TemporaryLibrary("Application Support/com.apple.sharedfilelist/data")
         #expect(library.leftoverPaths(of: "com.acme.example", named: "com.apple.sharedfilelist").isEmpty)
     }
+
+    @Test func aFolderInTheHomeFolderNamedAfterTheAppIsFound() throws {
+        let library = try TemporaryLibrary("Home/Visual Notes/files/readme", "Home/Projects/notes.txt")
+        #expect(library.leftoverPaths(of: "com.acme.notes", named: "VisualNotes") == ["Home/Visual Notes"])
+    }
+
+    @Test func aFolderInTheHomeFolderNamedAfterTheVendorIsLeftAlone() throws {
+        let library = try TemporaryLibrary("Home/Acme/data.db")
+        #expect(library.leftoverPaths(of: "com.acme.example").isEmpty)
+    }
+
+    @Test func theFoldersMacOSMakesInTheHomeFolderNeverMatch() throws {
+        let library = try TemporaryLibrary("Home/Documents/report.pdf", "Home/Downloads/file.zip")
+        #expect(library.leftoverPaths(of: "com.acme.documents", named: "Documents").isEmpty)
+        #expect(library.leftoverPaths(of: "com.acme.downloads", named: "Downloads").isEmpty)
+    }
 }
