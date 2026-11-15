@@ -42,6 +42,7 @@ import Observation
 
     func reset() {
         settings.finishEditing()
+        LeftoverIndexStore.shared.forget()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         review = nil
