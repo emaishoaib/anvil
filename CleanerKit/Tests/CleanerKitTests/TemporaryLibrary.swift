@@ -39,9 +39,10 @@ final class TemporaryLibrary {
         return app
     }
 
-    /// The path of a file inside this Library, such as `Caches/com.example.app`.
+    /// The path of a file inside this Library, such as `Caches/com.example.app`. Both paths are resolved first, because a walk of the Library gives back its `/var` paths as `/private/var`.
     func relativePath(of file: URL) -> String {
-        String(file.path(percentEncoded: false).dropFirst(url.path(percentEncoded: false).count))
+        let libraryPath = url.resolvingSymlinksInPath().path(percentEncoded: false)
+        return String(file.resolvingSymlinksInPath().path(percentEncoded: false).dropFirst(libraryPath.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
     }
 
     private func writeInfo(_ keys: [String: String?], inBundle bundle: URL) throws {

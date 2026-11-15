@@ -29,12 +29,11 @@ struct DiskWalkTests {
         #expect(visitCount == 0)
     }
 
-    /// The paths the walk visits inside the Library, sorted. The step for each one is decided from its path, and the Library's path is resolved first, because the walk gives back `/var` paths as `/private/var`.
+    /// The paths the walk visits inside the Library, sorted. The step for each one is decided from its path.
     private func visitedPaths(in library: TemporaryLibrary, step: (String) -> DiskWalk.Step = { _ in .goInside }) -> [String] {
-        let libraryPath = library.url.resolvingSymlinksInPath().path(percentEncoded: false)
         var visited: [String] = []
         DiskWalk.walk([library.url]) { item in
-            let path = String(item.resolvingSymlinksInPath().path(percentEncoded: false).dropFirst(libraryPath.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            let path = library.relativePath(of: item)
             visited.append(path)
             return step(path)
         }
