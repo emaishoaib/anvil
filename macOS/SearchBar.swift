@@ -154,6 +154,7 @@ final class SearchBar {
             content.autoresizingMask = [.width, .height]
             background.addSubview(content)
         }
+        content.layoutSubtreeIfNeeded()
         let size = content.fittingSize
         let top = screen.frame.maxY - screen.frame.height * Self.topShare
         panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
