@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 import Testing
 @testable import CleanerKit
 
@@ -32,6 +33,26 @@ struct DiskWalkTests {
             return .goInside
         }
         #expect(visitCount == 0)
+    }
+
+    @Test func walkingSideBySideVisitsWhatWalkingInOneGoVisits() throws {
+        let library = try TemporaryLibrary("Users/me/Library/Caches/Example/data.db", "Users/me/Library/Logs/Example.log", "Users/me/notes.txt", "Applications/Example.app/Contents/Info.plist")
+        let visited = Mutex<[URL]>([])
+        DiskWalk.walkSideBySide([library.url]) { item in
+            visited.withLock { $0.append(item.url) }
+            return .goInside
+        }
+        #expect(visited.withLock { $0 }.map(library.relativePath(of:)).sorted() == visitedPaths(in: library))
+    }
+
+    @Test func walkingSideBySideStaysOutsideABundleOrAFolderTheVisitorStaysOutsideOfAtAnyLevel() throws {
+        let library = try TemporaryLibrary("Users/me/Library/Example.app/Contents/Info.plist", "Users/me/Library/Caches/Example/data.db", "Users/me/Library/Logs/Other.log")
+        let visited = Mutex<[URL]>([])
+        DiskWalk.walkSideBySide([library.url]) { item in
+            visited.withLock { $0.append(item.url) }
+            return item.name == "Caches" ? .stayOutside : .goInside
+        }
+        #expect(visited.withLock { $0 }.map(library.relativePath(of:)).sorted() == ["Users", "Users/me", "Users/me/Library", "Users/me/Library/Caches", "Users/me/Library/Example.app", "Users/me/Library/Logs", "Users/me/Library/Logs/Other.log"])
     }
 
     /// The paths the walk visits inside the Library, sorted. The step for each one is decided from its path.

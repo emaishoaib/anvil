@@ -1,6 +1,6 @@
 /// The words of many apps' bundle IDs and names, filed under their first word, so a name can be checked against every app at once by looking up each of its words a single time.
-struct AppWordIndex {
-    private struct Entry {
+struct AppWordIndex: Sendable {
+    private struct Entry: Sendable {
         let app: AppIdentity
         let words: [String]
     }

@@ -13,6 +13,7 @@ public enum DiskWalk {
     public struct Item {
         public let name: String
         public let isFolder: Bool
+        fileprivate let level: Int
         fileprivate let path: UnsafeMutablePointer<CChar>
 
         public var url: URL {
@@ -25,17 +26,34 @@ public enum DiskWalk {
 
     private static let bundleExtensions: Set<String> = ["app", "appex", "bundle", "framework", "kext", "plugin", "sdk", "xcframework", "xpc"]
     private static let options = FTS_PHYSICAL | FTS_NOCHDIR | FTS_XDEV | FTS_NOSTAT
+    private static let shareOutLevel = 3
 
     public static func walk(_ folders: [URL], visit: (Item) -> Step) {
+        walk(folders, stoppingAtLevel: nil, visit: visit) { _ in }
+    }
+
+    /// Walks the folders like `walk`, but on several threads at once, so the visitor is called from several threads at once. The top few levels are walked first, and each folder three levels down is then walked on its own, so a large folder such as the home folder's Library is shared out between threads.
+    public static func walkSideBySide(_ folders: [URL], visit: @Sendable (Item) -> Step) {
+        var reachedFolders: [URL] = []
+        walk(folders, stoppingAtLevel: shareOutLevel, visit: visit) { reachedFolders.append($0) }
+        let shareOutFolders = reachedFolders
+        DispatchQueue.concurrentPerform(iterations: shareOutFolders.count) { index in
+            walk([shareOutFolders[index]], visit: visit)
+        }
+    }
+
+    /// Walks the folders, leaving each folder it would go into at the given level unopened and handing it to `reachedStop` instead.
+    private static func walk(_ folders: [URL], stoppingAtLevel stopLevel: Int?, visit: (Item) -> Step, reachedStop: (URL) -> Void) {
         let paths = folders.map { strdup($0.path(percentEncoded: false)) }
         defer { paths.forEach { free($0) } }
         guard let stream = (paths + [nil]).withUnsafeBufferPointer({ fts_open($0.baseAddress, options, nil) }) else { return }
         defer { fts_close(stream) }
         while let entry = fts_read(stream) {
             guard let item = item(at: entry) else { continue }
-            if visit(item) == .stayOutside || (item.isFolder && isSealed(item)) {
-                _ = fts_set(stream, entry, FTS_SKIP)
-            }
+            let staysOutside = visit(item) == .stayOutside || (item.isFolder && isSealed(item))
+            let isStop = item.isFolder && item.level == stopLevel
+            if isStop, !staysOutside { reachedStop(item.url) }
+            if staysOutside || isStop { _ = fts_set(stream, entry, FTS_SKIP) }
         }
     }
 
@@ -44,7 +62,7 @@ public enum DiskWalk {
         let info = Int32(entry.pointee.fts_info)
         guard entry.pointee.fts_level > 0, info != FTS_DP, info != FTS_ERR, let path = entry.pointee.fts_path else { return nil }
         let nameStart = path + Int(entry.pointee.fts_pathlen) - Int(entry.pointee.fts_namelen)
-        return Item(name: String(cString: nameStart), isFolder: info == FTS_D, path: path)
+        return Item(name: String(cString: nameStart), isFolder: info == FTS_D, level: Int(entry.pointee.fts_level), path: path)
     }
 
     /// Whether the walk stays outside a folder whatever the visitor says, because it is a bundle or another package. Only a folder whose name has an extension is asked about, so most folders cost nothing extra.
