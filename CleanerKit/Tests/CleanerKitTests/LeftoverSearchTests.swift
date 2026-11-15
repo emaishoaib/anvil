@@ -23,6 +23,11 @@ struct LeftoverSearchTests {
         ])
     }
 
+    @Test func aNameWithAnUnderscoreAfterTheBundleIDIsFound() throws {
+        let library = try TemporaryLibrary("Preferences/com.example.app_stats.sqlite3", "Preferences/com.example.app-stats.sqlite3")
+        #expect(library.leftoverPaths(of: "com.example.app") == ["Preferences/com.example.app_stats.sqlite3"])
+    }
+
     @Test func aNameThatOnlyStartsWithTheSameLettersIsLeftAlone() throws {
         let library = try TemporaryLibrary("Caches/com.example.application/cache.db", "Preferences/com.example.apple.plist")
         #expect(library.leftoverPaths(of: "com.example.app").isEmpty)
