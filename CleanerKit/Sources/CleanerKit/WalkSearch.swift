@@ -8,10 +8,11 @@ enum WalkSearch {
         let index = AppWordIndex(apps: apps)
         var found: [AppIdentity: [URL]] = [:]
         DiskWalk.walk(folders) { item in
-            let owners = index.owners(of: item.lastPathComponent)
+            let owners = index.owners(of: item.name)
             guard !owners.isEmpty else { return .goInside }
+            let url = item.url
             for app in owners {
-                found[app, default: []].append(item)
+                found[app, default: []].append(url)
             }
             return .stayOutside
         }

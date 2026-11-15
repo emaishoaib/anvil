@@ -13,6 +13,11 @@ struct DiskWalkTests {
         #expect(visitedPaths(in: library) == ["Applications", "Applications/Example.app", "SDKs", "SDKs/MacOSX.sdk"])
     }
 
+    @Test func aPackageThatIsNotABundleIsVisitedButNotWhatIsInsideIt() throws {
+        let library = try TemporaryLibrary("Pictures/Photos Library.photoslibrary/database/Photos.sqlite")
+        #expect(visitedPaths(in: library) == ["Pictures", "Pictures/Photos Library.photoslibrary"])
+    }
+
     @Test func aFolderTheVisitorStaysOutsideOfIsVisitedButNotWhatIsInsideIt() throws {
         let library = try TemporaryLibrary("Caches/Example/data.db", "Logs/Example.log")
         let visited = visitedPaths(in: library) { $0 == "Caches" ? .stayOutside : .goInside }
@@ -33,7 +38,7 @@ struct DiskWalkTests {
     private func visitedPaths(in library: TemporaryLibrary, step: (String) -> DiskWalk.Step = { _ in .goInside }) -> [String] {
         var visited: [String] = []
         DiskWalk.walk([library.url]) { item in
-            let path = library.relativePath(of: item)
+            let path = library.relativePath(of: item.url)
             visited.append(path)
             return step(path)
         }
