@@ -1,19 +1,21 @@
 import Foundation
 
-/// The app whose leftovers are searched for: its bundle ID, the name Finder shows for it, the name of the program inside it that macOS runs, the bundle IDs of the helpers it carries inside itself, and the app groups it shares files through.
+/// The app whose leftovers are searched for: its bundle ID, the name Finder shows for it, the name of the program inside it that macOS runs, the bundle IDs of the helpers it carries inside itself, and the app groups it shares files through. Lone app groups are the ones only a single bundle inside the app lists, so they may be shared with a program outside it.
 public struct AppIdentity: Hashable, Sendable {
     public let bundleID: String
     public let name: String
     public let executableName: String?
     public let helperBundleIDs: Set<String>
     public let appGroups: Set<String>
+    public let loneAppGroups: Set<String>
 
-    public init(bundleID: String, name: String, executableName: String? = nil, helperBundleIDs: Set<String> = [], appGroups: Set<String> = []) {
+    public init(bundleID: String, name: String, executableName: String? = nil, helperBundleIDs: Set<String> = [], appGroups: Set<String> = [], loneAppGroups: Set<String> = []) {
         self.bundleID = bundleID
         self.name = name
         self.executableName = executableName
         self.helperBundleIDs = helperBundleIDs
         self.appGroups = appGroups
+        self.loneAppGroups = loneAppGroups
     }
 
     /// Reads the bundle ID and the executable's name from the app's Info.plist, and takes the name from its file name. An app without a bundle ID gives nothing. Helpers and app groups are not read here, because finding them means looking through the whole app.
@@ -23,11 +25,11 @@ public struct AppIdentity: Hashable, Sendable {
         self.init(bundleID: bundleID, name: url.deletingPathExtension().lastPathComponent, executableName: executableName)
     }
 
-    func with(executableName: String?, helperBundleIDs: Set<String>, appGroups: Set<String>) -> AppIdentity {
-        AppIdentity(bundleID: bundleID, name: name, executableName: executableName, helperBundleIDs: helperBundleIDs, appGroups: appGroups)
+    func with(executableName: String?, helperBundleIDs: Set<String>, appGroups: AppGroups) -> AppIdentity {
+        AppIdentity(bundleID: bundleID, name: name, executableName: executableName, helperBundleIDs: helperBundleIDs, appGroups: appGroups.sharedWithinApp, loneAppGroups: appGroups.lone)
     }
 
-    /// The bundle IDs and app groups the Library may name the app's files after.
+    /// The bundle IDs and app groups the Library may name the app's files after, leaving out the lone app groups.
     var identifiers: Set<String> { helperBundleIDs.union(appGroups).union([bundleID]) }
 
     var isApple: Bool { bundleID.lowercased().hasPrefix("com.apple.") }

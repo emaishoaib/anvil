@@ -108,6 +108,28 @@ struct LeftoverSearchTests {
         #expect(roots.userTemp?.path(percentEncoded: false).hasSuffix("/T/") == true)
     }
 
+    @Test func aFolderFoundOnlyThroughALoneGroupIsMarkedAsMaybeShared() throws {
+        let library = try TemporaryLibrary(
+            "Group Containers/group.com.acme.sibling/data.db",
+            "Group Containers/group.com.acme.shared/data.db",
+            "Preferences/com.acme.example.plist"
+        )
+        let app = AppIdentity(bundleID: "com.acme.example", name: "Example", appGroups: ["group.com.acme.shared"], loneAppGroups: ["group.com.acme.sibling"])
+        let leftovers = LeftoverSearch.leftovers(of: app, in: library.roots, otherInstalledBundleIDs: [])
+        #expect(leftovers.map { library.relativePath(of: $0.url) } == [
+            "Preferences/com.acme.example.plist",
+            "Group Containers/group.com.acme.shared",
+            "Group Containers/group.com.acme.sibling",
+        ])
+        #expect(leftovers.map(\.mayBeShared) == [false, false, true])
+    }
+
+    @Test func aLoneGroupThatIsAlsoTheBundleIDIsNotMarked() throws {
+        let library = try TemporaryLibrary("Group Containers/group.com.acme.example/data.db")
+        let app = AppIdentity(bundleID: "com.acme.example", name: "Example", loneAppGroups: ["group.com.acme.example"])
+        #expect(LeftoverSearch.leftovers(of: app, in: library.roots, otherInstalledBundleIDs: []).map(\.mayBeShared) == [false])
+    }
+
     @Test func letterCaseIsIgnored() throws {
         let library = try TemporaryLibrary("Preferences/COM.Example.App.plist")
         #expect(library.leftoverPaths(of: "com.example.app") == ["Preferences/COM.Example.App.plist"])
