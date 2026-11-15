@@ -13,6 +13,7 @@ import Observation
     var field = SearchField.query
     var arguments = LinkArguments()
     var draft = QuickLink()
+    var ruleDraft = RuleDraft()
     private(set) var actionPanel: ActionPanel?
     private(set) var timesOpened = 0
     let settings = SettingsBarModel()
@@ -41,6 +42,7 @@ import Observation
         actionPanel = nil
         arguments = LinkArguments()
         draft = QuickLink()
+        ruleDraft = RuleDraft()
         entryPage = ""
         field = .query
         mode = .launcher
@@ -112,9 +114,19 @@ import Observation
     func open(_ setting: Setting) {
         settings.finishEditing()
         settings.select(setting)
-        guard case .choice = setting.row, !setting.isDisabled else { return settings.activate(setting) }
-        actionPanel = ActionPanel(subject: .settingChoices(setting))
-        field = .actionFilter
+        guard !setting.isDisabled else { return settings.activate(setting) }
+        switch setting.row {
+        case .choice: showPanel(for: .settingChoices(setting))
+        case .rule(let rule): showPanel(for: .rule(rule))
+        default: settings.activate(setting)
+        }
+    }
+
+    func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {
+        settings.finishEditing()
+        ruleDraft = draft
+        mode = .ruleForm(group, isNew: isNew, query: query)
+        query = ""
     }
 
     func clearSelectedShortcut() -> Bool {
@@ -138,6 +150,10 @@ import Observation
             settings.finishEditing()
             mode = .launcher
             query = ""
+        case .ruleForm(_, _, let previousQuery):
+            settings.reload()
+            mode = .settings
+            query = previousQuery
         }
         return true
     }
@@ -155,6 +171,7 @@ import Observation
     }
 
     func saveDraft() {
+        if case .ruleForm = mode { return saveRuleDraft() }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
         _ = goBack()
@@ -165,6 +182,10 @@ import Observation
             closeActions()
             return true
         }
+        if mode == .settings, let setting = settings.selectedSetting, case .rule(let rule) = setting.row, !setting.isDisabled {
+            showPanel(for: .rule(rule))
+            return true
+        }
         guard case .quickLink(let link) = selectedResult else { return false }
         showActions(for: link, page: .actions)
         return true
@@ -173,6 +194,17 @@ import Observation
     func toggleAnvilActions() {
         if case .anvil = actionPanel?.subject { return closeActions() }
         actionPanel = ActionPanel(subject: .anvil)
+        field = .actionFilter
+    }
+
+    private func saveRuleDraft() {
+        guard let rule = ruleDraft.rule else { return NSSound.beep() }
+        RuleLibrary.shared.save(rule)
+        _ = goBack()
+    }
+
+    private func showPanel(for subject: ActionPanel.Subject) {
+        actionPanel = ActionPanel(subject: subject)
         field = .actionFilter
     }
 
@@ -223,7 +255,7 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm:
+        case .wordEntry, .quickLinkForm, .ruleForm:
             results = []
         }
         showArguments()

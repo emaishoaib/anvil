@@ -1,4 +1,5 @@
 import LauncherKit
+import RulesKit
 import SwiftUI
 
 /// The settings that match the query in settings mode, under a header per tool and a subheader per subgroup. A tool's rows are indented one step under its header, and a subgroup's rows one step under its subheader. Only the rows on screen are built.
@@ -77,7 +78,13 @@ private struct SettingRowView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            SettingTitle(title: setting.entry.title, subtitle: setting.subtitle, warning: setting.warning)
+            SettingTitle(subtitle: setting.subtitle, warning: setting.warning) {
+                if case .rule(let rule) = setting.row {
+                    RuleLine(rule: rule)
+                } else {
+                    Text(setting.entry.title)
+                }
+            }
             Spacer()
             switch setting.row {
             case .toggle(let isOn, _):
@@ -96,7 +103,7 @@ private struct SettingRowView: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
-            case .action:
+            case .action, .rule:
                 EmptyView()
             }
         }
@@ -111,14 +118,14 @@ private struct SettingRowView: View {
     }
 }
 
-private struct SettingTitle: View {
-    let title: String
+private struct SettingTitle<Title: View>: View {
     let subtitle: String?
     let warning: String?
+    @ViewBuilder let title: Title
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title)
+            title
                 .foregroundStyle(Color(nsColor: .textColor))
             if let subtitle {
                 Text(subtitle)
@@ -132,6 +139,19 @@ private struct SettingTitle: View {
                     .foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true)
             }
+        }
+    }
+}
+
+private struct RuleLine: View {
+    let rule: Rule
+
+    var body: some View {
+        HStack(spacing: 6) {
+            RuleTriggerLabel(trigger: rule.trigger)
+            Image(systemName: "arrow.right")
+                .foregroundStyle(.secondary)
+            RuleActionLabel(action: rule.action)
         }
     }
 }

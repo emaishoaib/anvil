@@ -58,6 +58,24 @@ extension SearchModel {
             guard case .settingChoices(let setting) = actionPanel?.subject else { return }
             closeActions()
             settings.pick(index, for: setting)
+        case .ruleAction(let action):
+            perform(action)
+        case .confirmRuleDelete:
+            guard case .rule(let rule) = actionPanel?.subject else { return }
+            RuleLibrary.shared.delete(rule)
+            closeActions()
+            settings.refresh()
+        }
+    }
+
+    private func perform(_ action: RuleRowAction) {
+        guard case .rule(let rule) = actionPanel?.subject else { return }
+        switch action {
+        case .edit:
+            closeActions()
+            showRuleForm(RuleDraft(rule), in: RuleGroup.keysAndApps.contains(rule) ? .keysAndApps : .mouseButtons, isNew: false)
+        case .delete:
+            actionPanel?.show(.confirmDelete)
         }
     }
 

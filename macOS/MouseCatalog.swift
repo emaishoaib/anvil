@@ -1,10 +1,11 @@
 import LauncherKit
 
-/// The Mouse tool's settings in the search bar, in the settings window's order: scrolling, the keys that change what the wheel does, then the rows for Logitech devices.
+/// The Mouse tool's settings in the search bar, in the settings window's order: scrolling, the keys that change what the wheel does, the button actions, then the rows for Logitech devices.
 enum MouseCatalog {
-    static func settings() -> [Setting] {
+    static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
         Setting.subgroup("Scrolling", scrolling)
             + Setting.subgroup("While Holding a Key", whileHoldingAKey)
+            + Setting.subgroup(RuleGroup.mouseButtons.title, RulesCatalog.settings(for: .mouseButtons, systemShortcuts: systemShortcuts))
             + Setting.subgroup("Logitech", LogitechCatalog.settings())
     }
 

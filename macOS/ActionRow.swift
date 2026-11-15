@@ -37,6 +37,8 @@ struct ActionRow: View {
         case .cancel: Symbol(name: "xmark", isDestructive: false)
         case .anvil(let action): Symbol(name: action.symbol, isDestructive: false)
         case .choice(_, _, let isCurrent): if isCurrent { Symbol(name: "checkmark", isDestructive: false) }
+        case .ruleAction(let action): Symbol(name: action.symbol, isDestructive: action.isDestructive)
+        case .confirmRuleDelete: Symbol(name: "trash", isDestructive: true)
         }
     }
 
@@ -48,13 +50,16 @@ struct ActionRow: View {
         case .cancel: "Cancel"
         case .anvil(let action): action.name
         case .choice(_, let title, _): title
+        case .ruleAction(let action): action.name
+        case .confirmRuleDelete: RuleRowAction.delete.name
         }
     }
 
     private var isDestructive: Bool {
         switch item {
         case .action(let action): action.isDestructive
-        case .confirmDelete: true
+        case .confirmDelete, .confirmRuleDelete: true
+        case .ruleAction(let action): action.isDestructive
         case .app, .cancel, .anvil, .choice: false
         }
     }
@@ -62,7 +67,8 @@ struct ActionRow: View {
     private var shortcut: KeyCombo? {
         switch item {
         case .action(let action): action.shortcut
-        case .confirmDelete: KeyCombo(keyCode: kVK_Return, modifiers: [])
+        case .confirmDelete, .confirmRuleDelete: KeyCombo(keyCode: kVK_Return, modifiers: [])
+        case .ruleAction(let action): action.shortcut
         case .cancel: KeyCombo(keyCode: kVK_Escape, modifiers: [])
         case .anvil(let action): action.shortcut
         case .app, .choice: nil

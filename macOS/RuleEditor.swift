@@ -22,7 +22,7 @@ struct RuleEditor: View {
                     RuleTriggerFields(draft: $draft, kinds: triggerKinds)
                 }
                 Section("In") {
-                    RuleAppsPicker(apps: $draft.apps)
+                    RuleAppsPicker(apps: $draft.apps, chooseApps: InstalledAppNames.chooseApps)
                 }
                 Section("Do") {
                     RuleActionFields(draft: $draft)

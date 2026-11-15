@@ -30,6 +30,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .createQuickLink)
                     Text(kind.title)
                         .foregroundStyle(.secondary)
+                case .ruleForm(let group, let isNew, _):
+                    CommandIcon(command: .settings)
+                    Text("\(isNew ? "Add" : "Edit") \(group.itemName)")
+                        .foregroundStyle(.secondary)
                 case .settings:
                     CommandIcon(command: .settings)
                     if let message {
@@ -70,6 +74,7 @@ struct SearchFooter: View {
         if mode == .settings { return settingAction }
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
+        if case .ruleForm(let group, let isNew, _) = mode { return "\(isNew ? "Create" : "Update") \(group.itemName)" }
         return switch selected {
         case .answer: "Copy Answer"
         case .app: "Open Application"

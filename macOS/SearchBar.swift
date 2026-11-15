@@ -24,6 +24,10 @@ final class SearchBar {
         if NSApp.isActive, NSApp.activationPolicy() == .accessory { NSApp.hide(nil) }
     }
 
+    func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {
+        model.showRuleForm(draft, in: group, isNew: isNew)
+    }
+
     func presentModal<Result>(_ present: () -> Result) -> Result {
         isPresentingModal = true
         panel.level = .floating
@@ -82,6 +86,11 @@ final class SearchBar {
             }
         case .quickLink, nil:
             if let action = QuickLinkAction.forShortcut(combo) { return model.run(action) }
+        case .rule:
+            if let action = RuleRowAction.forShortcut(combo) {
+                model.perform(.ruleAction(action))
+                return true
+            }
         case .settingChoices:
             break
         }

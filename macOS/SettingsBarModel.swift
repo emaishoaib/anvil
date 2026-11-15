@@ -96,7 +96,7 @@ import Observation
         case .action(let run):
             message = run()
             refresh()
-        case .choice, .info:
+        case .choice, .info, .rule:
             break
         }
     }
@@ -175,7 +175,8 @@ import Observation
         settings = SettingsCatalog.settings(systemShortcuts: systemShortcuts)
     }
 
-    private func refresh() {
+    /// Reads every setting again after something outside the model changed one, keeping the same row selected.
+    func refresh() {
         let selectedID = selectedSetting?.id
         rebuild()
         show(matching: query)

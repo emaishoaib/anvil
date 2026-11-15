@@ -1,6 +1,6 @@
 import RulesKit
 
-/// Which rules a rules section lists, which triggers its editor offers, and what a rule added from it starts as.
+/// Which rules a rules section lists, which tool it sits in, which triggers its editor offers, and what a rule added from it starts as.
 enum RuleGroup {
     case keysAndApps
     case mouseButtons
@@ -9,6 +9,20 @@ enum RuleGroup {
         switch self {
         case .keysAndApps: "Rules"
         case .mouseButtons: "Buttons"
+        }
+    }
+
+    var itemName: String {
+        switch self {
+        case .keysAndApps: "Rule"
+        case .mouseButtons: "Button Action"
+        }
+    }
+
+    var tool: Tool {
+        switch self {
+        case .keysAndApps: .rules
+        case .mouseButtons: .mouse
         }
     }
 

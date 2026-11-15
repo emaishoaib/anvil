@@ -1,12 +1,14 @@
 import Foundation
 import LauncherKit
 import Observation
+import RulesKit
 
 @Observable final class ActionPanel {
     enum Subject {
         case quickLink(QuickLink)
         case anvil
         case settingChoices(Setting)
+        case rule(Rule)
 
         var link: QuickLink? {
             if case .quickLink(let link) = self { link } else { nil }
@@ -24,6 +26,8 @@ import Observation
         case cancel
         case anvil(AnvilAction)
         case choice(index: Int, title: String, isCurrent: Bool)
+        case ruleAction(RuleRowAction)
+        case confirmRuleDelete
     }
 
     private static let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
@@ -48,6 +52,7 @@ import Observation
         case .quickLink(let link): page == .confirmDelete ? "Delete \(link.name)?" : link.name
         case .anvil: "Anvil v\(Self.version)"
         case .settingChoices(let setting): setting.entry.title
+        case .rule(let rule): page == .confirmDelete ? "Delete this rule?" : "\(rule.trigger.text), \(rule.action.text)"
         }
     }
 
@@ -71,6 +76,10 @@ import Observation
             [.confirmDelete, .cancel]
         case (.settingChoices(let setting), _):
             Self.choices(of: setting, matching: filter)
+        case (.rule, .confirmDelete):
+            [.confirmRuleDelete, .cancel]
+        case (.rule, _):
+            RuleRowAction.matching(filter).map(Item.ruleAction)
         }
     }
 

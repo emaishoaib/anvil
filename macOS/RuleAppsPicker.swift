@@ -3,6 +3,7 @@ import SwiftUI
 
 struct RuleAppsPicker: View {
     @Binding var apps: RuleApps
+    let chooseApps: () -> [String]
 
     var body: some View {
         Picker("Works In", selection: choosesApps) {
@@ -13,7 +14,7 @@ struct RuleAppsPicker: View {
             ForEach(bundleIDs.sorted { InstalledAppNames.name(for: $0) < InstalledAppNames.name(for: $1) }, id: \.self) { bundleID in
                 ChosenAppRow(bundleID: bundleID) { apps = .only(bundleIDs: bundleIDs.subtracting([bundleID])) }
             }
-            Button("Add App…") { apps = .only(bundleIDs: bundleIDs.union(InstalledAppNames.chooseApps())) }
+            Button("Add App…") { apps = .only(bundleIDs: bundleIDs.union(chooseApps())) }
         }
     }
 
