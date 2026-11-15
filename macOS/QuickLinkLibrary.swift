@@ -16,10 +16,6 @@ import Observation
 
     var links: [QuickLink] { quickLinks.links }
 
-    func contains(_ link: QuickLink) -> Bool {
-        links.contains { $0.id == link.id }
-    }
-
     func save(_ link: QuickLink) {
         quickLinks.save(link)
         persist()

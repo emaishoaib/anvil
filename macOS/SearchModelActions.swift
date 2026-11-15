@@ -81,9 +81,6 @@ extension SearchModel {
 
     private func run(_ action: AnvilAction) {
         switch action {
-        case .settings:
-            SearchBar.shared.hide()
-            SettingsWindow.shared.show()
         case .checkForUpdates:
             SearchBar.shared.hide()
             AppUpdater.shared.check()

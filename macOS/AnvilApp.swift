@@ -21,7 +21,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CurrencyRatesStore.shared.start()
         AppUpdater.shared.start()
         EntryWebView.warmUp()
-        Task { SettingsWindow.shared.prepare() }
         #if !DEBUG
         LoginItem.addOnFirstLaunch()
         #endif

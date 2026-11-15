@@ -35,18 +35,6 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         }
     }
 
-    var symbol: String {
-        switch self {
-        case .switcher: "rectangle.on.rectangle"
-        case .launcher: "magnifyingglass"
-        case .windows: "rectangle.split.2x1"
-        case .keepAwake: "cup.and.saucer"
-        case .rules: "keyboard"
-        case .mouse: "computermouse"
-        case .dockWidgets: "dock.rectangle"
-        }
-    }
-
     var summary: String {
         switch self {
         case .switcher: "Switch between windows with Option and Tab."

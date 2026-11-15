@@ -17,10 +17,6 @@ import RulesKit
 
     var all: [Rule] { rules.rules }
 
-    func contains(_ id: UUID) -> Bool {
-        all.contains { $0.id == id }
-    }
-
     func save(_ rule: Rule) {
         rules.save(rule)
         persist()

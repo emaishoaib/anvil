@@ -16,10 +16,6 @@ struct AnvilMenu: View {
             .disabled(!KeepAwake.shared.isActive)
             Divider()
         }
-        Button("Settings…") {
-            SettingsWindow.shared.show()
-        }
-        .keyboardShortcut(",")
         Button("Check for Updates…") {
             AppUpdater.shared.check()
         }

@@ -21,7 +21,7 @@ final class SearchBar {
         guard panel.isVisible, !isPresentingModal else { return }
         model.settings.finishEditing()
         panel.orderOut(nil)
-        if NSApp.isActive, NSApp.activationPolicy() == .accessory { NSApp.hide(nil) }
+        if NSApp.isActive { NSApp.hide(nil) }
     }
 
     func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {

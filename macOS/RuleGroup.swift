@@ -33,13 +33,6 @@ enum RuleGroup {
         }
     }
 
-    var addTitle: String {
-        switch self {
-        case .keysAndApps: "Add Rule…"
-        case .mouseButtons: "Add Button Action…"
-        }
-    }
-
     var triggerKinds: [RuleTriggerKind] {
         RuleTriggerKind.allCases.filter { $0.usesMouseButton == (self == .mouseButtons) }
     }

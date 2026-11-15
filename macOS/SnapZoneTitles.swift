@@ -1,23 +1,4 @@
-import SwiftUI
 import WindowKit
-
-struct SnapZoneRow: View {
-    let zone: SnapZone
-    @AppStorage private var choice: ZoneChoice
-
-    init(zone: SnapZone) {
-        self.zone = zone
-        _choice = AppStorage(wrappedValue: zone.defaultChoice, SnappingSettings.choiceKey(for: zone))
-    }
-
-    var body: some View {
-        Picker(zone.title, selection: $choice) {
-            ForEach(zone.choices, id: \.self) { choice in
-                Text(choice.title(in: zone)).tag(choice)
-            }
-        }
-    }
-}
 
 extension SnapZone {
     var title: String {
