@@ -6,6 +6,7 @@ struct SearchBarView: View {
     private static let tintOpacity = 0.5
     private static let entryHeight: CGFloat = 420
     private static let actionPanelPadding: CGFloat = 8
+    private static let pinnedOutlineWidth: CGFloat = 2
 
     @Bindable var model: SearchModel
     @FocusState private var focus: SearchField?
@@ -51,6 +52,12 @@ struct SearchBarView: View {
         .frame(width: Self.width)
         .fixedSize(horizontal: false, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor).opacity(Self.tintOpacity))
+        .overlay {
+            if model.isPinned {
+                RoundedRectangle(cornerRadius: SearchStyle.barCornerRadius)
+                    .strokeBorder(Color.accentColor, lineWidth: Self.pinnedOutlineWidth)
+            }
+        }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { SearchBar.shared.fit(height: $0) }
         .onChange(of: model.timesOpened, initial: true) { focus = .query }
         .onChange(of: model.field) { focus = model.field }
