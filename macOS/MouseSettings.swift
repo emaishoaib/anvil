@@ -12,6 +12,7 @@ nonisolated struct MouseSettings: Codable, Equatable, Sendable {
     var reversesWheel = true
     var reversesThumbWheel = true
     var thumbWheelSpeedGain = 1.0
+    var thumbWheelEffect = WheelEffect.scrollHorizontally
     var ratchetDisengageSpeed = SmartShift.disengageSpeeds.upperBound
     var dpi: Int?
     var durationFrames = 12
@@ -32,6 +33,7 @@ nonisolated struct MouseSettings: Codable, Equatable, Sendable {
         reversesWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesWheel) ?? defaults.reversesWheel
         reversesThumbWheel = try container.decodeIfPresent(Bool.self, forKey: .reversesThumbWheel) ?? defaults.reversesThumbWheel
         thumbWheelSpeedGain = try container.decodeIfPresent(Double.self, forKey: .thumbWheelSpeedGain) ?? defaults.thumbWheelSpeedGain
+        thumbWheelEffect = try container.decodeIfPresent(WheelEffect.self, forKey: .thumbWheelEffect) ?? defaults.thumbWheelEffect
         ratchetDisengageSpeed = try container.decodeIfPresent(Int.self, forKey: .ratchetDisengageSpeed)
             ?? Self.disengageSpeed(fromOlder: decoder.container(keyedBy: OlderKeys.self))
             ?? defaults.ratchetDisengageSpeed

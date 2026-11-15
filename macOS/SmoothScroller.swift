@@ -1,7 +1,7 @@
 import AppKit
 import MouseKit
 
-nonisolated enum WheelEffect {
+nonisolated enum WheelEffect: String, Codable, CaseIterable {
     case scrollVertically, scrollHorizontally, zoom
 }
 

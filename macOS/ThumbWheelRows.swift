@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The thumb wheel rows in a Logitech mouse's group: how fast its sideways scrolling goes, as a gain on Anvil's base speed, and whether its direction is inverted.
+/// The thumb wheel rows in a Logitech mouse's group: what turning it does, how fast that goes, as a gain on Anvil's base speed, and whether its direction is inverted.
 struct ThumbWheelRows: View {
     private static let speedGains = 0.25...4.0
     private static let speedGainStep = 0.25
@@ -8,6 +8,11 @@ struct ThumbWheelRows: View {
     @Bindable private var library = MouseSettingsLibrary.shared
 
     var body: some View {
+        Picker("Thumb wheel", selection: $library.settings.thumbWheelEffect) {
+            ForEach(WheelEffect.allCases, id: \.self) { effect in
+                Text(Self.name(of: effect)).tag(effect)
+            }
+        }
         LabeledContent("Thumb wheel speed") {
             HStack {
                 Slider(value: $library.settings.thumbWheelSpeedGain, in: Self.speedGains, step: Self.speedGainStep)
@@ -17,5 +22,13 @@ struct ThumbWheelRows: View {
             }
         }
         Toggle("Invert the thumb wheel", isOn: $library.settings.reversesThumbWheel)
+    }
+
+    private static func name(of effect: WheelEffect) -> String {
+        switch effect {
+        case .scrollHorizontally: "Scrolls sideways"
+        case .scrollVertically: "Scrolls up and down"
+        case .zoom: "Zooms in and out"
+        }
     }
 }
