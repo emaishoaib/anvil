@@ -1,10 +1,11 @@
 import Foundation
 
-/// One thing an uninstall would move to the Trash: the app itself, or a file it left behind, with its size in bytes. An item starts ticked unless it may hold the user's own files, in which case it is only moved when the user ticks it.
+/// One thing an uninstall would move to the Trash: the app itself, a file it left behind in one of the search folders, or a file named after it found elsewhere on the Mac, with its size in bytes. An item starts ticked unless it may hold the user's own files, in which case it is only moved when the user ticks it.
 public struct RemovalItem: Hashable, Identifiable, Sendable {
     public enum Kind: Hashable, Sendable {
         case app
         case leftover(SearchFolder)
+        case foundByName
     }
 
     public let url: URL

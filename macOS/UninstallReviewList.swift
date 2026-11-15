@@ -90,7 +90,7 @@ private struct RemovalRow: View {
     private var place: String {
         switch item.kind {
         case .app: item.url.deletingLastPathComponent().path(percentEncoded: false)
-        case .leftover: ((item.url.path(percentEncoded: false) as NSString).deletingLastPathComponent as NSString).abbreviatingWithTildeInPath
+        case .leftover, .foundByName: ((item.url.path(percentEncoded: false) as NSString).deletingLastPathComponent as NSString).abbreviatingWithTildeInPath
         }
     }
 }

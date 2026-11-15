@@ -97,7 +97,7 @@ struct LeftoverSearchTests {
 
     @Test func aPerUserFolderThatCannotBeFoundIsSkipped() throws {
         let library = try TemporaryLibrary("Caches/com.example.app/cache.db")
-        let roots = SearchRoots(home: library.url.appending(path: "Home"), library: library.url, userCache: nil, userTemp: nil)
+        let roots = SearchRoots(home: library.url.appending(path: "Home"), library: library.url, userCache: nil, userTemp: nil, systemLibrary: library.url.appending(path: "System Library"))
         let leftovers = LeftoverSearch.leftovers(of: AppIdentity(bundleID: "com.example.app", name: "Example"), in: roots, otherInstalledBundleIDs: [])
         #expect(leftovers.map(\.folder) == [.caches])
     }
