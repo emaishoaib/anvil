@@ -62,6 +62,7 @@ final class SearchBar {
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
+        if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         switch keyCode {
         case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1)

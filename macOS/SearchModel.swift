@@ -325,6 +325,16 @@ import Observation
         query = ""
     }
 
+    func moveTickedToTrash() -> Bool {
+        guard case .uninstallReview = mode, let review else { return false }
+        Task {
+            guard await review.moveTickedToTrash() else { return }
+            SystemSounds.playMoveToTrash()
+            SearchBar.shared.hide()
+        }
+        return true
+    }
+
     private func showReview(of app: InstalledApp) {
         let review = UninstallReview(app: app)
         self.review = review

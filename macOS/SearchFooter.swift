@@ -60,7 +60,7 @@ struct SearchFooter: View {
                 if let action {
                     Text(action)
                         .fontWeight(.medium)
-                    KeyCaps(combo: KeyCombo(keyCode: kVK_Return, modifiers: mode.hasSearchField ? [] : .command))
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Return, modifiers: actionUsesCommand ? .command : []))
                 }
                 if hasActions {
                     Rectangle()
@@ -77,6 +77,11 @@ struct SearchFooter: View {
         }
     }
 
+    private var actionUsesCommand: Bool {
+        if case .uninstallReview = mode { return true }
+        return !mode.hasSearchField
+    }
+
     private var hasActions: Bool {
         guard mode == .launcher, case .quickLink = selected else { return false }
         return true
@@ -85,7 +90,7 @@ struct SearchFooter: View {
     private var action: String? {
         if mode == .settings { return settingAction }
         if mode == .uninstallApp { return selected == nil ? nil : "Review Files" }
-        if case .uninstallReview = mode { return "Tick or Untick" }
+        if case .uninstallReview = mode { return "Move to Trash" }
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         if case .keySwapForm = mode { return "Add Key Swap" }

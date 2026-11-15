@@ -2,7 +2,7 @@ import CleanerKit
 import LauncherKit
 import SwiftUI
 
-/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A row is ticked or unticked by clicking it. While the files are still being found, a spinner stands in for the rows.
+/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A row is ticked or unticked by clicking it. While the files are being found or moved to the Trash, a spinner stands in for the rows.
 struct UninstallReviewList: View {
     private static let rowHeight: CGFloat = 40
     private static let padding: CGFloat = 8
@@ -14,7 +14,7 @@ struct UninstallReviewList: View {
     var body: some View {
         Group {
             switch review.state {
-            case .searching:
+            case .searching, .movingToTrash:
                 ProgressView()
                     .controlSize(.small)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
