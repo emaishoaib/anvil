@@ -5,8 +5,11 @@ import RulesKit
 nonisolated final class RuleKeys: KeyResponder {
     static let shared = RuleKeys()
 
+    private static let anvilBundleID = Bundle.main.bundleIdentifier
+
     private let rules = OSAllocatedUnfairLock(initialState: Rules())
     private let frontmostBundleID = OSAllocatedUnfairLock<String?>(initialState: nil)
+    private let searchBarHasFocus = OSAllocatedUnfairLock(initialState: false)
     private let drag = OSAllocatedUnfairLock<ButtonDrag?>(initialState: nil)
 
     var shortcuts: [Shortcut] {
@@ -30,6 +33,15 @@ nonisolated final class RuleKeys: KeyResponder {
         rules.withLock { $0 = newRules }
     }
 
+    /// Tells the rules whether Anvil's search bar has keyboard focus. The search bar never makes Anvil the active app, so while it has focus the rules treat Anvil as the app in front, instead of the app behind the bar.
+    func searchBarFocusChanged(_ hasFocus: Bool) {
+        searchBarHasFocus.withLock { $0 = hasFocus }
+    }
+
+    private var bundleIDForRules: String? {
+        searchBarHasFocus.withLock { $0 } ? Self.anvilBundleID : frontmostBundleID.withLock { $0 }
+    }
+
     func respond(toMouse type: CGEventType, button number: Int, at location: CGPoint) -> Bool {
         switch type {
         case .otherMouseDown: pressed(number, at: location)
@@ -44,7 +56,7 @@ nonisolated final class RuleKeys: KeyResponder {
     }
 
     private func pressed(_ number: Int, at location: CGPoint) -> Bool {
-        let bundleID = frontmostBundleID.withLock { $0 }
+        let bundleID = bundleIDForRules
         guard rules.withLock({ $0.hasDragRules(forButton: number, in: bundleID) }) else {
             return perform(.mouseButton(number: number))
         }
@@ -73,13 +85,13 @@ nonisolated final class RuleKeys: KeyResponder {
     }
 
     private func hasRule(for trigger: RuleTrigger) -> Bool {
-        let bundleID = frontmostBundleID.withLock { $0 }
+        let bundleID = bundleIDForRules
         return rules.withLock { $0.rule(for: trigger, in: bundleID) } != nil
     }
 
     @discardableResult
     private func perform(_ trigger: RuleTrigger) -> Bool {
-        let bundleID = frontmostBundleID.withLock { $0 }
+        let bundleID = bundleIDForRules
         guard let rule = rules.withLock({ $0.rule(for: trigger, in: bundleID) }) else { return false }
         RuleActions.perform(rule.action)
         return true
@@ -87,7 +99,7 @@ nonisolated final class RuleKeys: KeyResponder {
 
     func respond(to press: KeyPress) -> Bool {
         guard press.kind == .keyDown, !press.isFromAnvil else { return false }
-        let bundleID = frontmostBundleID.withLock { $0 }
+        let bundleID = bundleIDForRules
         guard let rule = rules.withLock({ $0.rule(for: .shortcut(press.combo.keystroke), in: bundleID) }) else { return false }
         RuleActions.perform(rule.action)
         return true

@@ -24,8 +24,14 @@ final class SearchPanel: NSPanel {
         guard event.type == .keyDown, SearchBar.shared.handleKey(Int(event.keyCode), modifiers: event.modifierFlags) else { return super.sendEvent(event) }
     }
 
+    override func becomeKey() {
+        super.becomeKey()
+        RuleKeys.shared.searchBarFocusChanged(true)
+    }
+
     override func resignKey() {
         super.resignKey()
+        RuleKeys.shared.searchBarFocusChanged(false)
         SearchBar.shared.hide()
     }
 }
