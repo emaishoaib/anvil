@@ -11,7 +11,7 @@ struct SearchFooter: View {
     var settingAction: String? = nil
     var message: String? = nil
     var performAction: (() -> Void)? = nil
-    var isChatStarted = false
+    var chatState = ChatState.notStarted
 
     var body: some View {
         VStack(spacing: 0) {
@@ -74,7 +74,13 @@ struct SearchFooter: View {
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
                 }
-                if mode == .askClaude, !isChatStarted {
+                if mode == .askClaude, chatState == .awaitingApproval {
+                    Text("Deny")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                    FooterDivider()
+                }
+                if mode == .askClaude, chatState == .notStarted {
                     Text("Folder")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_O, modifiers: .command))
@@ -117,7 +123,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
-        if mode == .askClaude { return "Send" }
+        if mode == .askClaude { return chatState == .awaitingApproval ? "Allow" : "Send" }
         if mode == .uninstallApp { return selected == nil || LeftoverIndexStore.shared.isSearching ? nil : "Review Files" }
         if case .uninstallReview = mode { return "Move to Trash" }
         if case .wordEntry = mode { return "Open in Dictionary" }

@@ -15,6 +15,7 @@ extension ToolCall {
         case "WebSearch": input["query"].map { "Searching the web for \($0)" } ?? "Searching the web"
         case "Task", "Agent": input["description"].map { "Asking an agent to \($0.lowercasedFirstLetter)" } ?? "Asking an agent"
         case "TodoWrite": "Updating the task list"
+        case "ExitPlanMode": "Presenting the plan"
         default: "Using \(name)"
         }
     }

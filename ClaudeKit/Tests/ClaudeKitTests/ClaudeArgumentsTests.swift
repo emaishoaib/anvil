@@ -10,6 +10,11 @@ struct ClaudeArgumentsTests {
         #expect(value(after: "--permission-mode", in: arguments) == "acceptEdits")
     }
 
+    @Test func approvalsAreAskedOfTheAppDrivingTheChat() {
+        let arguments = ClaudeArguments.chat(sessionID: UUID(), mode: .manual)
+        #expect(value(after: "--permission-prompts", in: arguments) == "host")
+    }
+
     @Test func theChatTalksInStreamJSONWithoutItsInteractiveScreen() {
         let arguments = ClaudeArguments.chat(sessionID: UUID(), mode: .manual)
         #expect(arguments.contains("--print"))

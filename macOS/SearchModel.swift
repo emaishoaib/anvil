@@ -22,6 +22,11 @@ import Observation
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
+
+    var chatState: ChatState {
+        guard let chat else { return .notStarted }
+        return chat.approvals.isEmpty ? .started : .awaitingApproval
+    }
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 

@@ -10,6 +10,8 @@ public enum ClaudeEventParser {
         case "assistant": raw.message?.content.compactMap(toolStarted) ?? []
         case "user": raw.message?.content.compactMap(toolFinished) ?? []
         case "result": [.finished(answer: raw.result ?? "", failed: raw.isError ?? false)]
+        case "control_request": [approval(from: raw)].compactMap(\.self)
+        case "control_cancel_request": raw.requestID.map { [.approvalWithdrawn(requestID: $0)] } ?? []
         default: []
         }
     }
@@ -22,6 +24,12 @@ public enum ClaudeEventParser {
     private static func text(from raw: RawEvent) -> ClaudeEvent? {
         guard raw.event?.type == "content_block_delta", let delta = raw.event?.delta, delta.type == "text_delta", let text = delta.text else { return nil }
         return .text(text)
+    }
+
+    private static func approval(from raw: RawEvent) -> ClaudeEvent? {
+        guard let requestID = raw.requestID, let request = raw.request, request.subtype == "can_use_tool", let name = request.toolName else { return nil }
+        let tool = ToolCall(id: request.toolUseID ?? requestID, name: name, input: request.input?.values ?? [:])
+        return .approvalRequested(Approval(requestID: requestID, tool: tool))
     }
 
     private static func toolStarted(_ block: RawBlock) -> ClaudeEvent? {

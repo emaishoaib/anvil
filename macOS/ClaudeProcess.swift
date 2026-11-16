@@ -1,7 +1,7 @@
 import ClaudeKit
 import Foundation
 
-/// A running `claude` command that a chat talks to: prompts are written to it as lines, and every line it prints is read back as events. It gets a PATH with the usual install folders, because an app opened from Finder has almost none, and the tools Claude runs, such as `git`, need it.
+/// A running `claude` command that a chat talks to: prompts and approval answers are written to it as lines, and every line it prints is read back as events. It gets a PATH with the usual install folders, because an app opened from Finder has almost none, and the tools Claude runs, such as `git`, need it.
 final class ClaudeProcess {
     private static let searchPath = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
 
@@ -28,8 +28,8 @@ final class ClaudeProcess {
         }
     }
 
-    func send(_ prompt: String) -> Bool {
-        (try? input.fileHandleForWriting.write(contentsOf: ClaudePrompt.line(prompt))) != nil
+    func send(_ line: Data) -> Bool {
+        (try? input.fileHandleForWriting.write(contentsOf: line)) != nil
     }
 
     func end() {

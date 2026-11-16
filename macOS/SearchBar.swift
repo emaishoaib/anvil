@@ -85,7 +85,8 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
-        if model.mode == .askClaude, model.chat == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
+        if model.mode == .askClaude, model.chatState == .awaitingApproval, handleApprovalKey(keyCode) { return true }
+        if model.mode == .askClaude, model.chatState == .notStarted, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         if let action = AnvilAction.forShortcut(Self.combo(keyCode, modifiers)) {
             model.perform(.anvil(action))
@@ -135,6 +136,15 @@ final class SearchBar {
         case kVK_DownArrow: model.actionPanel?.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.performSelectedAction()
         case kVK_Escape: model.backInActions()
+        default: return false
+        }
+        return true
+    }
+
+    private func handleApprovalKey(_ keyCode: Int) -> Bool {
+        switch keyCode {
+        case kVK_Return, kVK_ANSI_KeypadEnter: model.chat?.answerApproval(allowed: true)
+        case kVK_Escape: model.chat?.answerApproval(allowed: false)
         default: return false
         }
         return true

@@ -9,11 +9,28 @@ struct RawEvent: Decodable {
     let message: RawMessage?
     let isError: Bool?
     let result: String?
+    let requestID: String?
+    let request: RawControlRequest?
 
     enum CodingKeys: String, CodingKey {
-        case type, subtype, model, cwd, event, message, result
+        case type, subtype, model, cwd, event, message, result, request
         case sessionID = "session_id"
         case isError = "is_error"
+        case requestID = "request_id"
+    }
+}
+
+/// Something Claude Code asks the app driving it, such as whether a tool may run.
+struct RawControlRequest: Decodable {
+    let subtype: String
+    let toolName: String?
+    let input: StringFields?
+    let toolUseID: String?
+
+    enum CodingKeys: String, CodingKey {
+        case subtype, input
+        case toolName = "tool_name"
+        case toolUseID = "tool_use_id"
     }
 }
 
