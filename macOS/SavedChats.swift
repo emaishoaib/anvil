@@ -28,7 +28,11 @@ enum SavedChats {
     /// Moves the chat's Claude Code files to the Trash and takes it off the list.
     static func trash(_ chat: SavedChat) {
         ClaudeSessionFiles.trash(chat.id)
-        store(load().filter { $0.id != chat.id })
+        forget(chat.id)
+    }
+
+    static func forget(_ id: UUID) {
+        store(load().filter { $0.id != id })
     }
 
     private static func store(_ chats: [SavedChat]) {

@@ -12,6 +12,10 @@ nonisolated enum ClaudeSessionFiles {
             .filter { FileManager.default.fileExists(atPath: $0.path) }
     }
 
+    static func transcript(of sessionID: UUID) -> URL? {
+        urls(of: sessionID).first { $0.pathExtension == "jsonl" }
+    }
+
     /// Moves the chat's files to the Trash, so Claude Code no longer lists the chat but it can still be brought back from the Trash.
     static func trash(_ sessionID: UUID) {
         for url in urls(of: sessionID) {

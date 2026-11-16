@@ -10,6 +10,15 @@ struct ClaudeArgumentsTests {
         #expect(value(after: "--permission-mode", in: arguments) == "acceptEdits")
     }
 
+    @Test func aResumedChatCarriesOnUnderItsSessionID() throws {
+        let sessionID = try #require(UUID(uuidString: "97B846CF-11CC-4FD7-89A9-B9BDB06776C6"))
+        let arguments = ClaudeArguments.resume(sessionID: sessionID, mode: .plan)
+        #expect(value(after: "--resume", in: arguments) == "97b846cf-11cc-4fd7-89a9-b9bdb06776c6")
+        #expect(!arguments.contains("--session-id"))
+        #expect(value(after: "--permission-mode", in: arguments) == "plan")
+        #expect(value(after: "--input-format", in: arguments) == "stream-json")
+    }
+
     @Test func approvalsAreAskedOfTheAppDrivingTheChat() {
         let arguments = ClaudeArguments.chat(sessionID: UUID(), mode: .manual)
         #expect(value(after: "--permission-prompts", in: arguments) == "host")

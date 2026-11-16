@@ -117,7 +117,7 @@ import Observation
 
     func openSelected() {
         if mode == .askClaude { return sendPrompt() }
-        if mode == .savedChats { return NSSound.beep() }
+        if mode == .savedChats { return continueSelectedChat() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -395,9 +395,9 @@ import Observation
     private func sendPrompt() {
         let prompt = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !prompt.isEmpty, chat?.isAnswering != true else { return NSSound.beep() }
-        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder, mode: chatSetup.mode)
+        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder)
         self.chat = chat
-        chat.send(prompt)
+        chat.send(prompt, mode: chatSetup.mode)
         query = ""
     }
 
@@ -407,6 +407,18 @@ import Observation
         case .discard: discardChat()
         case nil: isAskingToKeepChat = true
         }
+    }
+
+    private func continueSelectedChat() {
+        guard let saved = savedChatList?.selectedChat(matching: query) else { return NSSound.beep() }
+        let chat = ClaudeChatSession(resuming: saved)
+        self.chat = chat
+        Task { await chat.loadHistory() }
+        savedChatList = nil
+        wantsExpanded = false
+        mode = .askClaude
+        query = ""
+        claudeSignIn.check()
     }
 
     func trashSelectedChat() {
@@ -438,6 +450,7 @@ import Observation
         self.chat = nil
         isAskingToKeepChat = false
         plannedEnding = nil
+        SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
         mode = .launcher
         query = ""

@@ -63,6 +63,7 @@ struct RawMessage: Decodable {
 /// One block of a message, such as a tool Claude starts using or the result that tool gave back.
 struct RawBlock: Decodable {
     let type: String
+    let text: String?
     let id: String?
     let name: String?
     let input: StringFields?
@@ -70,7 +71,7 @@ struct RawBlock: Decodable {
     let isError: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case type, id, name, input
+        case type, text, id, name, input
         case toolUseID = "tool_use_id"
         case isError = "is_error"
     }

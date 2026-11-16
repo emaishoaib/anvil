@@ -6,6 +6,16 @@ struct ChatTranscript {
 
     private(set) var turns: [ChatTurn] = []
 
+    init() {}
+
+    /// The finished turns of a chat carried on from earlier, with each tool marked as having worked or failed.
+    init(past: [PastTurn]) {
+        turns = past.enumerated().map { index, turn in
+            let tools = turn.tools.map { ChatTool(id: $0.id, summary: $0.summary, state: turn.failedToolIDs.contains($0.id) ? .failed : .finished) }
+            return ChatTurn(id: index, prompt: turn.prompt, tools: tools, answer: turn.answer, isFinished: true)
+        }
+    }
+
     var isAnswering: Bool {
         turns.last.map { !$0.isFinished } ?? false
     }

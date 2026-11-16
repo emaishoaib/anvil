@@ -11,10 +11,6 @@ import Observation
     private(set) var folder = ChatSetup.rememberedFolder
     private(set) var mode = UserDefaults.standard.string(forKey: ChatSetup.modeKey).flatMap(PermissionMode.init) ?? .manual
 
-    var displayPath: String {
-        (folder.path as NSString).abbreviatingWithTildeInPath
-    }
-
     func chooseFolder() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false

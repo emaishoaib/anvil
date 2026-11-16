@@ -163,6 +163,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
+        if mode == .savedChats { return "Continue Chat" }
         if mode == .askClaude {
             return switch chatState {
             case .signedOut: "Sign In"

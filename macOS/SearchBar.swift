@@ -112,7 +112,7 @@ final class SearchBar {
         }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
         if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
-        if model.mode == .askClaude, model.chat == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
+        if model.mode == .askClaude, model.chat?.mode == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         if let action = AnvilAction.forShortcut(Self.combo(keyCode, modifiers)) {
             model.perform(.anvil(action))
@@ -206,7 +206,9 @@ final class SearchBar {
     private func handleChatSetupKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         let shortcut = modifiers.intersection([.command, .shift, .option, .control])
         switch (keyCode, shortcut) {
-        case (kVK_ANSI_O, .command): presentModal(model.chatSetup.chooseFolder)
+        case (kVK_ANSI_O, .command):
+            guard model.chat == nil else { return false }
+            presentModal(model.chatSetup.chooseFolder)
         case (kVK_Tab, .shift): model.chatSetup.useNextMode()
         default: return false
         }
