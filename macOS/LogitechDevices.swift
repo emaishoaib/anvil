@@ -10,6 +10,7 @@ import Observation
         [kIOHIDVendorIDKey: HIDPPRequest.logitechVendorID, kIOHIDDeviceUsagePageKey: 0xFF00, kIOHIDDeviceUsageKey: 0x02],
         [kIOHIDVendorIDKey: HIDPPRequest.logitechVendorID, kIOHIDDeviceUsagePageKey: 0xFF43, kIOHIDDeviceUsageKey: 0x0202],
     ]
+    private static let discoveryPauses: [Duration] = [.zero, .seconds(1), .seconds(2), .seconds(4)]
 
     private(set) var devices: [LogitechDevice] = []
     private(set) var batteries: [String: BatteryStatus] = [:]
@@ -60,8 +61,19 @@ import Observation
             notified(report, on: channel)
         }
         channels.append(channel)
-        Task {
-            for device in await LogitechDiscovery.devices(on: channel) { await use(device, on: channel) }
+        Task { await discover(on: channel) }
+    }
+
+    /// Looks for devices on a channel, and tries again a few times when none answers yet, as when a mouse has only just reconnected.
+    private func discover(on channel: HIDPPChannel) async {
+        for pause in Self.discoveryPauses {
+            try? await Task.sleep(for: pause)
+            guard channels.contains(where: { $0 === channel }) else { return }
+            let found = await LogitechDiscovery.devices(on: channel)
+            guard found.isEmpty else {
+                for device in found { await use(device, on: channel) }
+                return
+            }
         }
     }
 
