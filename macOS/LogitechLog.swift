@@ -23,6 +23,13 @@ extension HIDPPChannel {
 extension HIDPPRequest {
     /// The request's first bytes in hex, enough to tell which device, feature and function it was for.
     var logBytes: String {
-        report.prefix(7).map { String(format: "%02X", $0) }.joined(separator: " ")
+        Array(report.prefix(7)).logHex
+    }
+}
+
+extension [UInt8] {
+    /// The bytes in hex, separated by spaces, such as "02 FF 32".
+    var logHex: String {
+        map { String(format: "%02X", $0) }.joined(separator: " ")
     }
 }
