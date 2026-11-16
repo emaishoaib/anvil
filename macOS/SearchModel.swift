@@ -21,6 +21,7 @@ import Observation
     private(set) var isPinned = false
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
+    private(set) var chat: ClaudeChatSession?
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 
@@ -43,6 +44,7 @@ import Observation
 
     func reset() {
         settings.finishEditing()
+        endChat()
         LeftoverIndexStore.shared.forget()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
@@ -86,6 +88,7 @@ import Observation
     }
 
     func openSelected() {
+        if mode == .askClaude { return sendPrompt() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -165,7 +168,11 @@ import Observation
         switch mode {
         case .launcher:
             return false
-        case .defineWord, .uninstallApp, .askClaude:
+        case .defineWord, .uninstallApp:
+            mode = .launcher
+            query = ""
+        case .askClaude:
+            endChat()
             mode = .launcher
             query = ""
         case .uninstallReview(let previousQuery):
@@ -338,6 +345,20 @@ import Observation
             mode = .askClaude
         }
         query = ""
+    }
+
+    private func sendPrompt() {
+        let prompt = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !prompt.isEmpty, chat?.isAnswering != true else { return NSSound.beep() }
+        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder, mode: chatSetup.mode)
+        self.chat = chat
+        chat.send(prompt)
+        query = ""
+    }
+
+    private func endChat() {
+        chat?.end()
+        chat = nil
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {
