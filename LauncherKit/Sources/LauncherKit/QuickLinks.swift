@@ -17,14 +17,21 @@ public struct QuickLinks: Equatable, Sendable {
         sort()
     }
 
-    public mutating func add(_ incoming: [QuickLink]) -> (added: Int, skipped: Int) {
+    public mutating func merge(_ incoming: [QuickLink]) -> (added: Int, updated: Int, skipped: Int) {
         var added = 0
-        for link in incoming where !links.contains(where: { $0.name == link.name && $0.link == link.link }) {
-            links.append(link)
-            added += 1
+        var updated = 0
+        for link in incoming {
+            guard let index = links.firstIndex(where: { $0.name == link.name && $0.link == link.link }) else {
+                links.append(link)
+                added += 1
+                continue
+            }
+            guard links[index].openWith != link.openWith else { continue }
+            links[index].openWith = link.openWith
+            updated += 1
         }
         sort()
-        return (added, incoming.count - added)
+        return (added, updated, incoming.count - added - updated)
     }
 
     public mutating func delete(_ link: QuickLink) {

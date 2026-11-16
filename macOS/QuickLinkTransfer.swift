@@ -11,9 +11,11 @@ enum QuickLinkTransfer {
         guard let data = try? Data(contentsOf: url), let links = try? QuickLinkFile.decode(data, appNamed: app(named:)) else {
             return "That file isn't a list of quick links."
         }
-        let result = QuickLinkLibrary.shared.add(links)
-        guard result.skipped > 0 else { return "Added \(count(result.added))." }
-        return "Added \(count(result.added)) and skipped \(count(result.skipped)) already in Anvil."
+        let result = QuickLinkLibrary.shared.merge(links)
+        var outcomes = ["Added \(count(result.added))"]
+        if result.updated > 0 { outcomes.append("updated the app on \(count(result.updated))") }
+        if result.skipped > 0 { outcomes.append("skipped \(count(result.skipped)) already in Anvil") }
+        return ListFormatter.localizedString(byJoining: outcomes) + "."
     }
 
     static func exportFile() -> String? {

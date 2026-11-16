@@ -21,8 +21,8 @@ import Observation
         persist()
     }
 
-    func add(_ incoming: [QuickLink]) -> (added: Int, skipped: Int) {
-        let result = quickLinks.add(incoming)
+    func merge(_ incoming: [QuickLink]) -> (added: Int, updated: Int, skipped: Int) {
+        let result = quickLinks.merge(incoming)
         persist()
         return result
     }
