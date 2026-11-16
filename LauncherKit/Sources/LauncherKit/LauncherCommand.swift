@@ -11,7 +11,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .createQuickLink: "Create Quick Link"
         case .settings: "Settings"
         case .uninstallApp: "Uninstall App"
-        case .askClaude: "Ask Claude"
+        case .askClaude: "AI Ask Claude"
         }
     }
 
