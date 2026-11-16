@@ -1,6 +1,6 @@
 import AppKit
 
-/// Anvil's icon in the menu bar and the small menu it opens, with Check for Updates and Quit. It is a plain AppKit status item rather than a SwiftUI menu bar extra, so that the icon's layer can be animated.
+/// Anvil's icon in the menu bar and the small menu it opens, with Check for Updates and Quit. It is a plain AppKit status item rather than a SwiftUI menu bar extra, so that the icon's layer can be animated: it strikes as the search bar opens, and glows while Anvil sets up Logitech devices.
 final class MenuBarItem: NSObject, NSMenuDelegate {
     static let shared = MenuBarItem()
 
@@ -14,6 +14,11 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
         button.image = icon
         button.wantsLayer = true
         item.menu = makeMenu()
+        Task {
+            for await isBusy in Observations({ LogitechDevices.shared.isBusy }) {
+                HeatAnimation.set(isBusy, on: button)
+            }
+        }
     }
 
     /// Plays the strike on the icon, as the search bar opens.
