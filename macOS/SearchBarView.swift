@@ -39,7 +39,7 @@ struct SearchBarView: View {
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
             } else if model.mode == .askClaude {
                 Divider()
-                ChatSetupRow(setup: model.chatSetup, isLocked: model.chat != nil)
+                ChatSetupRow(setup: model.chatSetup, isLocked: model.chat != nil, ending: model.plannedEnding)
                 ClaudeChat(chat: model.chat, state: model.chatState, save: model.saveChat, discard: model.discardChat)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState)
             } else if model.mode == .settings {

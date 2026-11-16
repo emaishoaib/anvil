@@ -23,6 +23,7 @@ import Observation
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
     private(set) var isAskingToKeepChat = false
+    private(set) var plannedEnding: ChatEnding?
     let claudeSignIn = ClaudeSignIn()
 
     var chatState: ChatState {
@@ -188,9 +189,10 @@ import Observation
             query = ""
         case .askClaude:
             guard chat == nil else {
-                isAskingToKeepChat = true
+                leaveChat()
                 return true
             }
+            plannedEnding = nil
             mode = .launcher
             query = ""
         case .uninstallReview(let previousQuery):
@@ -375,8 +377,16 @@ import Observation
         query = ""
     }
 
-    func askToKeepChat() {
-        isAskingToKeepChat = true
+    func leaveChat() {
+        switch plannedEnding {
+        case .save: saveChat()
+        case .discard: discardChat()
+        case nil: isAskingToKeepChat = true
+        }
+    }
+
+    func plan(_ ending: ChatEnding) {
+        plannedEnding = plannedEnding == ending ? nil : ending
     }
 
     func keepChatting() {
@@ -395,6 +405,7 @@ import Observation
         guard let chat else { return }
         self.chat = nil
         isAskingToKeepChat = false
+        plannedEnding = nil
         Task { await chat.discard() }
         mode = .launcher
         query = ""
@@ -404,6 +415,7 @@ import Observation
         chat?.end()
         chat = nil
         isAskingToKeepChat = false
+        plannedEnding = nil
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {

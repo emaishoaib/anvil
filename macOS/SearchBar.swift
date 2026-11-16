@@ -155,10 +155,16 @@ final class SearchBar {
     private func handleEndingKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         switch (model.chatState, keyCode) {
         case (.answering, kVK_Escape): model.chat?.stop()
-        case (.started, kVK_Escape): model.askToKeepChat()
+        case (.started, kVK_Escape): model.leaveChat()
         case (.askingToKeep, kVK_Escape): model.keepChatting()
         case (.askingToKeep, kVK_Return), (.askingToKeep, kVK_ANSI_KeypadEnter): model.saveChat()
         case (.askingToKeep, kVK_Delete) where Self.onlyCommand(in: modifiers): model.discardChat()
+        case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
+            guard Self.onlyCommand(in: modifiers) else { return false }
+            model.plan(.save)
+        case (.notStarted, kVK_ANSI_D), (.started, kVK_ANSI_D), (.answering, kVK_ANSI_D):
+            guard Self.onlyCommand(in: modifiers) else { return false }
+            model.plan(.discard)
         default: return false
         }
         return true
