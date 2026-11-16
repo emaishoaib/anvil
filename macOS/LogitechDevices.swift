@@ -15,9 +15,13 @@ import Observation
     private(set) var devices: [LogitechDevice] = []
     private(set) var batteries: [String: BatteryStatus] = [:]
     private(set) var dpis: [String: SensorDPI] = [:]
+    private var busyTasks = 0
     @ObservationIgnored private var channels: [HIDPPChannel] = []
     @ObservationIgnored private var heldGestureButtons: Set<String> = []
     @ObservationIgnored private let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
+
+    /// Whether Anvil is finding devices or sending their settings right now.
+    var isBusy: Bool { busyTasks > 0 }
 
     func start() {
         let context = Unmanaged.passUnretained(self).toOpaque()
@@ -42,14 +46,23 @@ import Observation
     /// Looks again for the devices on every channel, as after the Mac wakes, when they may still be reconnecting and have forgotten their settings.
     private func rediscover() {
         for channel in channels {
-            Task { await discover(on: channel) }
+            whileBusy { await self.discover(on: channel) }
         }
     }
 
     func applyMouseTool() {
         for channel in channels {
             let onChannel = devices.filter { $0.id.hasPrefix(channel.id) }
-            Task { for device in onChannel { await applyMouseTool(to: device, on: channel) } }
+            whileBusy { for device in onChannel { await self.applyMouseTool(to: device, on: channel) } }
+        }
+    }
+
+    /// Runs device work in the background, and counts Anvil as busy until it finishes.
+    private func whileBusy(_ work: @escaping @MainActor () async -> Void) {
+        busyTasks += 1
+        Task {
+            await work()
+            busyTasks -= 1
         }
     }
 
@@ -68,7 +81,7 @@ import Observation
             notified(report, on: channel)
         }
         channels.append(channel)
-        Task { await discover(on: channel) }
+        whileBusy { await self.discover(on: channel) }
     }
 
     /// Looks for devices on a channel, and tries again a few times when none answers yet, as when a mouse has only just reconnected.
@@ -127,7 +140,7 @@ import Observation
             if isDown { heldGestureButtons.insert(id) } else { heldGestureButtons.remove(id) }
             GestureButton.send(isDown: isDown)
         case .linkRestored:
-            Task { if let device = await LogitechDiscovery.device(at: index, on: channel) { await use(device, on: channel) } }
+            whileBusy { if let device = await LogitechDiscovery.device(at: index, on: channel) { await self.use(device, on: channel) } }
         case .batteryChanged(let status):
             batteries[id] = status
         case .thumbWheelTurned(let rotation):
