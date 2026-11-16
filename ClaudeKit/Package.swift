@@ -8,8 +8,11 @@ let package = Package(
     products: [
         .library(name: "ClaudeKit", targets: ["ClaudeKit"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-markdown", from: "0.9.0"),
+    ],
     targets: [
-        .target(name: "ClaudeKit"),
+        .target(name: "ClaudeKit", dependencies: [.product(name: "Markdown", package: "swift-markdown")]),
         .testTarget(name: "ClaudeKitTests", dependencies: ["ClaudeKit"]),
     ]
 )

@@ -1,3 +1,4 @@
+import ClaudeKit
 import SwiftUI
 
 /// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent.
@@ -47,9 +48,12 @@ private struct TurnView: View {
             if turn.answer.isEmpty, !turn.isFinished {
                 ProgressView()
                     .controlSize(.small)
-            } else {
+            } else if turn.failed {
                 Text(turn.answer)
-                    .foregroundStyle(turn.failed ? AnyShapeStyle(.red) : AnyShapeStyle(.primary))
+                    .foregroundStyle(.red)
+                    .textSelection(.enabled)
+            } else {
+                AnswerView(blocks: AnswerMarkdown.blocks(from: turn.answer))
                     .textSelection(.enabled)
             }
         }
