@@ -73,6 +73,15 @@ struct SearchFooter: View {
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
                 }
+                if mode == .askClaude {
+                    Text("Folder")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_O, modifiers: .command))
+                    FooterDivider()
+                    Text("Mode")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Tab, modifiers: .shift))
+                }
                 if let action {
                     let label = ActionLabel(title: action, combo: KeyCombo(keyCode: kVK_Return, modifiers: actionUsesCommand ? .command : []))
                     if let performAction {

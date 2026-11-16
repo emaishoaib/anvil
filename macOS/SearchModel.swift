@@ -20,6 +20,7 @@ import Observation
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
+    let chatSetup = ChatSetup()
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 

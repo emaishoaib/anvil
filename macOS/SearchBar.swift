@@ -85,6 +85,7 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
+        if model.mode == .askClaude, handleChatKey(keyCode, modifiers: modifiers) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         if let action = AnvilAction.forShortcut(Self.combo(keyCode, modifiers)) {
             model.perform(.anvil(action))
@@ -134,6 +135,16 @@ final class SearchBar {
         case kVK_DownArrow: model.actionPanel?.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.performSelectedAction()
         case kVK_Escape: model.backInActions()
+        default: return false
+        }
+        return true
+    }
+
+    private func handleChatKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        let shortcut = modifiers.intersection([.command, .shift, .option, .control])
+        switch (keyCode, shortcut) {
+        case (kVK_ANSI_O, .command): presentModal(model.chatSetup.chooseFolder)
+        case (kVK_Tab, .shift): model.chatSetup.useNextMode()
         default: return false
         }
         return true
