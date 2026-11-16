@@ -11,6 +11,7 @@ enum SearchMode: Equatable {
     case ruleForm(RuleGroup, isNew: Bool, query: String)
     case keySwapForm(query: String)
     case askClaude
+    case savedChats
 
     var placeholder: String {
         switch self {
@@ -20,6 +21,7 @@ enum SearchMode: Equatable {
         case .uninstallReview: "Search files…"
         case .settings: "Search settings…"
         case .askClaude: "Ask Claude…"
+        case .savedChats: "Search saved chats…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm: ""
         }
     }

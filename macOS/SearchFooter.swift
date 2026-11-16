@@ -37,6 +37,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .uninstallApp)
                     Text(message ?? LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
+                case .savedChats:
+                    CommandIcon(command: .savedChats)
+                    Text(LauncherCommand.savedChats.name)
+                        .foregroundStyle(.secondary)
                 case .askClaude:
                     CommandIcon(command: .askClaude)
                     Text(LauncherCommand.askClaude.name)
@@ -73,6 +77,11 @@ struct SearchFooter: View {
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
+                }
+                if mode == .savedChats {
+                    Text("Move to Trash")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Delete, modifiers: .command))
                 }
                 if mode == .askClaude, chatState == .answering {
                     Text("Stop")

@@ -30,9 +30,17 @@ struct LauncherCommandTests {
         #expect(LauncherCommand.uninstallApp.match(for: "app") == .wordPrefix)
     }
 
-    @Test func askClaudeMatchesAIAndItsKeyword() {
+    @Test func bothAICommandsMatchAI() {
         #expect(LauncherCommand.askClaude.match(for: "ai") == .namePrefix)
+        #expect(LauncherCommand.savedChats.match(for: "ai") == .namePrefix)
+    }
+
+    @Test func askClaudeMatchesItsKeyword() {
         #expect(LauncherCommand.askClaude.match(for: "ask") == .namePrefix)
+    }
+
+    @Test func savedChatsMatchesItsKeyword() {
+        #expect(LauncherCommand.savedChats.match(for: "chats") == .namePrefix)
     }
 
     @Test func askClaudeMatchesClaudeOnlyAsALaterWordSoTheClaudeAppComesFirst() {

@@ -17,6 +17,7 @@ import Observation
     var keySwapDraft = KeySwapDraft()
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
+    private(set) var savedChatList: SavedChatList?
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
@@ -71,6 +72,7 @@ import Observation
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         review = nil
+        savedChatList = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -92,6 +94,10 @@ import Observation
             review?.moveSelection(by: offset, matching: query)
             return
         }
+        if mode == .savedChats {
+            savedChatList?.moveSelection(by: offset, matching: query)
+            return
+        }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -111,6 +117,7 @@ import Observation
 
     func openSelected() {
         if mode == .askClaude { return sendPrompt() }
+        if mode == .savedChats { return NSSound.beep() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -191,6 +198,10 @@ import Observation
         case .launcher:
             return false
         case .defineWord, .uninstallApp:
+            mode = .launcher
+            query = ""
+        case .savedChats:
+            savedChatList = nil
             mode = .launcher
             query = ""
         case .askClaude:
@@ -344,6 +355,9 @@ import Observation
             settings.filter(query)
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .askClaude:
             results = []
+        case .savedChats:
+            results = []
+            savedChatList?.select(0)
         }
         showArguments()
     }
@@ -371,6 +385,9 @@ import Observation
             wantsExpanded = false
             mode = .askClaude
             claudeSignIn.check()
+        case .savedChats:
+            savedChatList = SavedChatList()
+            mode = .savedChats
         }
         query = ""
     }
@@ -390,6 +407,10 @@ import Observation
         case .discard: discardChat()
         case nil: isAskingToKeepChat = true
         }
+    }
+
+    func trashSelectedChat() {
+        savedChatList?.trashSelected(matching: query)
     }
 
     func setExpanded(_ expanded: Bool) {
@@ -466,7 +487,7 @@ import Observation
         LauncherCommand.allCases.filter { command in
             switch command {
             case .uninstallApp: Tool.uninstaller.isOn
-            case .askClaude: Tool.ai.isOn
+            case .askClaude, .savedChats: Tool.ai.isOn
             default: true
             }
         }

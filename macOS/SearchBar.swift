@@ -102,6 +102,10 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
         if model.mode == .askClaude, model.chatState == .awaitingApproval, handleApprovalKey(keyCode) { return true }
+        if model.mode == .savedChats, Self.onlyCommand(in: modifiers), keyCode == kVK_Delete {
+            model.trashSelectedChat()
+            return true
+        }
         if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_E {
             toggleExpanded()
             return true

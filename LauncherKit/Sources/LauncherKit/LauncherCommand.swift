@@ -4,6 +4,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
     case settings
     case uninstallApp
     case askClaude
+    case savedChats
 
     public var name: String {
         switch self {
@@ -12,6 +13,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .settings: "Settings"
         case .uninstallApp: "Uninstall App"
         case .askClaude: "AI Ask Claude"
+        case .savedChats: "AI Saved Chats Claude"
         }
     }
 
@@ -22,6 +24,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .settings: "Anvil"
         case .uninstallApp: "Uninstaller"
         case .askClaude: "AI"
+        case .savedChats: "AI"
         }
     }
 
@@ -32,6 +35,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .settings: "settings"
         case .uninstallApp: "uninstall"
         case .askClaude: "ask"
+        case .savedChats: "chats"
         }
     }
 
