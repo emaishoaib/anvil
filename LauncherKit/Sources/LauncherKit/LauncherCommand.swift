@@ -3,6 +3,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
     case createQuickLink
     case settings
     case uninstallApp
+    case askClaude
 
     public var name: String {
         switch self {
@@ -10,6 +11,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .createQuickLink: "Create Quick Link"
         case .settings: "Settings"
         case .uninstallApp: "Uninstall App"
+        case .askClaude: "Ask Claude"
         }
     }
 
@@ -19,6 +21,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .createQuickLink: "Quick Links"
         case .settings: "Anvil"
         case .uninstallApp: "Uninstaller"
+        case .askClaude: "AI"
         }
     }
 
@@ -28,6 +31,7 @@ public enum LauncherCommand: String, CaseIterable, Sendable {
         case .createQuickLink: "link"
         case .settings: "settings"
         case .uninstallApp: "uninstall"
+        case .askClaude: "ask"
         }
     }
 

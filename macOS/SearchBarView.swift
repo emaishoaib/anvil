@@ -37,6 +37,10 @@ struct SearchBarView: View {
                 Divider()
                 UninstallReviewList(review: review, query: model.query)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
+            } else if model.mode == .askClaude {
+                Divider()
+                ClaudeChat()
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })

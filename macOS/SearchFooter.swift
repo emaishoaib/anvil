@@ -36,6 +36,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .uninstallApp)
                     Text(message ?? LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
+                case .askClaude:
+                    CommandIcon(command: .askClaude)
+                    Text(LauncherCommand.askClaude.name)
+                        .foregroundStyle(.secondary)
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)
                     Text(word.text)

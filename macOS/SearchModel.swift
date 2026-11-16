@@ -164,7 +164,7 @@ import Observation
         switch mode {
         case .launcher:
             return false
-        case .defineWord, .uninstallApp:
+        case .defineWord, .uninstallApp, .askClaude:
             mode = .launcher
             query = ""
         case .uninstallReview(let previousQuery):
@@ -308,7 +308,7 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .askClaude:
             results = []
         }
         showArguments()
@@ -333,6 +333,8 @@ import Observation
             mode = .uninstallApp
             let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
+        case .askClaude:
+            mode = .askClaude
         }
         query = ""
     }
@@ -371,7 +373,13 @@ import Observation
     }
 
     private var availableCommands: [LauncherCommand] {
-        LauncherCommand.allCases.filter { $0 != .uninstallApp || Tool.uninstaller.isOn }
+        LauncherCommand.allCases.filter { command in
+            switch command {
+            case .uninstallApp: Tool.uninstaller.isOn
+            case .askClaude: Tool.ai.isOn
+            default: true
+            }
+        }
     }
 
     private func showForm(_ kind: QuickLinkFormKind, for link: QuickLink, returningTo previousQuery: String) {

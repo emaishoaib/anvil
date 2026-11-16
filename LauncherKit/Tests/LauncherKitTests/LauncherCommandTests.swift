@@ -30,6 +30,15 @@ struct LauncherCommandTests {
         #expect(LauncherCommand.uninstallApp.match(for: "app") == .wordPrefix)
     }
 
+    @Test func askClaudeMatchesItsWholeName() {
+        #expect(LauncherCommand.askClaude.match(for: "ask") == .namePrefix)
+        #expect(LauncherCommand.askClaude.match(for: "ask claude") == .namePrefix)
+    }
+
+    @Test func askClaudeMatchesClaudeOnlyAsALaterWordSoTheClaudeAppComesFirst() {
+        #expect(LauncherCommand.askClaude.match(for: "claude") == .wordPrefix)
+    }
+
     @Test func settingsMatchesItsKeyword() {
         #expect(LauncherCommand.settings.match(for: "set") == .namePrefix)
         #expect(LauncherCommand.settings.match(for: "settings") == .namePrefix)

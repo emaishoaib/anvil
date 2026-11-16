@@ -10,6 +10,7 @@ struct CommandIcon: View {
         case .createQuickLink: SymbolIcon(symbol: "link", colour: .red)
         case .settings: SymbolIcon(symbol: "gearshape.fill", colour: .gray)
         case .uninstallApp: SymbolIcon(symbol: "minus.circle.fill", colour: .red)
+        case .askClaude: SymbolIcon(symbol: "sparkles", colour: .orange)
         }
     }
 }
