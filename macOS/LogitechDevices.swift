@@ -35,7 +35,14 @@ import Observation
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
-            MainActor.assumeIsolated { LogitechDevices.shared.applyMouseTool() }
+            MainActor.assumeIsolated { LogitechDevices.shared.rediscover() }
+        }
+    }
+
+    /// Looks again for the devices on every channel, as after the Mac wakes, when they may still be reconnecting and have forgotten their settings.
+    private func rediscover() {
+        for channel in channels {
+            Task { await discover(on: channel) }
         }
     }
 
