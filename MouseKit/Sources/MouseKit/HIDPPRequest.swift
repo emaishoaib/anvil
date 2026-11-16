@@ -1,6 +1,13 @@
 public struct HIDPPRequest: Hashable, Sendable {
+    /// Whether a request calls a function of a HID++ 2.0 feature on a device, or writes a HID++ 1.0 register on a receiver.
+    public enum Addressing: Hashable, Sendable {
+        case feature
+        case register
+    }
+
     public static let logitechVendorID = 0x046D
     public static let directDeviceIndex: UInt8 = 0xFF
+    public static let receiverIndex: UInt8 = 0xFF
     public static let receiverSlots: ClosedRange<UInt8> = 1...6
     public static let deviceNameFeature: UInt16 = 0x0005
     public static let reprogrammableControlsFeature: UInt16 = 0x1B04
@@ -13,31 +20,56 @@ public struct HIDPPRequest: Hashable, Sendable {
     static let firstSensor: UInt8 = 0
     static let divertedReporting: UInt8 = 0x03
     static let undivertedReporting: UInt8 = 0x02
+    static let shortReportID: UInt8 = 0x10
+    static let shortReportLength = 7
     static let longReportID: UInt8 = 0x11
     static let longReportLength = 20
     static let softwareID: UInt8 = 0x0B
     static let rootFeatureIndex: UInt8 = 0
     static let pingByte: UInt8 = 0x5A
+    static let setShortRegister: UInt8 = 0x80
+    static let notificationsRegister: UInt8 = 0x00
+    static let wirelessNotificationFlags: [UInt8] = [0x00, 0x01, 0x00]
 
     public let deviceIndex: UInt8
     public let featureIndex: UInt8
     public let function: UInt8
     public let parameters: [UInt8]
+    public let addressing: Addressing
 
-    public init(deviceIndex: UInt8, featureIndex: UInt8, function: UInt8, parameters: [UInt8] = []) {
+    public init(deviceIndex: UInt8, featureIndex: UInt8, function: UInt8, parameters: [UInt8] = [], addressing: Addressing = .feature) {
         self.deviceIndex = deviceIndex
         self.featureIndex = featureIndex
         self.function = function
         self.parameters = parameters
+        self.addressing = addressing
     }
 
-    var functionAndSoftwareID: UInt8 { function << 4 | Self.softwareID }
+    var functionAndSoftwareID: UInt8 {
+        switch addressing {
+        case .feature: function << 4 | Self.softwareID
+        case .register: function
+        }
+    }
 
     public var report: [UInt8] {
-        let header = [Self.longReportID, deviceIndex, featureIndex, functionAndSoftwareID]
-        let body = Array(parameters.prefix(Self.longReportLength - header.count))
-        return header + body + Array(repeating: 0, count: Self.longReportLength - header.count - body.count)
+        let (reportID, length) = switch addressing {
+        case .feature: (Self.longReportID, Self.longReportLength)
+        case .register: (Self.shortReportID, Self.shortReportLength)
+        }
+        let header = [reportID, deviceIndex, featureIndex, functionAndSoftwareID]
+        let body = Array(parameters.prefix(length - header.count))
+        return header + body + Array(repeating: 0, count: length - header.count - body.count)
     }
+
+    /// Asks a receiver to report each device that connects to it or drops off, which it stays quiet about until asked.
+    public static let enableWirelessNotifications = HIDPPRequest(
+        deviceIndex: receiverIndex,
+        featureIndex: setShortRegister,
+        function: notificationsRegister,
+        parameters: wirelessNotificationFlags,
+        addressing: .register
+    )
 
     public static func protocolVersion(of device: UInt8) -> HIDPPRequest {
         HIDPPRequest(deviceIndex: device, featureIndex: rootFeatureIndex, function: 1, parameters: [0, 0, pingByte])

@@ -31,6 +31,20 @@ struct HIDPPTests {
         #expect(HIDPPReply(report: otherApp, answering: request) == nil)
     }
 
+    @Test func turningOnWirelessNotificationsWritesTheReceiversNotificationRegisterAsAShortReport() {
+        #expect(HIDPPRequest.enableWirelessNotifications.report == [0x10, 0xFF, 0x80, 0x00, 0x00, 0x01, 0x00])
+    }
+
+    @Test func theReceiverConfirmingTheRegisterWriteIsAnAnswer() {
+        let confirmation: [UInt8] = [0x10, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00]
+        #expect(HIDPPReply(report: confirmation, answering: .enableWirelessNotifications) == .answer([0x00, 0x00, 0x00]))
+    }
+
+    @Test func theReceiverRefusingTheRegisterWriteIsAnError() {
+        let refusal: [UInt8] = [0x10, 0xFF, 0x8F, 0x80, 0x00, 0x03, 0x00]
+        #expect(HIDPPReply(report: refusal, answering: .enableWirelessNotifications) == .error(0x03))
+    }
+
     @Test func aNameIsJoinedFromItsPartsAndCutToItsLength() {
         let parts: [[UInt8]] = [Array("MX Master 3S".utf8) + [0, 0, 0, 0], Array(repeating: 0, count: 16)]
         #expect(LogitechDevice.name(from: parts, length: 12) == "MX Master 3S")

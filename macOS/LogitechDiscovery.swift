@@ -1,8 +1,10 @@
 import MouseKit
 
 enum LogitechDiscovery {
+    /// Finds the device on a direct connection, or else treats the channel as a receiver, asks it to report reconnects, and finds the devices paired to it.
     static func devices(on channel: HIDPPChannel) async -> [LogitechDevice] {
         if let direct = await device(at: HIDPPRequest.directDeviceIndex, on: channel) { return [direct] }
+        _ = await channel.send(.enableWirelessNotifications)
         var found: [LogitechDevice] = []
         for slot in HIDPPRequest.receiverSlots {
             if let device = await device(at: slot, on: channel) { found.append(device) }
