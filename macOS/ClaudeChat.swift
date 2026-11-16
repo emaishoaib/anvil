@@ -20,6 +20,7 @@ struct ClaudeChat: View {
                 .frame(height: Self.height)
                 .onChange(of: chat.turns.last?.answer) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: chat.turns.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
+                .onChange(of: chat.turns.last?.tools.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
             }
         } else {
             Text("Type a prompt for Claude Code")
@@ -40,6 +41,9 @@ private struct TurnView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(.primary.opacity(0.06), in: .rect(cornerRadius: 8))
+            if !turn.tools.isEmpty {
+                ChatToolList(tools: turn.tools, isFinished: turn.isFinished)
+            }
             if turn.answer.isEmpty, !turn.isFinished {
                 ProgressView()
                     .controlSize(.small)
