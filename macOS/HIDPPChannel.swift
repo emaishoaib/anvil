@@ -1,6 +1,7 @@
 import Foundation
 import IOKit.hid
 import MouseKit
+import os
 
 final class HIDPPChannel {
     private static let replyTimeout = Duration.seconds(1)
@@ -63,10 +64,15 @@ final class HIDPPChannel {
             let result = report.withUnsafeBufferPointer { bytes in
                 IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, CFIndex(report[0]), bytes.baseAddress!, bytes.count)
             }
-            guard result == kIOReturnSuccess else { return finish(with: nil) }
+            guard result == kIOReturnSuccess else {
+                Logger.logitech.error("Channel \(self.logName, privacy: .public) could not send \(request.logBytes, privacy: .public), error \(result)")
+                return finish(with: nil)
+            }
             Task {
                 try? await Task.sleep(for: Self.replyTimeout)
-                if waiting?.id == id { finish(with: nil) }
+                guard waiting?.id == id else { return }
+                Logger.logitech.info("Channel \(self.logName, privacy: .public) got no reply to \(request.logBytes, privacy: .public)")
+                finish(with: nil)
             }
         }
     }
@@ -75,6 +81,9 @@ final class HIDPPChannel {
         guard let waiting, let reply = HIDPPReply(report: report, answering: waiting.request) else {
             onNotification?(report)
             return
+        }
+        if case .error(let code) = reply {
+            Logger.logitech.info("Channel \(self.logName, privacy: .public) was refused \(waiting.request.logBytes, privacy: .public), error \(code)")
         }
         finish(with: reply)
     }

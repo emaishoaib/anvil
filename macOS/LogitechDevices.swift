@@ -2,6 +2,7 @@ import AppKit
 import IOKit.hid
 import MouseKit
 import Observation
+import os
 
 @MainActor @Observable final class LogitechDevices {
     static let shared = LogitechDevices()
@@ -39,7 +40,10 @@ import Observation
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
-            MainActor.assumeIsolated { LogitechDevices.shared.rediscover() }
+            MainActor.assumeIsolated {
+                Logger.logitech.notice("The Mac woke, so looking for devices again")
+                LogitechDevices.shared.rediscover()
+            }
         }
     }
 
@@ -51,6 +55,7 @@ import Observation
     }
 
     func applyMouseTool() {
+        Logger.logitech.notice("Sending the mouse settings to every known device again")
         for channel in channels {
             let onChannel = devices.filter { $0.id.hasPrefix(channel.id) }
             whileBusy { for device in onChannel { await self.applyMouseTool(to: device, on: channel) } }
@@ -59,10 +64,12 @@ import Observation
 
     /// Runs device work in the background, and counts Anvil as busy until it finishes.
     private func whileBusy(_ work: @escaping @MainActor () async -> Void) {
+        if busyTasks == 0 { Logger.logitech.info("Busy") }
         busyTasks += 1
         Task {
             await work()
             busyTasks -= 1
+            if busyTasks == 0 { Logger.logitech.info("No longer busy") }
         }
     }
 
@@ -72,10 +79,12 @@ import Observation
         await WheelRatchet.apply(to: device, on: channel)
         await ThumbWheel.shared.apply(to: device, on: channel)
         dpis[device.id] = await MouseDPI.shared.apply(to: device, on: channel)
+        Logger.logitech.notice("Sent the mouse settings to \(device.name, privacy: .public) on channel \(channel.logName, privacy: .public)")
     }
 
     private func added(_ device: IOHIDDevice) {
         let channel = HIDPPChannel(device: device)
+        Logger.logitech.notice("Channel \(channel.logName, privacy: .public) appeared: \(channel.logDevice, privacy: .public)")
         channel.onNotification = { [weak self, weak channel] report in
             guard let self, let channel else { return }
             notified(report, on: channel)
@@ -86,10 +95,13 @@ import Observation
 
     /// Looks for devices on a channel, and tries again a few times when none answers yet, as when a mouse has only just reconnected.
     private func discover(on channel: HIDPPChannel) async {
-        for pause in Self.discoveryPauses {
+        for (attempt, pause) in Self.discoveryPauses.enumerated() {
             try? await Task.sleep(for: pause)
             guard channels.contains(where: { $0 === channel }) else { return }
+            Logger.logitech.notice("Looking for devices on channel \(channel.logName, privacy: .public), try \(attempt + 1) of \(Self.discoveryPauses.count)")
             let found = await LogitechDiscovery.devices(on: channel)
+            let names = found.map(\.name).joined(separator: ", ")
+            Logger.logitech.notice("Channel \(channel.logName, privacy: .public) found \(found.isEmpty ? "no devices" : names, privacy: .public)")
             guard found.isEmpty else {
                 for device in found { await use(device, on: channel) }
                 return
@@ -99,6 +111,7 @@ import Observation
 
     private func removed(_ device: IOHIDDevice) {
         let gone = channels.filter { CFEqual($0.device, device) }
+        for channel in gone { Logger.logitech.notice("Channel \(channel.logName, privacy: .public) disappeared") }
         gone.forEach { $0.stop() }
         channels.removeAll { CFEqual($0.device, device) }
         devices.removeAll { found in gone.contains { found.id.hasPrefix($0.id) } }
@@ -140,6 +153,7 @@ import Observation
             if isDown { heldGestureButtons.insert(id) } else { heldGestureButtons.remove(id) }
             GestureButton.send(isDown: isDown)
         case .linkRestored:
+            Logger.logitech.notice("Device \(index) reconnected on channel \(channel.logName, privacy: .public)")
             whileBusy { if let device = await LogitechDiscovery.device(at: index, on: channel) { await self.use(device, on: channel) } }
         case .batteryChanged(let status):
             batteries[id] = status
