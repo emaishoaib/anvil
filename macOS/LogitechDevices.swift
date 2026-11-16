@@ -12,6 +12,10 @@ import os
         [kIOHIDVendorIDKey: HIDPPRequest.logitechVendorID, kIOHIDDeviceUsagePageKey: 0xFF43, kIOHIDDeviceUsageKey: 0x0202],
     ]
     private static let discoveryPauses: [Duration] = [.zero, .seconds(1), .seconds(2), .seconds(4)]
+    private static let quickRecheckPause = Duration.milliseconds(500)
+    private static let quickRecheckCount = 10
+    private static let finalRecheckPause = Duration.seconds(8)
+    private static let recheckPauses: [Duration] = [.zero] + Array(repeating: quickRecheckPause, count: quickRecheckCount) + [finalRecheckPause]
 
     private(set) var devices: [LogitechDevice] = []
     private(set) var batteries: [String: BatteryStatus] = [:]
@@ -74,7 +78,7 @@ import os
     }
 
     private func applyMouseTool(to device: LogitechDevice, on channel: HIDPPChannel) async {
-        await GestureButton.takeOver(device, on: channel)
+        await GestureButton.apply(to: device, on: channel)
         await WheelResolution.shared.apply(to: device, on: channel)
         await WheelRatchet.apply(to: device, on: channel)
         await ThumbWheel.shared.apply(to: device, on: channel)
@@ -125,7 +129,20 @@ import os
         devices.append(device)
         await readBattery(of: device, on: channel)
         await applyMouseTool(to: device, on: channel)
-        Task { await WheelRatchet.keepApplied(to: device, on: channel) }
+        Task { await keepApplied(to: device, on: channel) }
+    }
+
+    /// Reads the gesture button and the ratchet again after a device is set up, every half second for the first five seconds and once more at thirteen, and sets them again whenever the mouse has gone back to its own defaults. The MX Master 3S does that within a few seconds of connecting, so the quick checks keep the button working and the wheel ratcheting within half a second.
+    private func keepApplied(to device: LogitechDevice, on channel: HIDPPChannel) async {
+        var waited = Duration.zero
+        for pause in Self.recheckPauses {
+            try? await Task.sleep(for: pause)
+            waited += pause
+            let seconds = String(format: "%.1f", waited / .seconds(1))
+            Logger.logitech.info("Checking the gesture button and ratchet on \(device.name, privacy: .public) again, \(seconds, privacy: .public) s after setting it up")
+            await GestureButton.apply(to: device, on: channel)
+            await WheelRatchet.apply(to: device, on: channel)
+        }
     }
 
     private func readBattery(of device: LogitechDevice, on channel: HIDPPChannel) async {
