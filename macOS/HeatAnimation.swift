@@ -1,70 +1,83 @@
 import AppKit
 
-/// The glow the menu bar icon plays while Anvil works in the background: an orange copy of the anvil, cut to its shape, warms up over the icon and cools again, over and over. It waits a moment before the first warming, so work that ends quickly never shows, and it cools off gently when the work stops. Like the strike, it runs in Core Animation and is skipped when Reduce Motion is on.
-enum HeatAnimation {
-    private static let glowName = "heatGlow"
-    private static let heatKey = "heat"
-    private static let coolKey = "cool"
-    private static let cycleDuration = 1.6
-    private static let startDelay = 0.3
-    private static let coolDuration = 0.3
-    private static let peakOpacity: Float = 0.85
-
-    static func set(_ isHot: Bool, on button: NSStatusBarButton) {
-        guard let layer = button.layer else { return }
-        if isHot { heat(button, layer) } else { cool(layer) }
+/// The glow the menu bar icon plays while Anvil works in the background: the anvil itself warms to orange and cools back, over and over, by changing the colour the menu bar draws it in. Recolouring the icon, rather than laying an orange copy over it, keeps its edges clean. It waits a moment before the first warming, so work that ends quickly never shows, and it eases back to the usual colour when the work stops. A timer drives it only while it plays, and it is skipped when Reduce Motion is on.
+final class HeatAnimation {
+    private enum Phase {
+        case idle
+        case heating(since: CFTimeInterval)
+        case cooling(from: CGFloat, since: CFTimeInterval)
     }
 
-    private static func heat(_ button: NSStatusBarButton, _ layer: CALayer) {
-        guard !PanelAnimation.isReduced, let icon = button.image else { return }
-        let glow = glowLayer(in: layer)
-        guard glow.animation(forKey: heatKey) == nil else { return }
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        glow.frame = CGRect(
-            x: button.bounds.midX - icon.size.width / 2,
-            y: button.bounds.midY - icon.size.height / 2,
-            width: icon.size.width,
-            height: icon.size.height
-        )
-        glow.mask?.frame = glow.bounds
-        glow.mask?.contents = icon
-        CATransaction.commit()
+    private static let cycleSeconds = 1.6
+    private static let startDelaySeconds = 0.3
+    private static let coolSeconds = 0.3
+    private static let tickSeconds = 1.0 / 30
 
-        let pulse = CAKeyframeAnimation(keyPath: "opacity")
-        pulse.values = [0, peakOpacity, 0]
-        pulse.keyTimes = [0, 0.5, 1]
-        pulse.duration = cycleDuration
-        pulse.repeatCount = .infinity
-        pulse.beginTime = CACurrentMediaTime() + startDelay
-        pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        glow.removeAnimation(forKey: coolKey)
-        glow.add(pulse, forKey: heatKey)
+    private let button: NSStatusBarButton
+    private var phase = Phase.idle
+    private var heat: CGFloat = 0
+    private var timer: Timer?
+
+    init(on button: NSStatusBarButton) {
+        self.button = button
     }
 
-    private static func cool(_ layer: CALayer) {
-        guard let glow = layer.sublayers?.first(where: { $0.name == glowName }),
-              glow.animation(forKey: heatKey) != nil
-        else { return }
-        let fade = CABasicAnimation(keyPath: "opacity")
-        fade.fromValue = glow.presentation()?.opacity ?? 0
-        fade.toValue = 0
-        fade.duration = coolDuration
-        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        glow.removeAnimation(forKey: heatKey)
-        glow.add(fade, forKey: coolKey)
+    func set(_ isHot: Bool) {
+        let now = CACurrentMediaTime()
+        switch (isHot, phase) {
+        case (true, .heating), (false, .idle), (false, .cooling):
+            return
+        case (true, _):
+            guard !PanelAnimation.isReduced else { return }
+            phase = .heating(since: now)
+        case (false, .heating):
+            phase = .cooling(from: heat, since: now)
+        }
+        startTicking()
     }
 
-    private static func glowLayer(in layer: CALayer) -> CALayer {
-        if let existing = layer.sublayers?.first(where: { $0.name == glowName }) { return existing }
-        let glow = CALayer()
-        glow.name = glowName
-        glow.backgroundColor = NSColor.systemOrange.cgColor
-        glow.opacity = 0
-        let shape = CALayer()
-        shape.contentsGravity = .resizeAspect
-        glow.mask = shape
-        layer.addSublayer(glow)
-        return glow
+    private func startTicking() {
+        guard timer == nil else { return }
+        let timer = Timer(timeInterval: Self.tickSeconds, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.tick() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+    }
+
+    private func tick() {
+        let now = CACurrentMediaTime()
+        if case .cooling(_, let since) = phase, now - since >= Self.coolSeconds { phase = .idle }
+        heat = heat(at: now)
+        paint()
+        guard case .idle = phase else { return }
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func heat(at now: CFTimeInterval) -> CGFloat {
+        switch phase {
+        case .idle:
+            return 0
+        case .heating(let since):
+            let seconds = now - since - Self.startDelaySeconds
+            guard seconds > 0 else { return 0 }
+            return (1 - cos(2 * .pi * seconds / Self.cycleSeconds)) / 2
+        case .cooling(let from, let since):
+            let left = max(1 - (now - since) / Self.coolSeconds, 0)
+            return from * left * left
+        }
+    }
+
+    private func paint() {
+        guard heat > 0 else {
+            button.contentTintColor = nil
+            return
+        }
+        button.effectiveAppearance.performAsCurrentDrawingAppearance {
+            let cool = NSColor.labelColor.usingColorSpace(.sRGB)
+            let hot = NSColor.systemOrange.usingColorSpace(.sRGB) ?? .orange
+            button.contentTintColor = cool?.blended(withFraction: heat, of: hot) ?? hot
+        }
     }
 }

@@ -14,9 +14,10 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
         button.image = icon
         button.wantsLayer = true
         item.menu = makeMenu()
+        let heat = HeatAnimation(on: button)
         Task {
             for await isBusy in Observations({ LogitechDevices.shared.isBusy }) {
-                HeatAnimation.set(isBusy, on: button)
+                heat.set(isBusy)
             }
         }
     }
