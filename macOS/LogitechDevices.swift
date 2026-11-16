@@ -125,6 +125,7 @@ import os
         devices.append(device)
         await readBattery(of: device, on: channel)
         await applyMouseTool(to: device, on: channel)
+        Task { await WheelRatchet.keepApplied(to: device, on: channel) }
     }
 
     private func readBattery(of device: LogitechDevice, on channel: HIDPPChannel) async {
