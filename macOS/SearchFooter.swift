@@ -74,13 +74,18 @@ struct SearchFooter: View {
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
                 }
+                if mode == .askClaude, chatState == .signingIn {
+                    Text("Cancel Sign In")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                }
                 if mode == .askClaude, chatState == .awaitingApproval {
                     Text("Deny")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
                     FooterDivider()
                 }
-                if mode == .askClaude, chatState == .notStarted {
+                if mode == .askClaude, chatState == .notStarted || chatState == .signedOut {
                     Text("Folder")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_O, modifiers: .command))
@@ -123,7 +128,14 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
-        if mode == .askClaude { return chatState == .awaitingApproval ? "Allow" : "Send" }
+        if mode == .askClaude {
+            return switch chatState {
+            case .signedOut: "Sign In"
+            case .signingIn: nil
+            case .awaitingApproval: "Allow"
+            case .notStarted, .started: "Send"
+            }
+        }
         if mode == .uninstallApp { return selected == nil || LeftoverIndexStore.shared.isSearching ? nil : "Review Files" }
         if case .uninstallReview = mode { return "Move to Trash" }
         if case .wordEntry = mode { return "Open in Dictionary" }

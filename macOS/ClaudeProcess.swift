@@ -1,10 +1,8 @@
 import ClaudeKit
 import Foundation
 
-/// A running `claude` command that a chat talks to: prompts and approval answers are written to it as lines, and every line it prints is read back as events. It gets a PATH with the usual install folders, because an app opened from Finder has almost none, and the tools Claude runs, such as `git`, need it.
+/// A running `claude` command that a chat talks to: prompts and approval answers are written to it as lines, and every line it prints is read back as events.
 final class ClaudeProcess {
-    private static let searchPath = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
-
     private let process = Process()
     private let input = Pipe()
     private let output = Pipe()
@@ -14,7 +12,7 @@ final class ClaudeProcess {
         process.executableURL = command
         process.arguments = arguments
         process.currentDirectoryURL = folder
-        process.environment = Self.environment
+        process.environment = ClaudeCommand.environment
         process.standardInput = input
         process.standardOutput = output
         process.standardError = FileHandle.nullDevice
@@ -35,12 +33,5 @@ final class ClaudeProcess {
     func end() {
         try? input.fileHandleForWriting.close()
         process.terminate()
-    }
-
-    private static var environment: [String: String] {
-        var environment = ProcessInfo.processInfo.environment
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        environment["PATH"] = searchPath.map { $0.replacingOccurrences(of: "~", with: home) }.joined(separator: ":")
-        return environment
     }
 }

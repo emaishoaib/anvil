@@ -1,12 +1,13 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
 
     let chat: ClaudeChatSession?
+    let state: ChatState
 
     var body: some View {
         if let chat, !chat.turns.isEmpty {
@@ -27,6 +28,9 @@ struct ClaudeChat: View {
                 .onChange(of: chat.turns.last?.tools.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: chat.approvals.first?.requestID) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
             }
+        } else if state == .signedOut || state == .signingIn {
+            SignInPrompt(isSigningIn: state == .signingIn)
+                .frame(height: Self.height)
         } else {
             Text("Type a prompt for Claude Code")
                 .foregroundStyle(.secondary)

@@ -22,10 +22,15 @@ import Observation
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
+    let claudeSignIn = ClaudeSignIn()
 
     var chatState: ChatState {
-        guard let chat else { return .notStarted }
-        return chat.approvals.isEmpty ? .started : .awaitingApproval
+        if let chat { return chat.approvals.isEmpty ? .started : .awaitingApproval }
+        return switch claudeSignIn.state {
+        case .signedOut: .signedOut
+        case .signingIn: .signingIn
+        case .signedIn, .unknown: .notStarted
+        }
     }
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
@@ -348,6 +353,7 @@ import Observation
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
         case .askClaude:
             mode = .askClaude
+            claudeSignIn.check()
         }
         query = ""
     }
