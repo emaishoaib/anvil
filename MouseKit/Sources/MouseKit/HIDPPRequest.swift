@@ -132,6 +132,10 @@ public struct HIDPPRequest: Hashable, Sendable {
         HIDPPRequest(deviceIndex: device, featureIndex: thumbWheelFeature, function: 2, parameters: reporting.parameters)
     }
 
+    public static func controlReporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8) -> HIDPPRequest {
+        HIDPPRequest(deviceIndex: device, featureIndex: controlsFeature, function: 2, parameters: [UInt8(control >> 8), UInt8(control & 0xFF)])
+    }
+
     public static func reporting(of control: UInt16, on device: UInt8, controlsFeature: UInt8, diverted: Bool) -> HIDPPRequest {
         HIDPPRequest(
             deviceIndex: device,
