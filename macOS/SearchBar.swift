@@ -26,7 +26,7 @@ final class SearchBar {
         model.isPinned ? panel.makeKeyAndOrderFront(nil) : hide()
     }
 
-    /// Hides the search bar, unless it is pinned. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows.
+    /// Hides the search bar, unless it is pinned. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows. A chat with Claude is always brought back, however long the bar was hidden, and keeps running while it is.
     func hide(remembering: Bool = true) {
         guard panel.isVisible, !isPresentingModal, !model.isPinned else { return }
         model.settings.finishEditing()
@@ -255,7 +255,7 @@ final class SearchBar {
     private func show() {
         guard let screen = NSScreen.main else { return }
         CurrencyRatesStore.shared.refreshIfStale()
-        if remembersLastState { model.reopen() } else { model.reset() }
+        if remembersLastState || model.chat != nil { model.reopen() } else { model.reset() }
         attachContent()
         content.layoutSubtreeIfNeeded()
         let frame = model.isExpanded ? PanelResizing.expandedFrame(on: screen) : PanelResizing.usualFrame(for: content.fittingSize, on: screen)
