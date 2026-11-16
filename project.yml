@@ -35,6 +35,8 @@ packages:
     path: MouseKit
   CleanerKit:
     path: CleanerKit
+  ClaudeKit:
+    path: ClaudeKit
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     from: 2.10.1
@@ -52,6 +54,7 @@ targets:
       - package: RulesKit
       - package: MouseKit
       - package: CleanerKit
+      - package: ClaudeKit
       - package: Sparkle
     info:
       path: macOS/Info.plist
