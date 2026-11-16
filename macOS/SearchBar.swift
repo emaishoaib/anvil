@@ -6,13 +6,12 @@ import SwiftUI
 final class SearchBar {
     static let shared = SearchBar()
 
-    private static let topShare = 0.25
-
     private let panel = SearchPanel()
     private let model = SearchModel()
     private lazy var content = NSHostingView(rootView: SearchBarView(model: model))
     private var isPresentingModal = false
     private var hiddenAt: ContinuousClock.Instant?
+    private var collapsedFrame: NSRect?
 
     var isPinned: Bool { model.isPinned }
 
@@ -65,12 +64,29 @@ final class SearchBar {
         return present()
     }
 
-    func fit(height: CGFloat) {
-        guard panel.frame.height != height else { return }
+    /// Sizes the search bar to its content, keeping its top edge where it is. A change of width, such as leaving AI mode while it is expanded, puts the bar back in its usual place. An expanded bar is sized by the screen instead, so its content is not measured.
+    func fit(_ size: CGSize) {
+        guard !model.isExpanded else { return }
+        collapsedFrame = nil
+        guard panel.frame.size != size, let screen = panel.screen ?? NSScreen.main else { return }
+        guard panel.frame.width == size.width else { return panel.setFrame(PanelResizing.usualFrame(for: size, on: screen), display: true) }
         var frame = panel.frame
-        frame.origin.y = frame.maxY - height
-        frame.size.height = height
+        frame.origin.y = frame.maxY - size.height
+        frame.size.height = size.height
         panel.setFrame(frame, display: true)
+    }
+
+    /// Grows the search bar to fill most of the screen in AI mode, or shrinks it back to where it was, animating either way.
+    func toggleExpanded() {
+        guard model.mode == .askClaude, let screen = panel.screen ?? NSScreen.main else { return }
+        if let collapsedFrame {
+            self.collapsedFrame = nil
+            PanelResizing.animate(panel, to: collapsedFrame) { self.model.setExpanded(false) }
+        } else {
+            collapsedFrame = panel.frame
+            model.setExpanded(true)
+            PanelResizing.animate(panel, to: PanelResizing.expandedFrame(on: screen))
+        }
     }
 
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
@@ -86,6 +102,10 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
         if model.mode == .askClaude, model.chatState == .awaitingApproval, handleApprovalKey(keyCode) { return true }
+        if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_E {
+            toggleExpanded()
+            return true
+        }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
         if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
         if model.mode == .askClaude, model.chat == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
@@ -238,9 +258,8 @@ final class SearchBar {
         if remembersLastState { model.reopen() } else { model.reset() }
         attachContent()
         content.layoutSubtreeIfNeeded()
-        let size = content.fittingSize
-        let top = screen.frame.maxY - screen.frame.height * Self.topShare
-        panel.setFrame(NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height, width: size.width, height: size.height), display: true)
+        let frame = model.isExpanded ? PanelResizing.expandedFrame(on: screen) : PanelResizing.usualFrame(for: content.fittingSize, on: screen)
+        panel.setFrame(frame, display: true)
         PanelAnimation.appear(panel)
         panel.makeKeyAndOrderFront(nil)
         MenuBarItem.shared.strike()

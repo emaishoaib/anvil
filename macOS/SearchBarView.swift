@@ -40,7 +40,7 @@ struct SearchBarView: View {
             } else if model.mode == .askClaude {
                 Divider()
                 ChatSetupRow(setup: model.chatSetup, isLocked: model.chat != nil, ending: model.plannedEnding)
-                ClaudeChat(chat: model.chat, state: model.chatState, save: model.saveChat, discard: model.discardChat)
+                ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, save: model.saveChat, discard: model.discardChat)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState)
             } else if model.mode == .settings {
                 Divider()
@@ -54,8 +54,9 @@ struct SearchBarView: View {
                 SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
             }
         }
-        .frame(width: Self.width)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: model.isExpanded ? nil : Self.width)
+        .frame(maxWidth: model.isExpanded ? .infinity : nil, maxHeight: model.isExpanded ? .infinity : nil, alignment: .top)
+        .fixedSize(horizontal: false, vertical: !model.isExpanded)
         .background(Color(nsColor: .windowBackgroundColor).opacity(Self.tintOpacity))
         .overlay {
             if model.isPinned {
@@ -63,7 +64,7 @@ struct SearchBarView: View {
                     .strokeBorder(Color.accentColor, lineWidth: Self.pinnedOutlineWidth)
             }
         }
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { SearchBar.shared.fit(height: $0) }
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { SearchBar.shared.fit($0) }
         .onChange(of: model.timesOpened, initial: true) { focus = .query }
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }

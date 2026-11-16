@@ -24,6 +24,11 @@ import Observation
     private(set) var chat: ClaudeChatSession?
     private(set) var isAskingToKeepChat = false
     private(set) var plannedEnding: ChatEnding?
+    private var wantsExpanded = false
+
+    var isExpanded: Bool {
+        mode == .askClaude && wantsExpanded
+    }
     let claudeSignIn = ClaudeSignIn()
 
     var chatState: ChatState {
@@ -61,6 +66,7 @@ import Observation
     func reset() {
         settings.finishEditing()
         endChat()
+        wantsExpanded = false
         LeftoverIndexStore.shared.forget()
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
@@ -362,6 +368,7 @@ import Observation
             let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
         case .askClaude:
+            wantsExpanded = false
             mode = .askClaude
             claudeSignIn.check()
         }
@@ -383,6 +390,10 @@ import Observation
         case .discard: discardChat()
         case nil: isAskingToKeepChat = true
         }
+    }
+
+    func setExpanded(_ expanded: Bool) {
+        wantsExpanded = expanded
     }
 
     func plan(_ ending: ChatEnding) {

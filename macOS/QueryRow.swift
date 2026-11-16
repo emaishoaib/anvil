@@ -29,6 +29,9 @@ struct QueryRow: View {
                 }
                 Spacer(minLength: 0)
             }
+            if model.mode == .askClaude {
+                ExpandButton(isExpanded: model.isExpanded, action: SearchBar.shared.toggleExpanded)
+            }
             PinButton(isPinned: model.isPinned, action: model.togglePin)
         }
     }
@@ -88,6 +91,23 @@ private struct PinButton: View {
         }
         .buttonStyle(.plain)
         .help(isPinned ? "Unpin" : "Pin")
+    }
+}
+
+private struct ExpandButton: View {
+    let isExpanded: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 28)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .help(isExpanded ? "Shrink (Command E)" : "Expand (Command E)")
     }
 }
 
