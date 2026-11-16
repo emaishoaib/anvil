@@ -17,6 +17,8 @@ final class HIDPPChannel {
     var onNotification: (([UInt8]) -> Void)?
     private let reportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: reportCapacity)
     private var waiting: Waiting?
+    private var lastExchange: Task<HIDPPReply?, Never>?
+    private var isStopped = false
     private var nextID = 0
 
     init(device: IOHIDDevice) {
@@ -30,6 +32,7 @@ final class HIDPPChannel {
     }
 
     func stop() {
+        isStopped = true
         IOHIDDeviceRegisterInputReportCallback(device, reportBuffer, Self.reportCapacity, nil, nil)
         onNotification = nil
         finish(with: nil)
@@ -39,7 +42,19 @@ final class HIDPPChannel {
         reportBuffer.deallocate()
     }
 
+    /// Sends a request once every earlier one has its reply or has timed out, so only one request is ever waiting.
     func send(_ request: HIDPPRequest) async -> HIDPPReply? {
+        let previous = lastExchange
+        let exchange = Task {
+            _ = await previous?.value
+            return await self.exchange(request)
+        }
+        lastExchange = exchange
+        return await exchange.value
+    }
+
+    private func exchange(_ request: HIDPPRequest) async -> HIDPPReply? {
+        guard !isStopped else { return nil }
         nextID += 1
         let id = nextID
         return await withCheckedContinuation { continuation in
