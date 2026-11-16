@@ -74,6 +74,21 @@ struct SearchFooter: View {
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
                 }
+                if mode == .askClaude, chatState == .answering {
+                    Text("Stop")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                }
+                if mode == .askClaude, chatState == .askingToKeep {
+                    Text("Keep Chatting")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                    FooterDivider()
+                    Text("Discard")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Delete, modifiers: .command))
+                    FooterDivider()
+                }
                 if mode == .askClaude, chatState == .signingIn {
                     Text("Cancel Sign In")
                         .foregroundStyle(.secondary)
@@ -131,8 +146,9 @@ struct SearchFooter: View {
         if mode == .askClaude {
             return switch chatState {
             case .signedOut: "Sign In"
-            case .signingIn: nil
+            case .signingIn, .answering: nil
             case .awaitingApproval: "Allow"
+            case .askingToKeep: "Save Chat"
             case .notStarted, .started: "Send"
             }
         }

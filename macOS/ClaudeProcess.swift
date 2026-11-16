@@ -30,8 +30,11 @@ final class ClaudeProcess {
         (try? input.fileHandleForWriting.write(contentsOf: line)) != nil
     }
 
-    func end() {
+    /// Stops Claude Code and waits until it has exited, so its files are no longer being written.
+    func end() async {
         try? input.fileHandleForWriting.close()
         process.terminate()
+        let process = process
+        await Task.detached { process.waitUntilExit() }.value
     }
 }

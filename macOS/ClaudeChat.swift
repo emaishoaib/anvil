@@ -1,13 +1,15 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, or the question about keeping the chat, at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
 
     let chat: ClaudeChatSession?
     let state: ChatState
+    let save: () -> Void
+    let discard: () -> Void
 
     var body: some View {
         if let chat, !chat.turns.isEmpty {
@@ -18,6 +20,9 @@ struct ClaudeChat: View {
                         if let approval = chat.approvals.first {
                             ApprovalCard(approval: approval, answer: { chat.answerApproval(allowed: $0) })
                         }
+                        if state == .askingToKeep {
+                            KeepChatCard(save: save, discard: discard)
+                        }
                         Color.clear.frame(height: 1).id(Self.bottomID)
                     }
                     .padding(16)
@@ -27,6 +32,7 @@ struct ClaudeChat: View {
                 .onChange(of: chat.turns.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: chat.turns.last?.tools.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: chat.approvals.first?.requestID) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
+                .onChange(of: state) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
             }
         } else if state == .signedOut || state == .signingIn {
             SignInPrompt(isSigningIn: state == .signingIn)
@@ -60,9 +66,14 @@ private struct TurnView: View {
                 Text(turn.answer)
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
-            } else {
+            } else if !turn.answer.isEmpty {
                 AnswerView(blocks: AnswerMarkdown.blocks(from: turn.answer))
                     .textSelection(.enabled)
+            }
+            if turn.wasStopped {
+                Label("Stopped", systemImage: "stop.circle")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

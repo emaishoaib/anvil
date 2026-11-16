@@ -22,10 +22,15 @@ import Observation
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
+    private(set) var isAskingToKeepChat = false
     let claudeSignIn = ClaudeSignIn()
 
     var chatState: ChatState {
-        if let chat { return chat.approvals.isEmpty ? .started : .awaitingApproval }
+        if let chat {
+            if !chat.approvals.isEmpty { return .awaitingApproval }
+            if chat.isAnswering { return .answering }
+            return isAskingToKeepChat ? .askingToKeep : .started
+        }
         return switch claudeSignIn.state {
         case .signedOut: .signedOut
         case .signingIn: .signingIn
@@ -182,7 +187,10 @@ import Observation
             mode = .launcher
             query = ""
         case .askClaude:
-            endChat()
+            guard chat == nil else {
+                isAskingToKeepChat = true
+                return true
+            }
             mode = .launcher
             query = ""
         case .uninstallReview(let previousQuery):
@@ -367,9 +375,35 @@ import Observation
         query = ""
     }
 
+    func askToKeepChat() {
+        isAskingToKeepChat = true
+    }
+
+    func keepChatting() {
+        isAskingToKeepChat = false
+    }
+
+    func saveChat() {
+        guard let chat else { return }
+        SavedChats.save(chat)
+        endChat()
+        mode = .launcher
+        query = ""
+    }
+
+    func discardChat() {
+        guard let chat else { return }
+        self.chat = nil
+        isAskingToKeepChat = false
+        Task { await chat.discard() }
+        mode = .launcher
+        query = ""
+    }
+
     private func endChat() {
         chat?.end()
         chat = nil
+        isAskingToKeepChat = false
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {

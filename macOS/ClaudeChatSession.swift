@@ -2,21 +2,23 @@ import ClaudeKit
 import Foundation
 import Observation
 
-/// A chat with Claude Code in one folder and permission mode, which stay fixed for the whole chat. Claude Code starts with the first prompt and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. Approvals Claude asks for wait in line and are answered one at a time, oldest first.
+/// A chat with Claude Code in one folder and permission mode, which stay fixed for the whole chat. Claude Code starts with the first prompt and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. Approvals Claude asks for wait in line and are answered one at a time, oldest first. Stopping an answer asks Claude Code to stop, and if it has not finished a few seconds later, the answer counts as stopped anyway.
 @Observable final class ClaudeChatSession {
     private static let stoppedUnexpectedly = "Claude Code stopped before it finished answering."
     private static let notInstalled = "Anvil could not find Claude Code. Install it from claude.com/claude-code."
+    private static let stopGrace = Duration.seconds(3)
 
     let sessionID = UUID()
     let folder: URL
     let mode: PermissionMode
-    private(set) var turns: [ChatTurn] = []
+    private(set) var transcript = ChatTranscript()
     private(set) var approvals: [Approval] = []
     @ObservationIgnored private var process: ClaudeProcess?
+    @ObservationIgnored private var isStopping = false
 
-    var isAnswering: Bool {
-        turns.last.map { !$0.isFinished } ?? false
-    }
+    var turns: [ChatTurn] { transcript.turns }
+    var isAnswering: Bool { transcript.isAnswering }
+    var title: String { transcript.title }
 
     init(folder: URL, mode: PermissionMode) {
         self.folder = folder
@@ -25,7 +27,7 @@ import Observation
 
     func send(_ prompt: String) {
         guard !isAnswering else { return }
-        turns.append(ChatTurn(id: turns.count, prompt: prompt))
+        transcript.start(prompt)
         guard let command = ClaudeCommand.url else { return finish(answer: Self.notInstalled, failed: true) }
         guard let process = process ?? start(command), process.send(ClaudePrompt.line(prompt)) else { return finish(answer: Self.stoppedUnexpectedly, failed: true) }
     }
@@ -36,9 +38,28 @@ import Observation
         if process?.send(ApprovalAnswer.line(for: approval, allowed: allowed)) != true { finish(answer: Self.stoppedUnexpectedly, failed: true) }
     }
 
+    func stop() {
+        guard isAnswering, !isStopping else { return }
+        isStopping = true
+        approvals.removeAll()
+        guard process?.send(ClaudeInterrupt.line()) == true else { return finishStopping() }
+        Task { [weak self] in
+            try? await Task.sleep(for: Self.stopGrace)
+            self?.finishStopping()
+        }
+    }
+
     func end() {
-        process?.end()
-        process = nil
+        let process = process
+        self.process = nil
+        Task { await process?.end() }
+    }
+
+    func discard() async {
+        let process = process
+        self.process = nil
+        await process?.end()
+        ClaudeSessionFiles.trash(sessionID)
     }
 
     private func start(_ command: URL) -> ClaudeProcess? {
@@ -55,10 +76,10 @@ import Observation
     private func apply(_ events: [ClaudeEvent]) {
         for event in events {
             switch event {
-            case .text(let text): updateLastTurn { $0.answer += text }
+            case .text(let text): transcript.addText(text)
             case .finished(let answer, let failed): finish(answer: answer, failed: failed)
-            case .toolStarted(let call): startTool(call)
-            case .toolFinished(let id, let failed): finishTool(id, failed: failed)
+            case .toolStarted(let call): transcript.startTool(call)
+            case .toolFinished(let id, let failed): transcript.finishTool(id, failed: failed)
             case .approvalRequested(let approval): approvals.append(approval)
             case .approvalWithdrawn(let requestID): approvals.removeAll { $0.requestID == requestID }
             case .started: break
@@ -66,27 +87,16 @@ import Observation
         }
     }
 
-    private func startTool(_ call: ToolCall) {
-        updateLastTurn { turn in
-            turn.tools.append(ChatTool(id: call.id, summary: call.summary))
-            if !turn.answer.isEmpty, !turn.answer.hasSuffix("\n") { turn.answer += "\n\n" }
-        }
-    }
-
-    private func finishTool(_ id: String, failed: Bool) {
-        updateLastTurn { turn in
-            guard let index = turn.tools.firstIndex(where: { $0.id == id }) else { return }
-            turn.tools[index].state = failed ? .failed : .finished
-        }
-    }
-
     private func finish(answer: String, failed: Bool) {
+        guard !isStopping else { return finishStopping() }
         approvals.removeAll()
-        updateLastTurn { turn in
-            if turn.answer.isEmpty || failed, !answer.isEmpty { turn.answer = answer }
-            turn.isFinished = true
-            turn.failed = failed
-        }
+        transcript.finish(answer: answer, failed: failed)
+    }
+
+    private func finishStopping() {
+        guard isStopping else { return }
+        isStopping = false
+        transcript.markStopped()
     }
 
     private func stopped() {
@@ -94,10 +104,4 @@ import Observation
         guard isAnswering else { return }
         finish(answer: Self.stoppedUnexpectedly, failed: true)
     }
-
-    private func updateLastTurn(_ change: (inout ChatTurn) -> Void) {
-        guard !turns.isEmpty else { return }
-        change(&turns[turns.count - 1])
-    }
-
 }

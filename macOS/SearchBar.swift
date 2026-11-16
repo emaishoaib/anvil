@@ -87,6 +87,7 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
         if model.mode == .askClaude, model.chatState == .awaitingApproval, handleApprovalKey(keyCode) { return true }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
+        if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
         if model.mode == .askClaude, model.chat == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         if let action = AnvilAction.forShortcut(Self.combo(keyCode, modifiers)) {
@@ -146,6 +147,18 @@ final class SearchBar {
         switch keyCode {
         case kVK_Return, kVK_ANSI_KeypadEnter: model.chat?.answerApproval(allowed: true)
         case kVK_Escape: model.chat?.answerApproval(allowed: false)
+        default: return false
+        }
+        return true
+    }
+
+    private func handleEndingKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        switch (model.chatState, keyCode) {
+        case (.answering, kVK_Escape): model.chat?.stop()
+        case (.started, kVK_Escape): model.askToKeepChat()
+        case (.askingToKeep, kVK_Escape): model.keepChatting()
+        case (.askingToKeep, kVK_Return), (.askingToKeep, kVK_ANSI_KeypadEnter): model.saveChat()
+        case (.askingToKeep, kVK_Delete) where Self.onlyCommand(in: modifiers): model.discardChat()
         default: return false
         }
         return true
