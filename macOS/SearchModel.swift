@@ -23,7 +23,7 @@ import Observation
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
-    private(set) var isAskingToLeaveChat = false
+    private(set) var chatQuestion: ChatQuestion?
     private(set) var isChatSaved = false
     private var wantsExpanded = false
 
@@ -36,7 +36,11 @@ import Observation
         if let chat {
             if !chat.approvals.isEmpty { return .awaitingApproval }
             if chat.isAnswering { return .answering }
-            return isAskingToLeaveChat ? .askingToLeave : .started
+            return switch chatQuestion {
+            case .leave: .askingToLeave
+            case .delete: .askingToDelete
+            case nil: .started
+            }
         }
         return switch claudeSignIn.state {
         case .signedOut: .signedOut
@@ -404,7 +408,7 @@ import Observation
 
     func leaveChat() {
         guard !isChatSaved else { return saveChat() }
-        isAskingToLeaveChat = true
+        chatQuestion = .leave
     }
 
     private func continueSelectedChat() {
@@ -435,7 +439,12 @@ import Observation
     }
 
     func keepChatting() {
-        isAskingToLeaveChat = false
+        chatQuestion = nil
+    }
+
+    func askToDeleteChat() {
+        guard isChatSaved else { return NSSound.beep() }
+        chatQuestion = .delete
     }
 
     func saveChat() {
@@ -449,7 +458,7 @@ import Observation
     func discardChat() {
         guard let chat else { return }
         self.chat = nil
-        isAskingToLeaveChat = false
+        chatQuestion = nil
         isChatSaved = false
         SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
@@ -460,7 +469,7 @@ import Observation
     private func endChat() {
         chat?.end()
         chat = nil
-        isAskingToLeaveChat = false
+        chatQuestion = nil
         isChatSaved = false
     }
 

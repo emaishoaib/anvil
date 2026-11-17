@@ -97,6 +97,18 @@ struct SearchFooter: View {
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_S, modifiers: .command))
                     if chatState == .started { FooterDivider() }
                 }
+                if mode == .askClaude, isChatSaved, chatState == .started {
+                    Text("Delete")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_D, modifiers: .command))
+                    FooterDivider()
+                }
+                if mode == .askClaude, chatState == .askingToDelete {
+                    Text("Keep Chatting")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                    FooterDivider()
+                }
                 if mode == .askClaude, chatState == .askingToLeave {
                     Text("Keep Chatting")
                         .foregroundStyle(.secondary)
@@ -169,6 +181,7 @@ struct SearchFooter: View {
             case .signingIn, .answering: nil
             case .awaitingApproval: "Allow"
             case .askingToLeave: "Leave"
+            case .askingToDelete: "Delete"
             case .notStarted, .started: "Send"
             }
         }

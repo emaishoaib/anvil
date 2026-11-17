@@ -1,7 +1,7 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, or the question about leaving an unsaved chat, at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, or the question about leaving an unsaved chat or deleting a saved one, at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
@@ -30,6 +30,9 @@ struct ClaudeChat: View {
                         }
                         if state == .askingToLeave {
                             LeaveChatCard(keepChatting: keepChatting, save: save, leave: leave)
+                        }
+                        if state == .askingToDelete {
+                            DeleteChatCard(keepChatting: keepChatting, delete: leave)
                         }
                         Color.clear.frame(height: 1).id(Self.bottomID)
                     }
