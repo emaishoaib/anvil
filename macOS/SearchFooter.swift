@@ -40,16 +40,16 @@ struct SearchFooter: View {
                     Text(message ?? LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
                 case .aiChoice:
-                    SymbolIcon(symbol: "sparkles", colour: .orange)
+                    CommandIcon(command: .enterAIMode)
                     Text("AI Mode")
                         .foregroundStyle(.secondary)
                 case .savedChats:
-                    CommandIcon(command: .savedChats)
-                    Text(LauncherCommand.savedChats.name)
+                    SymbolIcon(symbol: AIChoice.loadChat.symbol, colour: .orange)
+                    Text(AIChoice.loadChat.title)
                         .foregroundStyle(.secondary)
                 case .askClaude:
-                    CommandIcon(command: .askClaude)
-                    Text(LauncherCommand.askClaude.name)
+                    SymbolIcon(symbol: AIChoice.startChat.symbol, colour: .orange)
+                    Text(AIChoice.startChat.title)
                         .foregroundStyle(.secondary)
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)

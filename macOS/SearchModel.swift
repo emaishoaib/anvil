@@ -398,10 +398,8 @@ import Observation
             mode = .uninstallApp
             let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
-        case .askClaude:
-            startChat()
-        case .savedChats:
-            showSavedChats()
+        case .enterAIMode:
+            mode = .aiChoice
         }
         query = ""
     }
@@ -553,7 +551,7 @@ import Observation
         LauncherCommand.allCases.filter { command in
             switch command {
             case .uninstallApp: Tool.uninstaller.isOn
-            case .askClaude, .savedChats: Tool.ai.isOn
+            case .enterAIMode: Tool.ai.isOn
             default: true
             }
         }
