@@ -13,9 +13,7 @@ struct SearchBarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            QueryRow(model: model, focus: $focus)
-                .padding(.horizontal, 16)
-                .frame(height: Self.fieldHeight)
+            if model.mode != .askClaude { queryRow }
             if case .wordEntry = model.mode {
                 Divider()
                 EntryView(page: model.entryPage)
@@ -42,10 +40,11 @@ struct SearchBarView: View {
                 SavedChatListView(list: list, query: model.query)
                 SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions)
             } else if model.mode == .askClaude {
+                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, dividerEdge: .bottom)
+                ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, save: model.saveChat, discard: model.discardChat)
                 Divider()
                 ChatSetupRow(setup: model.chatSetup, chat: model.chat, ending: model.plannedEnding)
-                ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, save: model.saveChat, discard: model.discardChat)
-                SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState)
+                queryRow
             } else if model.mode == .settings {
                 Divider()
                 SettingsList(model: model.settings, open: { model.open($0) })
@@ -73,6 +72,12 @@ struct SearchBarView: View {
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }
         .onChange(of: focus) { if let focus { model.field = focus } }
+    }
+
+    private var queryRow: some View {
+        QueryRow(model: model, focus: $focus)
+            .padding(.horizontal, 16)
+            .frame(height: Self.fieldHeight)
     }
 
     @ViewBuilder private var actionPanel: some View {

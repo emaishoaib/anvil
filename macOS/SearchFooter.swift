@@ -12,10 +12,11 @@ struct SearchFooter: View {
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
+    var dividerEdge = VerticalEdge.top
 
     var body: some View {
         VStack(spacing: 0) {
-            Divider()
+            if dividerEdge == .top { Divider() }
             HStack(spacing: 8) {
                 switch mode {
                 case .launcher:
@@ -148,6 +149,7 @@ struct SearchFooter: View {
             .padding(.horizontal, 12)
             .frame(height: Self.height - 1)
             .background(.primary.opacity(0.02))
+            if dividerEdge == .bottom { Divider() }
         }
     }
 
