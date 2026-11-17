@@ -238,6 +238,8 @@ final class SearchBar {
         case kVK_Return, kVK_ANSI_KeypadEnter:
             guard modifiers.contains(.command) else { return false }
             model.saveDraft()
+        case kVK_Tab:
+            return model.moveQuickLinkFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_Escape:
             _ = model.goBack()
         default:

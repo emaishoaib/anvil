@@ -60,7 +60,7 @@ struct SearchBarView: View {
                 .frame(height: Self.entryHeight)
         } else if case .quickLinkForm = model.mode {
             Divider()
-            QuickLinkForm(draft: $model.draft)
+            QuickLinkForm(draft: $model.draft, field: $model.quickLinkField)
         } else if case .ruleForm(let group, _, _) = model.mode {
             Divider()
             RuleForm(draft: $model.ruleDraft, group: group)

@@ -5,19 +5,20 @@ struct QuickLinkForm: View {
     private static let fieldWidth: CGFloat = 460
 
     @Binding var draft: QuickLink
-    @FocusState private var isNameFocused: Bool
+    @Binding var field: QuickLinkField
+    @FocusState private var focus: QuickLinkField?
 
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 22) {
             GridRow {
                 FormLabel(text: "Name")
                 TextField("Name", text: $draft.name, prompt: Text("Quick link name"))
-                    .focused($isNameFocused)
+                    .focused($focus, equals: .name)
             }
             GridRow(alignment: .firstTextBaseline) {
                 FormLabel(text: "Link")
                 VStack(alignment: .leading, spacing: 10) {
-                    LinkField(link: $draft.link) { SearchBar.shared.presentModal(FilePicker.chooseFileOrFolder) }
+                    LinkField(link: $draft.link, focus: $focus) { SearchBar.shared.presentModal(FilePicker.chooseFileOrFolder) }
                     Text(QuickLink.placeholderHint)
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -36,12 +37,14 @@ struct QuickLinkForm: View {
         .padding(.vertical, 28)
         .frame(maxWidth: .infinity)
         .onAppear(perform: focusName)
+        .onChange(of: field) { focus = field }
+        .onChange(of: focus) { if let focus { field = focus } }
     }
 
     /// Puts the cursor in the name field with all its text selected, ready to be typed over. It waits until the form is in the window, because a field can't take focus before then, and selects the text once the field has focus.
     private func focusName() {
         DispatchQueue.main.async {
-            isNameFocused = true
+            focus = .name
             DispatchQueue.main.async { NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil) }
         }
     }

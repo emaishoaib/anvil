@@ -8,11 +8,13 @@ extension QuickLink {
 
 struct LinkField: View {
     @Binding var link: String
+    let focus: FocusState<QuickLinkField?>.Binding
     var choose: @MainActor () -> URL? = FilePicker.chooseFileOrFolder
 
     var body: some View {
         HStack {
             TextField("Link", text: $link, prompt: Text(verbatim: "https://google.com/search?q={Query}"))
+                .focused(focus, equals: .link)
             Button("Choose a File or Folder", systemImage: "folder") {
                 guard let url = choose() else { return }
                 link = (url.path as NSString).abbreviatingWithTildeInPath

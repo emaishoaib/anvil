@@ -13,6 +13,7 @@ import Observation
     var field = SearchField.query
     var arguments = LinkArguments()
     var draft = QuickLink()
+    var quickLinkField = QuickLinkField.name
     var ruleDraft = RuleDraft()
     var keySwapDraft = KeySwapDraft()
     private(set) var actionPanel: ActionPanel?
@@ -119,6 +120,12 @@ import Observation
     func moveFocus(by offset: Int) -> Bool {
         guard mode == .launcher, !arguments.placeholders.isEmpty else { return false }
         field = field.moved(by: offset, argumentCount: arguments.placeholders.count)
+        return true
+    }
+
+    func moveQuickLinkFocus(by offset: Int) -> Bool {
+        guard case .quickLinkForm = mode else { return false }
+        quickLinkField = quickLinkField.moved(by: offset)
         return true
     }
 
@@ -559,6 +566,7 @@ import Observation
 
     private func showForm(_ kind: QuickLinkFormKind, for link: QuickLink, returningTo previousQuery: String) {
         draft = link
+        quickLinkField = .name
         mode = .quickLinkForm(kind, query: previousQuery)
         query = ""
     }
