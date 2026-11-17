@@ -184,15 +184,15 @@ final class SearchBar {
         switch (model.chatState, keyCode) {
         case (.answering, kVK_Escape): model.chat?.stop()
         case (.started, kVK_Escape): model.leaveChat()
-        case (.askingToKeep, kVK_Escape): model.keepChatting()
-        case (.askingToKeep, kVK_Return), (.askingToKeep, kVK_ANSI_KeypadEnter): model.saveChat()
-        case (.askingToKeep, kVK_Delete) where Self.onlyCommand(in: modifiers): model.discardChat()
+        case (.askingToLeave, kVK_Escape): model.keepChatting()
+        case (.askingToLeave, kVK_Return), (.askingToLeave, kVK_ANSI_KeypadEnter): model.discardChat()
+        case (.askingToLeave, kVK_ANSI_S) where Self.onlyCommand(in: modifiers): model.saveChat()
         case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
             guard Self.onlyCommand(in: modifiers) else { return false }
             model.startSavingChat()
         case (.notStarted, kVK_ANSI_D), (.started, kVK_ANSI_D), (.answering, kVK_ANSI_D):
             guard Self.onlyCommand(in: modifiers) else { return false }
-            model.plan(.discard)
+            NSSound.beep()
         default: return false
         }
         return true

@@ -23,8 +23,7 @@ import Observation
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
-    private(set) var isAskingToKeepChat = false
-    private(set) var plannedEnding: ChatEnding?
+    private(set) var isAskingToLeaveChat = false
     private(set) var isChatSaved = false
     private var wantsExpanded = false
 
@@ -37,7 +36,7 @@ import Observation
         if let chat {
             if !chat.approvals.isEmpty { return .awaitingApproval }
             if chat.isAnswering { return .answering }
-            return isAskingToKeepChat ? .askingToKeep : .started
+            return isAskingToLeaveChat ? .askingToLeave : .started
         }
         return switch claudeSignIn.state {
         case .signedOut: .signedOut
@@ -210,7 +209,6 @@ import Observation
                 leaveChat()
                 return true
             }
-            plannedEnding = nil
             isChatSaved = false
             mode = .launcher
             query = ""
@@ -406,10 +404,7 @@ import Observation
 
     func leaveChat() {
         guard !isChatSaved else { return saveChat() }
-        switch plannedEnding {
-        case .discard: discardChat()
-        case nil: isAskingToKeepChat = true
-        }
+        isAskingToLeaveChat = true
     }
 
     private func continueSelectedChat() {
@@ -433,20 +428,14 @@ import Observation
         wantsExpanded = expanded
     }
 
-    func plan(_ ending: ChatEnding) {
-        guard !isChatSaved else { return NSSound.beep() }
-        plannedEnding = plannedEnding == ending ? nil : ending
-    }
-
     /// Keeps the chat in the saved chats from now on, saving it again after every prompt, so leaving it no longer asks. Before the first prompt, it is saved as soon as that prompt is sent.
     func startSavingChat() {
         isChatSaved = true
-        plannedEnding = nil
         if let chat { SavedChats.save(chat) }
     }
 
     func keepChatting() {
-        isAskingToKeepChat = false
+        isAskingToLeaveChat = false
     }
 
     func saveChat() {
@@ -460,8 +449,7 @@ import Observation
     func discardChat() {
         guard let chat else { return }
         self.chat = nil
-        isAskingToKeepChat = false
-        plannedEnding = nil
+        isAskingToLeaveChat = false
         isChatSaved = false
         SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
@@ -472,8 +460,7 @@ import Observation
     private func endChat() {
         chat?.end()
         chat = nil
-        isAskingToKeepChat = false
-        plannedEnding = nil
+        isAskingToLeaveChat = false
         isChatSaved = false
     }
 

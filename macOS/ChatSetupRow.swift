@@ -1,13 +1,12 @@
 import ClaudeKit
 import SwiftUI
 
-/// The strip under the prompt in AI mode that shows the folder the chat works in, its permission mode, and whether the chat is saved or set to be discarded when it is left. Clicking the folder picks another one, and clicking the mode moves on to the next, the same as the footer's shortcuts. A chat keeps one folder, so the folder is locked once there is a chat, including one carried on from the saved chats. The mode is locked once Claude Code has started for the chat.
+/// The strip under the prompt in AI mode that shows the folder the chat works in, its permission mode, and whether the chat is saved. Clicking the folder picks another one, and clicking the mode moves on to the next, the same as the footer's shortcuts. A chat keeps one folder, so the folder is locked once there is a chat, including one carried on from the saved chats. The mode is locked once Claude Code has started for the chat.
 struct ChatSetupRow: View {
     private static let height: CGFloat = 32
 
     let setup: ChatSetup
     let chat: ClaudeChatSession?
-    let ending: ChatEnding?
     let isSaved: Bool
 
     var body: some View {
@@ -24,9 +23,6 @@ struct ChatSetupRow: View {
                 Label(savedTitle, systemImage: "checkmark.circle")
                     .foregroundStyle(Color.accentColor)
                     .help("This chat is in your saved chats and is saved again after every prompt")
-            } else if ending == .discard {
-                Label("Discard on Exit", systemImage: "trash")
-                    .foregroundStyle(.red)
             }
             Button(action: setup.useNextMode) {
                 Label(mode.title, systemImage: "checkmark.shield")

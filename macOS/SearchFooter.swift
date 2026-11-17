@@ -95,20 +95,16 @@ struct SearchFooter: View {
                     Text("Save")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_S, modifiers: .command))
-                    FooterDivider()
-                    Text("Discard on Exit")
-                        .foregroundStyle(.secondary)
-                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_D, modifiers: .command))
                     if chatState == .started { FooterDivider() }
                 }
-                if mode == .askClaude, chatState == .askingToKeep {
+                if mode == .askClaude, chatState == .askingToLeave {
                     Text("Keep Chatting")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
                     FooterDivider()
-                    Text("Discard")
+                    Text("Save and Leave")
                         .foregroundStyle(.secondary)
-                    KeyCaps(combo: KeyCombo(keyCode: kVK_Delete, modifiers: .command))
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_S, modifiers: .command))
                     FooterDivider()
                 }
                 if mode == .askClaude, chatState == .signingIn {
@@ -172,7 +168,7 @@ struct SearchFooter: View {
             case .signedOut: "Sign In"
             case .signingIn, .answering: nil
             case .awaitingApproval: "Allow"
-            case .askingToKeep: "Save Chat"
+            case .askingToLeave: "Leave"
             case .notStarted, .started: "Send"
             }
         }

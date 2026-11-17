@@ -74,9 +74,9 @@ struct SearchBarView: View {
             Divider()
             SavedChatListView(list: list, query: model.query)
         } else if model.mode == .askClaude {
-            ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, save: model.saveChat, discard: model.discardChat)
+            ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, keepChatting: model.keepChatting, save: model.saveChat, leave: model.discardChat)
             Divider()
-            ChatSetupRow(setup: model.chatSetup, chat: model.chat, ending: model.plannedEnding, isSaved: model.isChatSaved)
+            ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
         } else if model.mode == .settings {
             Divider()
             SettingsList(model: model.settings, open: { model.open($0) })
