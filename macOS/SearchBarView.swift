@@ -73,6 +73,9 @@ struct SearchBarView: View {
         } else if model.mode == .savedChats, let list = model.savedChatList {
             Divider()
             SavedChatListView(list: list, query: model.query)
+        } else if model.mode == .aiChoice {
+            Divider()
+            AIChoiceList(choices: model.aiChoices, selected: model.aiChoiceSelection, select: model.selectAIChoice)
         } else if model.mode == .askClaude {
             ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, keepChatting: model.keepChatting, save: model.saveChat, leave: model.discardChat)
             Divider()

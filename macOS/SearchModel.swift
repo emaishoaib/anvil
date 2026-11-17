@@ -18,6 +18,7 @@ import Observation
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var savedChatList: SavedChatList?
+    private(set) var aiChoiceSelection = 0
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
@@ -64,6 +65,10 @@ import Observation
         }
     }
 
+    var aiChoices: [AIChoice] {
+        AIChoice.matching(query)
+    }
+
     var isQueryEmpty: Bool {
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }
@@ -102,6 +107,10 @@ import Observation
             savedChatList?.moveSelection(by: offset, matching: query)
             return
         }
+        if mode == .aiChoice {
+            aiChoiceSelection = min(max(aiChoiceSelection + offset, 0), max(aiChoices.count - 1, 0))
+            return
+        }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -122,6 +131,7 @@ import Observation
     func openSelected() {
         if mode == .askClaude { return sendPrompt() }
         if mode == .savedChats { return continueSelectedChat() }
+        if mode == .aiChoice { return openSelectedAIChoice() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -201,12 +211,12 @@ import Observation
         switch mode {
         case .launcher:
             return false
-        case .defineWord, .uninstallApp:
+        case .defineWord, .uninstallApp, .aiChoice:
             mode = .launcher
             query = ""
         case .savedChats:
             savedChatList = nil
-            mode = .launcher
+            mode = .aiChoice
             query = ""
         case .askClaude:
             guard chat == nil else {
@@ -214,7 +224,7 @@ import Observation
                 return true
             }
             isChatSaved = false
-            mode = .launcher
+            mode = .aiChoice
             query = ""
         case .uninstallReview(let previousQuery):
             review = nil
@@ -362,6 +372,9 @@ import Observation
         case .savedChats:
             results = []
             savedChatList?.select(0)
+        case .aiChoice:
+            results = []
+            aiChoiceSelection = 0
         }
         showArguments()
     }
@@ -386,12 +399,9 @@ import Observation
             let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
         case .askClaude:
-            wantsExpanded = false
-            mode = .askClaude
-            claudeSignIn.check()
+            startChat()
         case .savedChats:
-            savedChatList = SavedChatList()
-            mode = .savedChats
+            showSavedChats()
         }
         query = ""
     }
@@ -424,6 +434,39 @@ import Observation
         claudeSignIn.check()
     }
 
+    /// Opens AI mode's first page, where a chat is started or loaded. It only opens from the launcher, and only while the AI tool is on.
+    func enterAIMode() -> Bool {
+        guard mode == .launcher, Tool.ai.isOn else { return false }
+        mode = .aiChoice
+        query = ""
+        return true
+    }
+
+    func selectAIChoice(_ index: Int) {
+        aiChoiceSelection = index
+    }
+
+    private func openSelectedAIChoice() {
+        let choices = aiChoices
+        guard choices.indices.contains(aiChoiceSelection) else { return NSSound.beep() }
+        switch choices[aiChoiceSelection] {
+        case .startChat: startChat()
+        case .loadChat: showSavedChats()
+        }
+        query = ""
+    }
+
+    private func startChat() {
+        wantsExpanded = false
+        mode = .askClaude
+        claudeSignIn.check()
+    }
+
+    private func showSavedChats() {
+        savedChatList = SavedChatList()
+        mode = .savedChats
+    }
+
     func trashSelectedChat() {
         savedChatList?.trashSelected(matching: query)
     }
@@ -451,7 +494,7 @@ import Observation
         guard let chat else { return }
         SavedChats.save(chat)
         endChat()
-        mode = .launcher
+        mode = .aiChoice
         query = ""
     }
 
@@ -462,7 +505,7 @@ import Observation
         isChatSaved = false
         SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
-        mode = .launcher
+        mode = .aiChoice
         query = ""
     }
 

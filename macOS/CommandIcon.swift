@@ -16,7 +16,7 @@ struct CommandIcon: View {
     }
 }
 
-private struct SymbolIcon: View {
+struct SymbolIcon: View {
     private static let size: CGFloat = 22
 
     let symbol: String

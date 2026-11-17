@@ -123,7 +123,7 @@ final class SearchBar {
             return true
         }
         switch keyCode {
-        case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1)
+        case kVK_Tab: return model.moveFocus(by: modifiers.contains(.shift) ? -1 : 1) || !modifiers.contains(.shift) && model.enterAIMode()
         case kVK_UpArrow: model.moveSelection(by: -1)
         case kVK_DownArrow: model.moveSelection(by: 1)
         case kVK_Return, kVK_ANSI_KeypadEnter: model.openSelected()

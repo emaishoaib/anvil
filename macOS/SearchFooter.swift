@@ -39,6 +39,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .uninstallApp)
                     Text(message ?? LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
+                case .aiChoice:
+                    SymbolIcon(symbol: "sparkles", colour: .orange)
+                    Text("AI Mode")
+                        .foregroundStyle(.secondary)
                 case .savedChats:
                     CommandIcon(command: .savedChats)
                     Text(LauncherCommand.savedChats.name)
@@ -175,6 +179,7 @@ struct SearchFooter: View {
     private var action: String? {
         if mode == .settings { return settingAction }
         if mode == .savedChats { return "Continue Chat" }
+        if mode == .aiChoice { return "Open" }
         if mode == .askClaude {
             return switch chatState {
             case .signedOut: "Sign In"
