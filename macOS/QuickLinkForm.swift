@@ -35,7 +35,15 @@ struct QuickLinkForm: View {
         .frame(width: Self.fieldWidth + 120)
         .padding(.vertical, 28)
         .frame(maxWidth: .infinity)
-        .onAppear { isNameFocused = true }
+        .onAppear(perform: focusName)
+    }
+
+    /// Puts the cursor in the name field with all its text selected, ready to be typed over. It waits until the form is in the window, because a field can't take focus before then, and selects the text once the field has focus.
+    private func focusName() {
+        DispatchQueue.main.async {
+            isNameFocused = true
+            DispatchQueue.main.async { NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil) }
+        }
     }
 }
 
