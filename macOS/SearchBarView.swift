@@ -3,6 +3,7 @@ import SwiftUI
 struct SearchBarView: View {
     private static let width: CGFloat = 750
     private static let fieldHeight: CGFloat = 56
+    private static let fieldPadding: CGFloat = 12
     private static let tintOpacity = 0.5
     private static let entryHeight: CGFloat = 420
     private static let actionPanelPadding: CGFloat = 8
@@ -48,7 +49,8 @@ struct SearchBarView: View {
     private var queryRow: some View {
         QueryRow(model: model, focus: $focus)
             .padding(.horizontal, 16)
-            .frame(height: Self.fieldHeight)
+            .padding(.vertical, Self.fieldPadding)
+            .frame(minHeight: Self.fieldHeight)
     }
 
     @ViewBuilder private var content: some View {

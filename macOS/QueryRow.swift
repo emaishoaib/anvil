@@ -4,6 +4,7 @@ import SwiftUI
 struct QueryRow: View {
     private static let fontSize: CGFloat = 17
     private static let caretRoom: CGFloat = 8
+    private static let promptLineLimit = 6
 
     @Bindable var model: SearchModel
     let focus: FocusState<SearchField?>.Binding
@@ -14,7 +15,8 @@ struct QueryRow: View {
                 BackButton { _ = model.goBack() }
             }
             if model.mode.hasSearchField {
-                TextField(model.mode.placeholder, text: query)
+                TextField(model.mode.placeholder, text: query, axis: model.mode == .askClaude ? .vertical : .horizontal)
+                    .lineLimit(1...Self.promptLineLimit)
                     .textFieldStyle(.plain)
                     .font(.system(size: Self.fontSize))
                     .focused(focus, equals: .query)

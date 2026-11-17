@@ -110,6 +110,10 @@ final class SearchBar {
             toggleExpanded()
             return true
         }
+        if model.mode == .askClaude, keyCode == kVK_Return, modifiers.contains(.shift), let editor = panel.firstResponder as? NSTextView {
+            editor.insertNewlineIgnoringFieldEditor(nil)
+            return true
+        }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
         if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
         if model.mode == .askClaude, model.chat?.mode == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
