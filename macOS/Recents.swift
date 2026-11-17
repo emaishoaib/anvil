@@ -6,12 +6,14 @@ final class Recents {
     private static let remembered = 100
     private static let focusRetries = 20
     private static let focusRetryInterval = Duration.milliseconds(100)
+    private static let focusSettleDelay = Duration.milliseconds(60)
 
     private var order: [CGWindowID] = []
+    private var settling: [pid_t: Task<Void, Never>] = [:]
 
     func start() {
-        Watcher.shared.on(kAXFocusedWindowChangedNotification) { [self] _, window in
-            if let window { record(window) }
+        Watcher.shared.on(kAXFocusedWindowChangedNotification) { [self] pid, window in
+            if let window { settle(window, of: pid) }
         }
         NSWorkspace.shared.onAppChange(NSWorkspace.didActivateApplicationNotification) { [self] in
             recordFocusedWindowOfNewlyActiveApp($0)
@@ -41,6 +43,16 @@ final class Recents {
         else { return false }
         record(id)
         return true
+    }
+
+    private func settle(_ window: CGWindowID, of pid: pid_t) {
+        settling[pid]?.cancel()
+        settling[pid] = Task {
+            try? await Task.sleep(for: Self.focusSettleDelay)
+            guard !Task.isCancelled else { return }
+            record(window)
+            settling[pid] = nil
+        }
     }
 
     private func recordFocusedWindowOfNewlyActiveApp(_ pid: pid_t) {
