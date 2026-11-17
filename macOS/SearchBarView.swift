@@ -37,8 +37,13 @@ struct SearchBarView: View {
         .onGeometryChange(for: CGSize.self) { $0.size } action: { SearchBar.shared.fit($0) }
         .onChange(of: model.timesOpened, initial: true) { focus = .query }
         .onChange(of: model.field) { focus = model.field }
-        .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focus = model.field } }
+        .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focusReturningField() } }
         .onChange(of: focus) { if let focus { model.field = focus } }
+    }
+
+    /// Puts the cursor back in the search field as a form closes. It waits until the field is in the window again, because a field can't take focus before then.
+    private func focusReturningField() {
+        DispatchQueue.main.async { focus = model.field }
     }
 
     /// The order of the bar's three sections. AI mode puts the prompt at the bottom, like a chat, and the footer at the top. Each section keeps its identity when the order changes, so the prompt keeps its focus and the sections slide into place.
