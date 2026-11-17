@@ -25,6 +25,7 @@ import Observation
     private(set) var chat: ClaudeChatSession?
     private(set) var isAskingToKeepChat = false
     private(set) var plannedEnding: ChatEnding?
+    private(set) var isChatSaved = false
     private var wantsExpanded = false
 
     var isExpanded: Bool {
@@ -210,6 +211,7 @@ import Observation
                 return true
             }
             plannedEnding = nil
+            isChatSaved = false
             mode = .launcher
             query = ""
         case .uninstallReview(let previousQuery):
@@ -398,12 +400,13 @@ import Observation
         let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder)
         self.chat = chat
         chat.send(prompt, mode: chatSetup.mode)
+        if isChatSaved { SavedChats.save(chat) }
         query = ""
     }
 
     func leaveChat() {
+        guard !isChatSaved else { return saveChat() }
         switch plannedEnding {
-        case .save: saveChat()
         case .discard: discardChat()
         case nil: isAskingToKeepChat = true
         }
@@ -413,6 +416,7 @@ import Observation
         guard let saved = savedChatList?.selectedChat(matching: query) else { return NSSound.beep() }
         let chat = ClaudeChatSession(resuming: saved)
         self.chat = chat
+        isChatSaved = true
         Task { await chat.loadHistory() }
         savedChatList = nil
         wantsExpanded = false
@@ -430,7 +434,15 @@ import Observation
     }
 
     func plan(_ ending: ChatEnding) {
+        guard !isChatSaved else { return NSSound.beep() }
         plannedEnding = plannedEnding == ending ? nil : ending
+    }
+
+    /// Keeps the chat in the saved chats from now on, saving it again after every prompt, so leaving it no longer asks. Before the first prompt, it is saved as soon as that prompt is sent.
+    func startSavingChat() {
+        isChatSaved = true
+        plannedEnding = nil
+        if let chat { SavedChats.save(chat) }
     }
 
     func keepChatting() {
@@ -450,6 +462,7 @@ import Observation
         self.chat = nil
         isAskingToKeepChat = false
         plannedEnding = nil
+        isChatSaved = false
         SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
         mode = .launcher
@@ -461,6 +474,7 @@ import Observation
         chat = nil
         isAskingToKeepChat = false
         plannedEnding = nil
+        isChatSaved = false
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {

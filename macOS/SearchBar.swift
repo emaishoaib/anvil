@@ -189,7 +189,7 @@ final class SearchBar {
         case (.askingToKeep, kVK_Delete) where Self.onlyCommand(in: modifiers): model.discardChat()
         case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
             guard Self.onlyCommand(in: modifiers) else { return false }
-            model.plan(.save)
+            model.startSavingChat()
         case (.notStarted, kVK_ANSI_D), (.started, kVK_ANSI_D), (.answering, kVK_ANSI_D):
             guard Self.onlyCommand(in: modifiers) else { return false }
             model.plan(.discard)

@@ -76,7 +76,7 @@ struct SearchBarView: View {
         } else if model.mode == .askClaude {
             ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, save: model.saveChat, discard: model.discardChat)
             Divider()
-            ChatSetupRow(setup: model.chatSetup, chat: model.chat, ending: model.plannedEnding)
+            ChatSetupRow(setup: model.chatSetup, chat: model.chat, ending: model.plannedEnding, isSaved: model.isChatSaved)
         } else if model.mode == .settings {
             Divider()
             SettingsList(model: model.settings, open: { model.open($0) })
@@ -92,7 +92,7 @@ struct SearchBarView: View {
         if case .uninstallReview = model.mode, let review = model.review {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
         } else if model.mode == .askClaude {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, dividerEdge: .bottom)
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, isChatSaved: model.isChatSaved, dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else {

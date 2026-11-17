@@ -12,6 +12,7 @@ struct SearchFooter: View {
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
+    var isChatSaved = false
     var dividerEdge = VerticalEdge.top
 
     var body: some View {
@@ -88,10 +89,10 @@ struct SearchFooter: View {
                     Text("Stop")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
-                    FooterDivider()
+                    if !isChatSaved { FooterDivider() }
                 }
-                if mode == .askClaude, chatState == .started || chatState == .answering {
-                    Text("Save on Exit")
+                if mode == .askClaude, !isChatSaved, chatState == .started || chatState == .answering {
+                    Text("Save")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_S, modifiers: .command))
                     FooterDivider()
