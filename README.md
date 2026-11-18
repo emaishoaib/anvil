@@ -8,7 +8,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **Settings** -- every setting lives in the search bar as a grid of the tools or found by name as you type. Any tool but the search bar can be turned off.
 
-**Search bar** -- a bar near the top of the screen that opens over whatever app is in front, which strikes the anvil in the menu bar like a hammer as it opens. It finds apps and quick links as you type, and the apps you open most rise to the top. Typing a command's name such as `define`, `link`, `settings`, `uninstall` or `ai` opens that tool inside the bar, which you can pin so it stays open while you work in other apps.
+**Search bar** -- a bar near the top of the screen that opens over whatever app is in front, which strikes the anvil in the menu bar like a hammer as it opens. It finds apps and quick links as you type, and the apps you open most rise to the top. Typing a command's name such as `define`, `link`, `settings`, `uninstall` or `ai` opens that tool inside the bar, which you can pin so it stays open while you work in other apps. Close the bar and open it again soon and it comes back as you left it with the same page and text (for as long as you set in its settings). Opening an app or a quick link starts it fresh instead and a chat with Claude always comes back however long the bar was closed.
 
 **Quick answers** -- the bar answers some things without opening anything like sums, unit conversions, currency conversions and dates. Typing `define` looks a word up in the Mac's own dictionary.
 

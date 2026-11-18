@@ -30,8 +30,8 @@ final class SearchBar {
     func hide(remembering: Bool = true) {
         guard panel.isVisible, !isPresentingModal, !model.isPinned else { return }
         model.settings.finishEditing()
-        hiddenAt = remembering ? .now : nil
         panel.orderOut(nil)
+        hiddenAt = remembering ? .now : nil
         if NSApp.isActive { NSApp.hide(nil) }
     }
 

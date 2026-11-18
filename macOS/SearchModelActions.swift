@@ -43,7 +43,7 @@ extension SearchModel {
             guard let link else { return }
             closeActions()
             open(link, filling: arguments.values, in: app)
-            SearchBar.shared.hide()
+            SearchBar.shared.hide(remembering: false)
         case .confirmDelete:
             guard let link else { return }
             QuickLinkLibrary.shared.delete(link)

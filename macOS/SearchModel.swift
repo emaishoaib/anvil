@@ -169,7 +169,7 @@ import Observation
         case .app(let app):
             guard mode != .uninstallApp else { return showReview(of: app) }
             launch(app)
-            SearchBar.shared.hide()
+            SearchBar.shared.hide(remembering: false)
         case .command(let command):
             run(command)
         case .quickLink(let link):
@@ -182,7 +182,7 @@ import Observation
                 return
             }
             open(link, filling: arguments.values, in: link.openWith)
-            SearchBar.shared.hide()
+            SearchBar.shared.hide(remembering: false)
         case .word(let word):
             SavedRecentWords.record(word.text)
             entryPage = DictionaryEntries.page(for: word.text)
