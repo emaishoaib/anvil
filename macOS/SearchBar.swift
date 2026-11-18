@@ -73,6 +73,10 @@ final class SearchBar {
         model.showShellTextForm(text)
     }
 
+    func showPhraseForm(_ phrase: SpokenPhrase) {
+        model.showPhraseForm(phrase)
+    }
+
     func presentModal<Result>(_ present: () -> Result) -> Result {
         isPresentingModal = true
         panel.level = .floating

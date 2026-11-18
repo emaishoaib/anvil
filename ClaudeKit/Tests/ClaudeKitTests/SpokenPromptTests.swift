@@ -2,38 +2,57 @@ import Testing
 @testable import ClaudeKit
 
 struct SpokenPromptTests {
-    @Test func sayingNewSessionAsksForANewOneAndIsDropped() {
-        let spoken = SpokenPrompt("New session. Why does the build fail?")
+    private static func spoken(_ said: String, unnamed: SpokenPrompt.Session = .new) -> SpokenPrompt {
+        SpokenPrompt(said, newSessionPhrase: "new session", lastSessionPhrase: "last session", unnamed: unnamed)
+    }
+
+    @Test func sayingTheNewSessionPhraseAsksForANewOneAndIsDropped() {
+        let spoken = Self.spoken("New session. Why does the build fail?", unnamed: .last)
         #expect(spoken.session == .new)
         #expect(spoken.text == "Why does the build fail?")
     }
 
-    @Test func sayingLastSessionMeansTheLastOneAndIsDropped() {
-        let spoken = SpokenPrompt("last session, try it again")
+    @Test func sayingTheLastSessionPhraseMeansTheLastOneAndIsDropped() {
+        let spoken = Self.spoken("last session, try it again")
         #expect(spoken.session == .last)
         #expect(spoken.text == "try it again")
     }
 
-    @Test func namingNoSessionMeansTheLastOne() {
-        let spoken = SpokenPrompt("  Explain this function. ")
+    @Test func namingNoSessionGoesWhereUnnamedSpeechIsSetToGo() {
+        #expect(Self.spoken("  Explain this function. ", unnamed: .new) == SpokenPrompt("Explain this function.", newSessionPhrase: "", lastSessionPhrase: "", unnamed: .new))
+        #expect(Self.spoken("Explain this function.", unnamed: .last).session == .last)
+    }
+
+    @Test func namingNoSessionKeepsEverythingThatWasSaid() {
+        #expect(Self.spoken("  Explain this function. ").text == "Explain this function.")
+    }
+
+    @Test func otherPhrasesCanBeChosen() {
+        let spoken = SpokenPrompt("Fresh start: plan the release", newSessionPhrase: "fresh start", lastSessionPhrase: "carry on", unnamed: .last)
+        #expect(spoken.session == .new)
+        #expect(spoken.text == "plan the release")
+    }
+
+    @Test func anEmptyPhraseNeverMatches() {
+        let spoken = SpokenPrompt("Plan the release", newSessionPhrase: " ", lastSessionPhrase: "", unnamed: .last)
         #expect(spoken.session == .last)
-        #expect(spoken.text == "Explain this function.")
+        #expect(spoken.text == "Plan the release")
     }
 
     @Test func thePhraseOnlyCountsAtTheStart() {
-        let spoken = SpokenPrompt("Open a new session for this")
+        let spoken = Self.spoken("Open a new session for this", unnamed: .last)
         #expect(spoken.session == .last)
         #expect(spoken.text == "Open a new session for this")
     }
 
     @Test func thePhraseOnlyCountsAsWholeWords() {
-        let spoken = SpokenPrompt("New sessions are slow")
+        let spoken = Self.spoken("New sessions are slow", unnamed: .last)
         #expect(spoken.session == .last)
         #expect(spoken.text == "New sessions are slow")
     }
 
     @Test func sayingOnlyThePhraseLeavesNothingToSend() {
-        let spoken = SpokenPrompt("New session.")
+        let spoken = Self.spoken("New session.")
         #expect(spoken.session == .new)
         #expect(spoken.text.isEmpty)
     }

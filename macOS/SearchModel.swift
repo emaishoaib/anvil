@@ -21,6 +21,7 @@ import ShellKit
     var aliasDraft = Alias(name: "", command: "")
     var aliasField = AliasField.name
     var shellTextDraft = ""
+    var phraseDraft = ""
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var desktopSessionList: DesktopSessionList?
@@ -104,6 +105,7 @@ import ShellKit
         aliasDraft = Alias(name: "", command: "")
         aliasField = .name
         shellTextDraft = ""
+        phraseDraft = ""
         entryPage = ""
         field = .query
         mode = .launcher
@@ -240,6 +242,13 @@ import ShellKit
         query = ""
     }
 
+    func showPhraseForm(_ phrase: SpokenPhrase) {
+        settings.finishEditing()
+        phraseDraft = phrase.current
+        mode = .phraseForm(phrase, query: query)
+        query = ""
+    }
+
     func clearSelectedShortcut() -> Bool {
         mode == .settings && settings.clearSelectedShortcut()
     }
@@ -281,7 +290,7 @@ import ShellKit
             if settings.goUp() { return true }
             mode = .launcher
             query = ""
-        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery), .shellTextForm(_, let previousQuery):
+        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery), .shellTextForm(_, let previousQuery), .phraseForm(_, let previousQuery):
             settings.reload()
             mode = .settings
             query = previousQuery
@@ -306,6 +315,7 @@ import ShellKit
         if case .keySwapForm = mode { return saveKeySwapDraft() }
         if case .aliasForm = mode { return saveAliasDraft() }
         if case .shellTextForm(let text, _) = mode { return saveShellTextDraft(text) }
+        if case .phraseForm(let phrase, _) = mode { return savePhraseDraft(phrase) }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
         _ = goBack()
@@ -360,6 +370,11 @@ import ShellKit
 
     private func saveShellTextDraft(_ text: ShellText) {
         text.save(shellTextDraft)
+        _ = goBack()
+    }
+
+    private func savePhraseDraft(_ phrase: SpokenPhrase) {
+        guard phrase.save(phraseDraft) else { return NSSound.beep() }
         _ = goBack()
     }
 
@@ -420,7 +435,7 @@ import ShellKit
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm, .askClaude:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm, .phraseForm, .askClaude:
             results = []
         case .desktopSessions:
             results = []
@@ -519,7 +534,7 @@ import ShellKit
     /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped. Whether anything was sent, or is about to be.
     @discardableResult
     func sendSpoken(_ said: String) -> Bool {
-        let spoken = SpokenPrompt(said)
+        let spoken = SpokenPhrase.prompt(in: said)
         guard !spoken.text.isEmpty else {
             NSSound.beep()
             return false
