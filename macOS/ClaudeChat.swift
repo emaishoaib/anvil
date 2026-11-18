@@ -10,9 +10,8 @@ struct ClaudeChat: View {
     let state: ChatState
     let update: ClaudeUpdate.State
     let isExpanded: Bool
-    let keepChatting: () -> Void
-    let save: () -> Void
-    let leave: () -> Void
+    let cardChoice: CardChoice?
+    let choose: (CardChoice) -> Void
 
     var body: some View {
         content
@@ -27,16 +26,16 @@ struct ClaudeChat: View {
                     VStack(alignment: .leading, spacing: 20) {
                         ForEach(chat.turns) { TurnView(turn: $0) }
                         if let approval = chat.approvals.first {
-                            ApprovalCard(approval: approval, answer: { chat.answerApproval(allowed: $0) })
+                            ApprovalCard(approval: approval, highlighted: cardChoice, choose: choose)
                         }
                         if update != .notNeeded {
                             UpdateCard(state: update)
                         }
                         if state == .askingToLeave {
-                            LeaveChatCard(keepChatting: keepChatting, save: save, leave: leave)
+                            LeaveChatCard(highlighted: cardChoice, choose: choose)
                         }
                         if state == .askingToDelete {
-                            DeleteChatCard(keepChatting: keepChatting, delete: leave)
+                            DeleteChatCard(highlighted: cardChoice, choose: choose)
                         }
                         Color.clear.frame(height: 1).id(Self.bottomID)
                     }

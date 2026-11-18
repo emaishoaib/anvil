@@ -88,7 +88,7 @@ struct SearchBarView: View {
             Divider()
             AIChoiceList(choices: model.aiChoices, selected: model.aiChoiceSelection, select: model.selectAIChoice)
         } else if model.mode == .askClaude {
-            ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, keepChatting: model.keepChatting, save: model.saveChat, leave: model.discardChat)
+            ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, cardChoice: model.cardChoice, choose: model.choose)
             Divider()
             ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
         } else if model.mode == .settings {
@@ -112,7 +112,7 @@ struct SearchBarView: View {
         if case .uninstallReview = model.mode, let review = model.review {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
         } else if model.mode == .askClaude {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, isChatSaved: model.isChatSaved, dividerEdge: .bottom)
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else {

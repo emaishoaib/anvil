@@ -113,7 +113,11 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
-        if model.mode == .askClaude, model.chatState == .awaitingApproval, handleApprovalKey(keyCode) { return true }
+        if model.mode == .askClaude, handleCardKey(keyCode) { return true }
+        if model.mode == .askClaude, model.chatState == .awaitingApproval, keyCode == kVK_Escape {
+            model.choose(.deny)
+            return true
+        }
         if model.mode == .savedChats, Self.onlyCommand(in: modifiers), keyCode == kVK_Delete {
             model.trashSelectedChat()
             return true
@@ -184,13 +188,13 @@ final class SearchBar {
         return true
     }
 
-    private func handleApprovalKey(_ keyCode: Int) -> Bool {
+    private func handleCardKey(_ keyCode: Int) -> Bool {
         switch keyCode {
-        case kVK_Return, kVK_ANSI_KeypadEnter: model.chat?.answerApproval(allowed: true)
-        case kVK_Escape: model.chat?.answerApproval(allowed: false)
-        default: return false
+        case kVK_LeftArrow: model.moveCardChoice(by: -1)
+        case kVK_RightArrow: model.moveCardChoice(by: 1)
+        case kVK_Return, kVK_ANSI_KeypadEnter: model.chooseCardChoice()
+        default: false
         }
-        return true
     }
 
     private func handleEndingKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
@@ -198,10 +202,8 @@ final class SearchBar {
         case (.answering, kVK_Escape): model.chat?.stop()
         case (.started, kVK_Escape), (.outdated, kVK_Escape): model.leaveChat()
         case (.askingToLeave, kVK_Escape): model.keepChatting()
-        case (.askingToLeave, kVK_Return), (.askingToLeave, kVK_ANSI_KeypadEnter): model.discardChat()
         case (.askingToLeave, kVK_ANSI_S) where Self.onlyCommand(in: modifiers): model.saveChat()
         case (.askingToDelete, kVK_Escape): model.keepChatting()
-        case (.askingToDelete, kVK_Return), (.askingToDelete, kVK_ANSI_KeypadEnter): model.discardChat()
         case (.started, kVK_ANSI_D) where Self.onlyCommand(in: modifiers): model.askToDeleteChat()
         case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
             guard Self.onlyCommand(in: modifiers) else { return false }

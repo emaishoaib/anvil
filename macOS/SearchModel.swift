@@ -29,7 +29,10 @@ import ShellKit
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
     private(set) var chat: ClaudeChatSession?
-    private(set) var chatQuestion: ChatQuestion?
+    private(set) var chatQuestion: ChatQuestion? {
+        didSet { highlightedChoice = nil }
+    }
+    private var highlightedChoice: CardChoice?
     private(set) var isChatSaved = false
     private var wantsExpanded = false
 
@@ -562,6 +565,45 @@ import ShellKit
 
     func keepChatting() {
         chatQuestion = nil
+    }
+
+    /// The buttons of the question card at the end of the chat, left to right, or none when no card is asking.
+    var cardChoices: [CardChoice] {
+        switch chatState {
+        case .awaitingApproval: CardChoice.approving
+        case .askingToLeave: CardChoice.leaving
+        case .askingToDelete: CardChoice.deleting
+        default: []
+        }
+    }
+
+    /// The button Return presses on the question card, which is the rightmost one until the arrows move the highlight.
+    var cardChoice: CardChoice? {
+        guard let highlightedChoice, cardChoices.contains(highlightedChoice) else { return cardChoices.last }
+        return highlightedChoice
+    }
+
+    func moveCardChoice(by offset: Int) -> Bool {
+        guard let cardChoice, let index = cardChoices.firstIndex(of: cardChoice) else { return false }
+        highlightedChoice = cardChoices[min(max(index + offset, 0), cardChoices.count - 1)]
+        return true
+    }
+
+    func chooseCardChoice() -> Bool {
+        guard let cardChoice else { return false }
+        choose(cardChoice)
+        return true
+    }
+
+    func choose(_ choice: CardChoice) {
+        highlightedChoice = nil
+        switch choice {
+        case .keepChatting: keepChatting()
+        case .saveAndLeave: saveChat()
+        case .leave, .delete: discardChat()
+        case .deny: chat?.answerApproval(allowed: false)
+        case .allow: chat?.answerApproval(allowed: true)
+        }
     }
 
     func askToDeleteChat() {

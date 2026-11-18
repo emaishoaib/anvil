@@ -12,6 +12,7 @@ struct SearchFooter: View {
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
+    var cardChoice: CardChoice? = nil
     var isChatSaved = false
     var dividerEdge = VerticalEdge.top
 
@@ -198,9 +199,7 @@ struct SearchFooter: View {
             case .signedOut: "Sign In"
             case .signingIn, .answering, .updating: nil
             case .outdated: "Update Claude Code"
-            case .awaitingApproval: "Allow"
-            case .askingToLeave: "Leave"
-            case .askingToDelete: "Delete"
+            case .awaitingApproval, .askingToLeave, .askingToDelete: cardChoice?.title
             case .notStarted, .started: "Send"
             }
         }

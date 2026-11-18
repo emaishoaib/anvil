@@ -1,13 +1,14 @@
 import ClaudeKit
 import SwiftUI
 
-/// Claude Code asking for approval, shown at the end of the chat in an outlined box. A command shows in full and a plan shows as markdown, so either can be read before answering. Return allows and Escape turns it down, and the buttons do the same.
+/// Claude Code asking for approval, shown at the end of the chat in an outlined box. A command shows in full and a plan shows as markdown, so either can be read before answering. Return presses the highlighted button, which starts on Allow and moves with left and right, Escape turns it down, and the buttons can be clicked too.
 struct ApprovalCard: View {
     private static let cornerRadius: CGFloat = 10
     private static let planHeight: CGFloat = 220
 
     let approval: Approval
-    let answer: (Bool) -> Void
+    let highlighted: CardChoice?
+    let choose: (CardChoice) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -25,12 +26,7 @@ struct ApprovalCard: View {
             case nil:
                 EmptyView()
             }
-            HStack(spacing: 8) {
-                Spacer()
-                Button("Deny") { answer(false) }
-                Button("Allow") { answer(true) }
-                    .buttonStyle(.borderedProminent)
-            }
+            ChoiceButtons(choices: CardChoice.approving, highlighted: highlighted, choose: choose)
         }
         .padding(14)
         .overlay(RoundedRectangle(cornerRadius: Self.cornerRadius).strokeBorder(.orange.opacity(0.6)))
