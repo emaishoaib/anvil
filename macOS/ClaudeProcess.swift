@@ -1,7 +1,7 @@
 import ClaudeKit
 import Foundation
 
-/// A running `claude` command that a chat talks to: prompts and approval answers are written to it as lines, and every line it prints is read back as events. The last few lines it prints as errors are kept and handed over once it exits, so a chat can say why it stopped. Those lines normally end when the command does, but a process it started could keep them open, so after a short wait they are handed over as they are.
+/// A running `claude` command that a chat talks to: prompts and approval answers are written to it as lines, and every line it prints is read back as events. The last few lines it prints as errors are kept and handed over once it exits, so a chat can say why it stopped. Those lines normally end when the command does, but a process it started could keep them open, so after a short wait they are handed over as they are. The errors are read as they arrive rather than through `FileHandle.bytes`, because every `bytes` read in the app waits in one shared line, and a read waiting for errors that never come would hold up the answer.
 final class ClaudeProcess {
     private static let errorLinesKept = 5
     private static let errorGrace = Duration.milliseconds(500)
@@ -10,7 +10,7 @@ final class ClaudeProcess {
     private let input = Pipe()
     private let output = Pipe()
     private let errors = Pipe()
-    private var recentErrors: [String] = []
+    private var errorText = ""
     private var errorsEnded = false
 
     init?(command: URL, arguments: [String], folder: URL, onEvents: @escaping ([ClaudeEvent]) -> Void, onExit: @escaping @MainActor (String) -> Void) {
@@ -30,10 +30,10 @@ final class ClaudeProcess {
                 onEvents(ClaudeEventParser.events(in: line))
             }
         }
-        let errorLines = errors.fileHandleForReading.bytes.lines
+        let errorChunks = Self.chunks(of: errors.fileHandleForReading)
         Task { [weak self] in
-            for try await line in errorLines {
-                self?.keepError(line)
+            for await chunk in errorChunks {
+                self?.keepErrors(chunk)
             }
             self?.errorsEnded = true
         }
@@ -51,12 +51,27 @@ final class ClaudeProcess {
         await Task.detached { process.waitUntilExit() }.value
     }
 
-    private func keepError(_ line: String) {
-        recentErrors = Array((recentErrors + [line]).suffix(Self.errorLinesKept))
+    /// What a file handle gives as it arrives, in order, ending when the other side closes it.
+    private nonisolated static func chunks(of handle: FileHandle) -> AsyncStream<Data> {
+        AsyncStream { continuation in
+            handle.readabilityHandler = { handle in
+                let chunk = handle.availableData
+                guard !chunk.isEmpty else {
+                    handle.readabilityHandler = nil
+                    return continuation.finish()
+                }
+                continuation.yield(chunk)
+            }
+        }
+    }
+
+    private func keepErrors(_ chunk: Data) {
+        errorText += String(decoding: chunk, as: UTF8.self)
+        errorText = errorText.split(separator: "\n", omittingEmptySubsequences: false).suffix(Self.errorLinesKept + 1).joined(separator: "\n")
     }
 
     private func lastErrors() async -> String {
         if !errorsEnded { try? await Task.sleep(for: Self.errorGrace) }
-        return recentErrors.joined(separator: "\n")
+        return errorText.split(separator: "\n").suffix(Self.errorLinesKept).joined(separator: "\n")
     }
 }
