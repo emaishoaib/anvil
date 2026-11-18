@@ -16,8 +16,8 @@ nonisolated enum DesktopSessionFiles {
         }
     }
 
-    static func contains(_ sessionID: UUID) -> Bool {
-        DesktopSessions.contains(sessionID, in: records())
+    static func session(running sessionID: UUID) -> DesktopSession? {
+        DesktopSessions.session(running: sessionID, in: records())
     }
 
     private static func records() -> [Data] {

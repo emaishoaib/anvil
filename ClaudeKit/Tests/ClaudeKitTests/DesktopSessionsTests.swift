@@ -38,15 +38,15 @@ struct DesktopSessionsTests {
     }
 
     @Test func aSessionClaudeDesktopHasIsFound() {
-        #expect(DesktopSessions.contains(UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record()]))
+        #expect(DesktopSessions.session(running: UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record()])?.desktopID == "local_a02fd0ad")
     }
 
     @Test func anArchivedSessionIsStillFound() {
-        #expect(DesktopSessions.contains(UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record(isArchived: true)]))
+        #expect(DesktopSessions.session(running: UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record(isArchived: true)]) != nil)
     }
 
     @Test func aSessionClaudeDesktopDoesNotHaveIsNotFound() {
-        #expect(!DesktopSessions.contains(UUID(), in: [Self.record()]))
+        #expect(DesktopSessions.session(running: UUID(), in: [Self.record()]) == nil)
     }
 
     @Test func theLastSessionIsTheOneWhoseTranscriptChangedLast() {

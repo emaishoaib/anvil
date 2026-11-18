@@ -40,10 +40,16 @@ final class SearchBar {
         return ContinuousClock.now - hiddenAt < SearchMemory.current.duration
     }
 
-    /// Sends what was said by voice to Claude and shows the bar in AI mode with the chat it went to, opening the bar first if it is hidden.
-    func sendSpoken(_ prompt: String) {
-        if !panel.isVisible { show() }
-        model.sendSpoken(prompt)
+    /// Sends what was said by voice to Claude, then shows the chat it went to where the after-sending setting says: in the bar in AI mode, pinned or not, or in Claude desktop. When the bar is needed to go on, it shows in the bar whatever the setting.
+    func sendSpoken(_ said: String) {
+        if !panel.isVisible { refreshModel() }
+        guard model.sendSpoken(said) else { return }
+        if AfterSending.current == .claudeDesktop, !model.needsBarAfterSpeaking {
+            hide()
+            return model.handOverToClaudeDesktop()
+        }
+        if !panel.isVisible { show(refreshingModel: false) }
+        if AfterSending.current == .pinnedBar { model.pin() }
         panel.makeKeyAndOrderFront(nil)
     }
 
@@ -289,10 +295,10 @@ final class SearchBar {
         background.addSubview(content)
     }
 
-    private func show() {
+    private func show(refreshingModel: Bool = true) {
         guard let screen = NSScreen.main else { return }
         CurrencyRatesStore.shared.refreshIfStale()
-        if remembersLastState || model.isHoldingChat { model.reopen() } else { model.reset() }
+        if refreshingModel { refreshModel() }
         attachContent()
         content.layoutSubtreeIfNeeded()
         let frame = model.isExpanded ? PanelResizing.expandedFrame(on: screen) : PanelResizing.usualFrame(for: content.fittingSize, on: screen)
@@ -301,5 +307,10 @@ final class SearchBar {
         panel.makeKeyAndOrderFront(nil)
         MenuBarItem.shared.strike()
         AirPodsBatteries.shared.refresh()
+    }
+
+    /// Brings the bar back as it was when it was hidden only a moment ago or holds a chat, and otherwise starts it fresh.
+    private func refreshModel() {
+        if remembersLastState || model.isHoldingChat { model.reopen() } else { model.reset() }
     }
 }

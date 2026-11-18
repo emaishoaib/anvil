@@ -42,9 +42,9 @@ public enum DesktopSessions {
             .sorted { $0.lastActivity > $1.lastActivity }
     }
 
-    /// Whether Claude desktop already has a session running on the given Claude Code session, archived or not.
-    public static func contains(_ sessionID: UUID, in records: [Data]) -> Bool {
-        decoded(records).contains { $0.sessionID == sessionID }
+    /// The session Claude desktop runs on the given Claude Code session, archived or not, if it has one.
+    public static func session(running sessionID: UUID, in records: [Data]) -> DesktopSession? {
+        decoded(records).first { $0.sessionID == sessionID }
     }
 
     /// The session used last, going by when its Claude Code transcript last changed, so a turn sent from outside Claude desktop counts too. A session whose transcript cannot be found is never the last one.

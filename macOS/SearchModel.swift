@@ -342,6 +342,10 @@ import ShellKit
         isPinned.toggle()
     }
 
+    func pin() {
+        isPinned = true
+    }
+
     private func saveRuleDraft() {
         guard let rule = ruleDraft.rule else { return NSSound.beep() }
         RuleLibrary.shared.save(rule)
@@ -521,13 +525,46 @@ import ShellKit
         return chat
     }
 
-    /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped.
-    func sendSpoken(_ said: String) {
+    /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped. Whether anything was sent, or is about to be.
+    @discardableResult
+    func sendSpoken(_ said: String) -> Bool {
         let spoken = SpokenPrompt(said)
-        guard !spoken.text.isEmpty else { return NSSound.beep() }
+        guard !spoken.text.isEmpty else {
+            NSSound.beep()
+            return false
+        }
         switch spoken.session {
         case .new: sendToNewChat(spoken.text)
         case .last: sendToLastSession(spoken.text)
+        }
+        return true
+    }
+
+    /// Whether what was said by voice needs the search bar to go on: a question waits before leaving the chat, or the prompt waits in the field while Claude is busy.
+    var needsBarAfterSpeaking: Bool {
+        chat == nil || chatQuestion != nil || !isQueryEmpty
+    }
+
+    /// Opens the chat in Claude desktop and lets go of it once Claude has answered, so Claude desktop alone carries the session on from there, and the next prompt said by voice reads it afresh from its file.
+    func handOverToClaudeDesktop() {
+        guard let chat else { return }
+        Task { await ClaudeDesktop.open(chat.sessionID) }
+        Task {
+            await Self.answered(chat)
+            guard self.chat === chat, chatQuestion == nil else { return }
+            saveChat()
+        }
+    }
+
+    /// Waits until Claude has started answering and then finished, since a prompt sent after the chat's earlier turns are read has not started yet when this begins.
+    private static func answered(_ chat: ClaudeChatSession) async {
+        var hasStarted = false
+        for await isAnswering in Observations({ chat.isAnswering }) {
+            if isAnswering {
+                hasStarted = true
+            } else if hasStarted {
+                return
+            }
         }
     }
 
