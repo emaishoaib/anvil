@@ -28,7 +28,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **Keep Awake** -- keeps the Mac from sleeping for a while, even with the lid closed if you want.
 
-**AI** -- turns the bar into a chat with Claude Code about a folder you pick and asks you before Claude runs a command or makes a change. A chat can be saved into Claude desktop, and any Claude desktop Code session can be carried on from the bar. From any app, the listening shortcut, Option Shift Space by default, listens until it is pressed again, then sends what you said to a new session and shows it in the bar. Starting with "last session" sends it to the last session you used instead, and starting with "new session" says so outright. Where unnamed speech goes, and both phrases, can be changed in the AI settings. A setting picks where it shows once sent: the bar, the bar pinned, or Claude desktop, which takes the session over once Claude has answered. Speech is turned into text on the Mac.
+**AI** -- opens on your Claude desktop Code sessions, newest first. Typing searches them and Return carries one on in the bar, or Tab starts a new chat with Claude Code about a folder you pick. Claude asks you before it runs a command or makes a change. A new chat can be saved into Claude desktop, and one left unsaved goes to the Trash when you leave it. From any app, the listening shortcut, Option Shift Space by default, listens until it is pressed again and sends what you said to a new session. Starting with "last session" sends it to the last session you used instead, and starting with "new session" says so outright. Where unnamed speech goes, both phrases, and where the chat shows once sent can all be changed in the AI settings. It can show in the bar, in the bar pinned, or in Claude desktop. Speech is turned into text on the Mac.
 
 **Uninstaller** -- removes an app along with the files it leaves across the Mac. You untick anything you want to keep and the rest goes to the Trash, so a mistake can be undone.
 
@@ -41,6 +41,8 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Accessibility** -- to see keys and mouse buttons and move other apps' windows
 - **Full Disk Access** -- for the Uninstaller to find every leftover
 - **Bluetooth** -- to read AirPods batteries
+- **Microphone** -- to hear what you say to Claude, only between two presses of the listening shortcut
+- **Speech recognition** -- macOS may ask for it alongside the microphone, even though speech is turned into text on the Mac
 - **Administrator password** -- when uninstalling an app from the Mac App Store or keeping the Mac awake with the lid closed
 
 **Where settings are kept** -- rules, key swaps, mouse settings and the shell setup can live as files in a folder you choose such as one that syncs between Macs.
@@ -50,8 +52,9 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Currency rates** -- downloaded from a free public exchange rate service at most twice a day then kept on the Mac
 - **Quick link icons** -- each quick link's icon is fetched from its own website then kept on the Mac
 - **Updates** -- Anvil checks its own website for new versions
+- **Speech model** -- Apple's speech recognition downloads its model for your language once, the first time you listen, and your voice is never sent
 
-**Where AI chats run** -- a chat runs through Claude Code on the Mac and your Claude account, so what you type goes to Anthropic the same way it would from a terminal. Each chat is a Claude Code session kept where Claude Code keeps all its sessions.
+**Where AI chats run** -- a chat runs through Claude Code on the Mac and your Claude account, so what you type goes to Anthropic the same way it would from a terminal. Each chat is a Claude Code session kept where Claude Code keeps all its sessions. What you say by voice becomes text on the Mac, and only that text is sent. Anvil lists Claude desktop's sessions by reading the records Claude desktop keeps for them, and saves or opens a session there through links Claude desktop answers. Neither is documented, so a Claude desktop update could stop them working.
 
 **Your zshrc** -- turning the Shell tool on adds a small block to `~/.zshrc` that loads Anvil's zsh file and turning it off takes the block out again. Anvil never touches the rest of the file and leaves it alone if it can't read it.
 
@@ -63,6 +66,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Xcode 27** -- to build it
 - **Sparkle** -- installs updates and is the only third-party dependency
 - **[Claude Code](https://claude.com/claude-code)** -- for the AI tool
+- **[Claude desktop](https://claude.com/download)** -- for the list of sessions, saving a chat and opening one there
 
 ## Building
 
