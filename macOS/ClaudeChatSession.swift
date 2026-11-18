@@ -2,7 +2,7 @@ import ClaudeKit
 import Foundation
 import Observation
 
-/// A chat with Claude Code in one folder, which stays fixed for the whole chat. Claude Code starts with the first prompt sent here, in the permission mode picked at that moment, and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. A saved chat carried on later resumes that session, showing its earlier turns once they are read, and its mode can still change until the first new prompt. Approvals Claude asks for wait in line and are answered one at a time, oldest first. Stopping an answer asks Claude Code to stop, and if it has not finished a few seconds later, the answer counts as stopped anyway. If Claude Code exits before it finishes an answer, the answer says so, followed by the last errors it printed.
+/// A chat with Claude Code in one folder, which stays fixed for the whole chat. Claude Code starts with the first prompt sent here, in the permission mode picked at that moment, and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. A saved chat carried on later resumes that session, showing its earlier turns once they are read, and its mode can still change until the first new prompt. Approvals Claude asks for wait in line and are answered one at a time, oldest first. Stopping an answer asks Claude Code to stop, and if it has not finished a few seconds later, the answer counts as stopped anyway. If Claude Code exits before it finishes an answer, the answer says so, followed by the last errors it printed, and when those show Claude Code is too old, the chat asks for it to be updated. A chat whose Claude Code never got as far as starting its session starts it afresh with the next prompt, rather than resuming a session that does not exist.
 @Observable final class ClaudeChatSession {
     private static let stoppedUnexpectedly = "Claude Code stopped before it finished answering."
     private static let notInstalled = "Anvil could not find Claude Code. Install it from claude.com/claude-code."
@@ -17,20 +17,23 @@ import Observation
     @ObservationIgnored private var isStopping = false
     @ObservationIgnored private var resumes: Bool
     @ObservationIgnored private let savedTitle: String?
+    @ObservationIgnored private let update: ClaudeUpdate
 
     var turns: [ChatTurn] { transcript.turns }
     var isAnswering: Bool { transcript.isAnswering }
     var title: String { transcript.title.isEmpty ? savedTitle ?? "" : transcript.title }
 
-    init(folder: URL) {
+    init(folder: URL, update: ClaudeUpdate) {
         self.folder = folder
+        self.update = update
         sessionID = UUID()
         resumes = false
         savedTitle = nil
     }
 
-    init(resuming saved: SavedChat) {
+    init(resuming saved: SavedChat, update: ClaudeUpdate) {
         folder = saved.folder
+        self.update = update
         sessionID = saved.id
         resumes = true
         savedTitle = saved.title
@@ -85,7 +88,6 @@ import Observation
     private func start(_ command: URL) -> ClaudeProcess? {
         let mode = mode ?? .manual
         let arguments = resumes ? ClaudeArguments.resume(sessionID: sessionID, mode: mode) : ClaudeArguments.chat(sessionID: sessionID, mode: mode)
-        resumes = true
         process = ClaudeProcess(
             command: command,
             arguments: arguments,
@@ -105,7 +107,7 @@ import Observation
             case .toolFinished(let id, let failed): transcript.finishTool(id, failed: failed)
             case .approvalRequested(let approval): approvals.append(approval)
             case .approvalWithdrawn(let requestID): approvals.removeAll { $0.requestID == requestID }
-            case .started: break
+            case .started: resumes = true
             }
         }
     }
@@ -125,6 +127,7 @@ import Observation
     private func stopped(printing errors: String) {
         process = nil
         guard isAnswering else { return }
+        if OutdatedClaude.isOutdated(printing: errors) { update.need() }
         finish(answer: errors.isEmpty ? Self.stoppedUnexpectedly : "\(Self.stoppedUnexpectedly)\n\n\(errors)", failed: true)
     }
 }

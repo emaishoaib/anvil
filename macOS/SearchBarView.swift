@@ -82,7 +82,7 @@ struct SearchBarView: View {
             Divider()
             AIChoiceList(choices: model.aiChoices, selected: model.aiChoiceSelection, select: model.selectAIChoice)
         } else if model.mode == .askClaude {
-            ClaudeChat(chat: model.chat, state: model.chatState, isExpanded: model.isExpanded, keepChatting: model.keepChatting, save: model.saveChat, leave: model.discardChat)
+            ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, keepChatting: model.keepChatting, save: model.saveChat, leave: model.discardChat)
             Divider()
             ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
         } else if model.mode == .settings {

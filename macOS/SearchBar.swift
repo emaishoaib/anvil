@@ -115,6 +115,7 @@ final class SearchBar {
             return true
         }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
+        if model.mode == .askClaude, handleUpdateKey(keyCode) { return true }
         if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
         if model.mode == .askClaude, model.chat?.mode == nil, handleChatSetupKey(keyCode, modifiers: modifiers) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
@@ -183,7 +184,7 @@ final class SearchBar {
     private func handleEndingKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         switch (model.chatState, keyCode) {
         case (.answering, kVK_Escape): model.chat?.stop()
-        case (.started, kVK_Escape): model.leaveChat()
+        case (.started, kVK_Escape), (.outdated, kVK_Escape): model.leaveChat()
         case (.askingToLeave, kVK_Escape): model.keepChatting()
         case (.askingToLeave, kVK_Return), (.askingToLeave, kVK_ANSI_KeypadEnter): model.discardChat()
         case (.askingToLeave, kVK_ANSI_S) where Self.onlyCommand(in: modifiers): model.saveChat()
@@ -205,6 +206,15 @@ final class SearchBar {
         switch (model.chatState, keyCode) {
         case (.signedOut, kVK_Return), (.signedOut, kVK_ANSI_KeypadEnter): model.claudeSignIn.signIn()
         case (.signingIn, kVK_Escape): model.claudeSignIn.cancel()
+        default: return false
+        }
+        return true
+    }
+
+    private func handleUpdateKey(_ keyCode: Int) -> Bool {
+        switch (model.chatState, keyCode) {
+        case (.outdated, kVK_Return), (.outdated, kVK_ANSI_KeypadEnter): model.claudeUpdate.update()
+        case (.updating, kVK_Escape): model.claudeUpdate.cancel()
         default: return false
         }
         return true

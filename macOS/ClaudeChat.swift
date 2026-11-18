@@ -1,13 +1,14 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, or the question about leaving an unsaved chat or deleting a saved one, at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, the offer to update Claude Code when it is too old, or the question about leaving an unsaved chat or deleting a saved one, at the end. It keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
 
     let chat: ClaudeChatSession?
     let state: ChatState
+    let update: ClaudeUpdate.State
     let isExpanded: Bool
     let keepChatting: () -> Void
     let save: () -> Void
@@ -28,6 +29,9 @@ struct ClaudeChat: View {
                         if let approval = chat.approvals.first {
                             ApprovalCard(approval: approval, answer: { chat.answerApproval(allowed: $0) })
                         }
+                        if update != .notNeeded {
+                            UpdateCard(state: update)
+                        }
                         if state == .askingToLeave {
                             LeaveChatCard(keepChatting: keepChatting, save: save, leave: leave)
                         }
@@ -43,6 +47,7 @@ struct ClaudeChat: View {
                 .onChange(of: chat.turns.last?.tools.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: chat.approvals.first?.requestID) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
                 .onChange(of: state) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
+                .onChange(of: update) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
             }
         } else if state == .signedOut || state == .signingIn {
             SignInPrompt(isSigningIn: state == .signingIn)

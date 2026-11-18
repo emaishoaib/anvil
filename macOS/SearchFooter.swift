@@ -128,6 +128,11 @@ struct SearchFooter: View {
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
                 }
+                if mode == .askClaude, chatState == .updating {
+                    Text("Stop Update")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
+                }
                 if mode == .askClaude, chatState == .awaitingApproval {
                     Text("Deny")
                         .foregroundStyle(.secondary)
@@ -183,7 +188,8 @@ struct SearchFooter: View {
         if mode == .askClaude {
             return switch chatState {
             case .signedOut: "Sign In"
-            case .signingIn, .answering: nil
+            case .signingIn, .answering, .updating: nil
+            case .outdated: "Update Claude Code"
             case .awaitingApproval: "Allow"
             case .askingToLeave: "Leave"
             case .askingToDelete: "Delete"

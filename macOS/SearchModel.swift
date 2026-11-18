@@ -33,11 +33,17 @@ import Observation
         mode == .askClaude && wantsExpanded
     }
     let claudeSignIn = ClaudeSignIn()
+    let claudeUpdate = ClaudeUpdate()
 
     var chatState: ChatState {
         if let chat {
             if !chat.approvals.isEmpty { return .awaitingApproval }
             if chat.isAnswering { return .answering }
+            switch claudeUpdate.state {
+            case .needed, .failed: return .outdated
+            case .updating: return .updating
+            case .notNeeded, .updated: break
+            }
             return switch chatQuestion {
             case .leave: .askingToLeave
             case .delete: .askingToDelete
@@ -413,9 +419,10 @@ import Observation
 
     private func sendPrompt() {
         let prompt = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !prompt.isEmpty, chat?.isAnswering != true else { return NSSound.beep() }
-        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder)
+        guard !prompt.isEmpty, chat?.isAnswering != true, claudeUpdate.state != .updating else { return NSSound.beep() }
+        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder, update: claudeUpdate)
         self.chat = chat
+        claudeUpdate.forget()
         chat.send(prompt, mode: chatSetup.mode)
         if isChatSaved { SavedChats.save(chat) }
         query = ""
@@ -428,7 +435,7 @@ import Observation
 
     private func continueSelectedChat() {
         guard let saved = savedChatList?.selectedChat(matching: query) else { return NSSound.beep() }
-        let chat = ClaudeChatSession(resuming: saved)
+        let chat = ClaudeChatSession(resuming: saved, update: claudeUpdate)
         self.chat = chat
         isChatSaved = true
         Task { await chat.loadHistory() }
