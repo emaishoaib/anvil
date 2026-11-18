@@ -5,10 +5,6 @@ public enum ZshrcBlock {
     static let start = "# >>> anvil >>>"
     static let end = "# <<< anvil <<<"
 
-    public static func isPresent(sourcing path: String, in zshrc: String) -> Bool {
-        zshrc.contains(block(sourcing: path))
-    }
-
     /// Puts the block at the end of the file, replacing any block already there, such as one pointing at an older path.
     public static func adding(sourcing path: String, to zshrc: String) -> String {
         let kept = removing(from: zshrc)

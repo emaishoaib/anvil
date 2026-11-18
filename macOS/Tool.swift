@@ -52,7 +52,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: "Show your next meeting in the space beside the Dock."
         case .uninstaller: "Remove apps along with the files they leave in your Library."
         case .ai: "Ask Claude Code about a folder from the search bar."
-        case .shell: "Keep your zsh aliases, startup lines and prompt in Anvil."
+        case .shell: "Keep your zsh aliases, startup lines and prompt in Anvil. Turning it on adds a block to ~/.zshrc that loads them."
         }
     }
 

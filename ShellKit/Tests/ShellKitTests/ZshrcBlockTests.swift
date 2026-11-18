@@ -38,10 +38,4 @@ struct ZshrcBlockTests {
         let zshrc = "export A=1\n\n# >>> workshop >>>\nsource x\n# <<< workshop <<<\n"
         #expect(ZshrcBlock.removing(from: zshrc) == zshrc)
     }
-
-    @Test func theBlockIsPresentOnlyWhenItSourcesTheSamePath() {
-        let zshrc = ZshrcBlock.adding(sourcing: Self.path, to: "export A=1\n")
-        #expect(ZshrcBlock.isPresent(sourcing: Self.path, in: zshrc))
-        #expect(!ZshrcBlock.isPresent(sourcing: "/old/shell.zsh", in: zshrc))
-    }
 }
