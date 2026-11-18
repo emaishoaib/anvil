@@ -24,7 +24,6 @@ import ShellKit
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var desktopSessionList: DesktopSessionList?
-    private(set) var aiChoiceSelection = 0
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
@@ -80,10 +79,6 @@ import ShellKit
         }
     }
 
-    var aiChoices: [AIChoice] {
-        AIChoice.matching(query)
-    }
-
     var isQueryEmpty: Bool {
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }
@@ -125,10 +120,6 @@ import ShellKit
             desktopSessionList?.moveSelection(by: offset, matching: query)
             return
         }
-        if mode == .aiChoice {
-            aiChoiceSelection = min(max(aiChoiceSelection + offset, 0), max(aiChoices.count - 1, 0))
-            return
-        }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -158,7 +149,6 @@ import ShellKit
     func openSelected() {
         if mode == .askClaude { return sendPrompt() }
         if mode == .desktopSessions { return continueSelectedChat() }
-        if mode == .aiChoice { return openSelectedAIChoice() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -253,12 +243,12 @@ import ShellKit
         switch mode {
         case .launcher:
             return false
-        case .defineWord, .uninstallApp, .aiChoice:
+        case .defineWord, .uninstallApp:
             mode = .launcher
             query = ""
         case .desktopSessions:
             desktopSessionList = nil
-            mode = .aiChoice
+            mode = .launcher
             query = ""
         case .askClaude:
             guard chat == nil else {
@@ -266,8 +256,7 @@ import ShellKit
                 return true
             }
             isChatSaved = false
-            mode = .aiChoice
-            query = ""
+            showDesktopSessions()
         case .uninstallReview(let previousQuery):
             review = nil
             mode = .uninstallApp
@@ -431,9 +420,6 @@ import ShellKit
         case .desktopSessions:
             results = []
             desktopSessionList?.select(0)
-        case .aiChoice:
-            results = []
-            aiChoiceSelection = 0
         }
         showArguments()
     }
@@ -458,7 +444,7 @@ import ShellKit
             let removableApps = appsOtherThanAnvil.filter(\.isRemovable).map(\.url)
             LeftoverIndexStore.shared.search(AppCatalog.shared.apps.map(\.url)) { AppSizes.shared.measure(removableApps, with: $0) }
         case .enterAIMode:
-            mode = .aiChoice
+            showDesktopSessions()
         }
         query = ""
     }
@@ -607,37 +593,25 @@ import ShellKit
         send(prompt)
     }
 
-    /// Opens AI mode's first page, where a chat is started or loaded. It only opens from the launcher, and only while the AI tool is on.
+    /// Opens AI mode on the list of Claude desktop sessions, where typing narrows it and Tab starts a new chat. It only opens from the launcher, and only while the AI tool is on.
     func enterAIMode() -> Bool {
         guard mode == .launcher, Tool.ai.isOn else { return false }
-        mode = .aiChoice
-        query = ""
+        showDesktopSessions()
         return true
     }
 
-    func selectAIChoice(_ index: Int) {
-        aiChoiceSelection = index
-    }
-
-    private func openSelectedAIChoice() {
-        let choices = aiChoices
-        guard choices.indices.contains(aiChoiceSelection) else { return NSSound.beep() }
-        switch choices[aiChoiceSelection] {
-        case .startChat: startChat()
-        case .loadChat: showDesktopSessions()
-        }
-        query = ""
-    }
-
-    private func startChat() {
+    func startChat() {
+        desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude
+        query = ""
         claudeSignIn.check()
     }
 
     private func showDesktopSessions() {
         desktopSessionList = DesktopSessionList()
         mode = .desktopSessions
+        query = ""
     }
 
     func setExpanded(_ expanded: Bool) {
@@ -699,8 +673,7 @@ import ShellKit
         let waiting = promptAfterLeaving
         ClaudeDesktop.save(chat.sessionID)
         endChat()
-        mode = .aiChoice
-        query = ""
+        showDesktopSessions()
         if let waiting { startNewChat(waiting) }
     }
 
@@ -712,8 +685,7 @@ import ShellKit
         promptAfterLeaving = nil
         isChatSaved = false
         Task { await chat.discard() }
-        mode = .aiChoice
-        query = ""
+        showDesktopSessions()
         if let waiting { startNewChat(waiting) }
     }
 

@@ -2,7 +2,7 @@ import ClaudeKit
 import Foundation
 import Observation
 
-/// The Load Chat page: Claude desktop's Code sessions, newest first, narrowed by the search field to those whose title or folder contains it, and the one selected.
+/// AI mode's chat list: Claude desktop's Code sessions, newest first, narrowed by the search field to those whose title or folder contains it, and the one selected.
 @Observable final class DesktopSessionList {
     private(set) var sessions = DesktopSessionFiles.newestFirst()
     private(set) var selected = 0

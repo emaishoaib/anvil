@@ -1,7 +1,7 @@
 import ClaudeKit
 import SwiftUI
 
-/// The rows of the Load Chat page, newest first: each Claude desktop session's title, the folder it works in, and how long ago it was last active. Clicking a row selects it. With no sessions, or nothing matching the search, the page says so.
+/// The rows of AI mode's chat list, newest first: each Claude desktop session's title, the folder it works in, and how long ago it was last active. Clicking a row selects it. With no sessions, or nothing matching the search, the page says so.
 struct DesktopSessionListView: View {
     private static let rowHeight: CGFloat = 44
     private static let padding: CGFloat = 8

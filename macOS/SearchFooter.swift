@@ -40,17 +40,13 @@ struct SearchFooter: View {
                     CommandIcon(command: .uninstallApp)
                     Text(message ?? LauncherCommand.uninstallApp.name)
                         .foregroundStyle(.secondary)
-                case .aiChoice:
+                case .desktopSessions:
                     CommandIcon(command: .enterAIMode)
                     Text("AI Mode")
                         .foregroundStyle(.secondary)
-                case .desktopSessions:
-                    SymbolIcon(symbol: AIChoice.loadChat.symbol, colour: .orange)
-                    Text(AIChoice.loadChat.title)
-                        .foregroundStyle(.secondary)
                 case .askClaude:
-                    SymbolIcon(symbol: AIChoice.startChat.symbol, colour: .orange)
-                    Text(AIChoice.startChat.title)
+                    CommandIcon(command: .enterAIMode)
+                    Text("Chat")
                         .foregroundStyle(.secondary)
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)
@@ -176,7 +172,6 @@ struct SearchFooter: View {
     private var action: String? {
         if mode == .settings { return settingAction }
         if mode == .desktopSessions { return "Continue Chat" }
-        if mode == .aiChoice { return "Open" }
         if mode == .askClaude {
             return switch chatState {
             case .signedOut: "Sign In"

@@ -84,9 +84,6 @@ struct SearchBarView: View {
         } else if model.mode == .desktopSessions, let list = model.desktopSessionList {
             Divider()
             DesktopSessionListView(list: list, query: model.query)
-        } else if model.mode == .aiChoice {
-            Divider()
-            AIChoiceList(choices: model.aiChoices, selected: model.aiChoiceSelection, select: model.selectAIChoice)
         } else if model.mode == .askClaude {
             ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, cardChoice: model.cardChoice, choose: model.choose)
             Divider()

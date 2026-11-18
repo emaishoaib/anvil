@@ -12,20 +12,18 @@ enum SearchMode: Equatable {
     case keySwapForm(query: String)
     case aliasForm(query: String)
     case shellTextForm(ShellText, query: String)
-    case aiChoice
     case askClaude
     case desktopSessions
 
     var placeholder: String {
         switch self {
         case .launcher: Tool.ai.isOn ? "Search for apps and quick links, or press Tab for AI mode…" : "Search for apps and quick links…"
-        case .aiChoice: "Start or load a chat…"
         case .defineWord: "Search word…"
         case .uninstallApp: "Search apps to uninstall…"
         case .uninstallReview: "Search files…"
         case .settings: "Search settings…"
         case .askClaude: "Ask Claude…"
-        case .desktopSessions: "Search Claude desktop sessions…"
+        case .desktopSessions: "Search chats, or press Tab for a new chat…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm: ""
         }
     }
