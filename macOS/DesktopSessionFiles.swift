@@ -7,10 +7,18 @@ nonisolated enum DesktopSessionFiles {
     private static let recordPrefix = "local_"
 
     static func newestFirst() -> [DesktopSession] {
-        DesktopSessions.newestFirst(from: records().compactMap { try? Data(contentsOf: $0) })
+        DesktopSessions.newestFirst(from: records())
     }
 
-    private static func records() -> [URL] {
+    static func contains(_ sessionID: UUID) -> Bool {
+        DesktopSessions.contains(sessionID, in: records())
+    }
+
+    private static func records() -> [Data] {
+        recordFiles().compactMap { try? Data(contentsOf: $0) }
+    }
+
+    private static func recordFiles() -> [URL] {
         contents(of: sessions)
             .flatMap(contents)
             .flatMap(contents)

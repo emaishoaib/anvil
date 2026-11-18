@@ -5,12 +5,10 @@ enum CardChoice {
     case keepChatting
     case saveAndLeave
     case leave
-    case delete
     case deny
     case allow
 
     static let leaving: [CardChoice] = [.keepChatting, .saveAndLeave, .leave]
-    static let deleting: [CardChoice] = [.keepChatting, .delete]
     static let approving: [CardChoice] = [.deny, .allow]
 
     var title: String {
@@ -18,7 +16,6 @@ enum CardChoice {
         case .keepChatting: "Keep Chatting"
         case .saveAndLeave: "Save and Leave"
         case .leave: "Leave"
-        case .delete: "Delete"
         case .deny: "Deny"
         case .allow: "Allow"
         }
@@ -26,7 +23,7 @@ enum CardChoice {
 
     var role: ButtonRole? {
         switch self {
-        case .leave, .delete: .destructive
+        case .leave: .destructive
         case .keepChatting, .saveAndLeave, .deny, .allow: nil
         }
     }

@@ -199,14 +199,9 @@ final class SearchBar {
         case (.started, kVK_Escape), (.outdated, kVK_Escape): model.leaveChat()
         case (.askingToLeave, kVK_Escape): model.keepChatting()
         case (.askingToLeave, kVK_ANSI_S) where Self.onlyCommand(in: modifiers): model.saveChat()
-        case (.askingToDelete, kVK_Escape): model.keepChatting()
-        case (.started, kVK_ANSI_D) where Self.onlyCommand(in: modifiers): model.askToDeleteChat()
         case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
             guard Self.onlyCommand(in: modifiers) else { return false }
             model.startSavingChat()
-        case (.notStarted, kVK_ANSI_D), (.answering, kVK_ANSI_D):
-            guard Self.onlyCommand(in: modifiers) else { return false }
-            NSSound.beep()
         default: return false
         }
         return true

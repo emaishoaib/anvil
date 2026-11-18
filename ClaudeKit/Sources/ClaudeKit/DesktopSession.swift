@@ -33,12 +33,21 @@ public struct DesktopSession: Decodable, Equatable, Sendable {
     }
 }
 
-/// Claude desktop's Code sessions, read from their records, newest first. Archived sessions are left out, and so is any record that cannot be read, such as one written by a later version of Claude desktop in a different shape.
+/// Claude desktop's Code sessions, read from their records. Any record that cannot be read is left out, such as one written by a later version of Claude desktop in a different shape.
 public enum DesktopSessions {
+    /// The sessions to list, newest first, leaving out archived ones.
     public static func newestFirst(from records: [Data]) -> [DesktopSession] {
-        records
-            .compactMap { try? JSONDecoder().decode(DesktopSession.self, from: $0) }
+        decoded(records)
             .filter { !$0.isArchived }
             .sorted { $0.lastActivity > $1.lastActivity }
+    }
+
+    /// Whether Claude desktop already has a session running on the given Claude Code session, archived or not.
+    public static func contains(_ sessionID: UUID, in records: [Data]) -> Bool {
+        decoded(records).contains { $0.sessionID == sessionID }
+    }
+
+    private static func decoded(_ records: [Data]) -> [DesktopSession] {
+        records.compactMap { try? JSONDecoder().decode(DesktopSession.self, from: $0) }
     }
 }

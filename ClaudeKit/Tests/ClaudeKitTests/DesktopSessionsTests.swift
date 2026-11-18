@@ -37,6 +37,18 @@ struct DesktopSessionsTests {
         #expect(DesktopSessions.newestFirst(from: [unreadable, Self.record(title: "Readable")]).map(\.title) == ["Readable"])
     }
 
+    @Test func aSessionClaudeDesktopHasIsFound() {
+        #expect(DesktopSessions.contains(UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record()]))
+    }
+
+    @Test func anArchivedSessionIsStillFound() {
+        #expect(DesktopSessions.contains(UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, in: [Self.record(isArchived: true)]))
+    }
+
+    @Test func aSessionClaudeDesktopDoesNotHaveIsNotFound() {
+        #expect(!DesktopSessions.contains(UUID(), in: [Self.record()]))
+    }
+
     @Test func aSessionWithoutATitleHasAnEmptyOne() {
         let untitled = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","cwd":"/","lastActivityAt":1}"#.utf8)
         #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == [""])

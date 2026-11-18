@@ -53,7 +53,6 @@ import ShellKit
             }
             return switch chatQuestion {
             case .leave: .askingToLeave
-            case .delete: .askingToDelete
             case nil: .started
             }
         }
@@ -474,7 +473,6 @@ import ShellKit
         self.chat = chat
         claudeUpdate.forget()
         chat.send(prompt, mode: chatSetup.mode)
-        if isChatSaved { SavedChats.save(chat) }
     }
 
     /// Whether the search bar should come back as it was however long it was hidden, because a chat is going on or a sign-in is still waiting on the browser.
@@ -553,10 +551,10 @@ import ShellKit
         wantsExpanded = expanded
     }
 
-    /// Keeps the chat in the saved chats from now on, saving it again after every prompt, so leaving it no longer asks. Before the first prompt, it is saved as soon as that prompt is sent.
+    /// Saves the chat into Claude desktop, so leaving it no longer asks. Before the first prompt there is nothing for Claude desktop to take yet, so it is saved when the chat is left.
     func startSavingChat() {
         isChatSaved = true
-        if let chat { SavedChats.save(chat) }
+        if let chat { ClaudeDesktop.save(chat.sessionID) }
     }
 
     func keepChatting() {
@@ -568,7 +566,6 @@ import ShellKit
         switch chatState {
         case .awaitingApproval: CardChoice.approving
         case .askingToLeave: CardChoice.leaving
-        case .askingToDelete: CardChoice.deleting
         default: []
         }
     }
@@ -596,20 +593,15 @@ import ShellKit
         switch choice {
         case .keepChatting: keepChatting()
         case .saveAndLeave: saveChat()
-        case .leave, .delete: discardChat()
+        case .leave: discardChat()
         case .deny: chat?.answerApproval(allowed: false)
         case .allow: chat?.answerApproval(allowed: true)
         }
     }
 
-    func askToDeleteChat() {
-        guard isChatSaved else { return NSSound.beep() }
-        chatQuestion = .delete
-    }
-
     func saveChat() {
         guard let chat else { return }
-        SavedChats.save(chat)
+        ClaudeDesktop.save(chat.sessionID)
         endChat()
         mode = .aiChoice
         query = ""
@@ -620,7 +612,6 @@ import ShellKit
         self.chat = nil
         chatQuestion = nil
         isChatSaved = false
-        SavedChats.forget(chat.sessionID)
         Task { await chat.discard() }
         mode = .aiChoice
         query = ""

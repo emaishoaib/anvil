@@ -34,9 +34,6 @@ struct ClaudeChat: View {
                         if state == .askingToLeave {
                             LeaveChatCard(highlighted: cardChoice, choose: choose)
                         }
-                        if state == .askingToDelete {
-                            DeleteChatCard(highlighted: cardChoice, choose: choose)
-                        }
                         Color.clear.frame(height: 1).id(Self.bottomID)
                     }
                     .padding(16)
