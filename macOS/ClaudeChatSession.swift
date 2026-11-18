@@ -2,7 +2,7 @@ import ClaudeKit
 import Foundation
 import Observation
 
-/// A chat with Claude Code in one folder, which stays fixed for the whole chat. Claude Code starts with the first prompt sent here, in the permission mode picked at that moment, and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. A saved chat carried on later resumes that session, showing its earlier turns once they are read, and its mode can still change until the first new prompt. Approvals Claude asks for wait in line and are answered one at a time, oldest first. Stopping an answer asks Claude Code to stop, and if it has not finished a few seconds later, the answer counts as stopped anyway.
+/// A chat with Claude Code in one folder, which stays fixed for the whole chat. Claude Code starts with the first prompt sent here, in the permission mode picked at that moment, and keeps running between prompts, so each follow-up continues the same conversation, saved under this chat's session id. A saved chat carried on later resumes that session, showing its earlier turns once they are read, and its mode can still change until the first new prompt. Approvals Claude asks for wait in line and are answered one at a time, oldest first. Stopping an answer asks Claude Code to stop, and if it has not finished a few seconds later, the answer counts as stopped anyway. If Claude Code exits before it finishes an answer, the answer says so, followed by the last errors it printed.
 @Observable final class ClaudeChatSession {
     private static let stoppedUnexpectedly = "Claude Code stopped before it finished answering."
     private static let notInstalled = "Anvil could not find Claude Code. Install it from claude.com/claude-code."
@@ -91,7 +91,7 @@ import Observation
             arguments: arguments,
             folder: folder,
             onEvents: { [weak self] in self?.apply($0) },
-            onExit: { [weak self] in self?.stopped() }
+            onExit: { [weak self] in self?.stopped(printing: $0) }
         )
         return process
     }
@@ -122,9 +122,9 @@ import Observation
         transcript.markStopped()
     }
 
-    private func stopped() {
+    private func stopped(printing errors: String) {
         process = nil
         guard isAnswering else { return }
-        finish(answer: Self.stoppedUnexpectedly, failed: true)
+        finish(answer: errors.isEmpty ? Self.stoppedUnexpectedly : "\(Self.stoppedUnexpectedly)\n\n\(errors)", failed: true)
     }
 }
