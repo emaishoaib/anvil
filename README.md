@@ -14,13 +14,15 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **Quick links** -- a quick link is a named web address opened from the bar like an app. A link can hold up to three placeholders such as a search query. Each link can open in an app of your choosing rather than the default browser. Links can be exported to a file and imported again.
 
-**Switcher** -- switches between every window on the current Space rather than every app, or only between the windows of the app in front. It started as [Hop](https://github.com/emaishoaib/hop), a standalone window switcher.
+**Switcher** -- switches between every window on the current Space rather than every app, or only between the windows of the app in front. Windows are listed by how recently you used them and that order is kept when Anvil restarts. It started as [Hop](https://github.com/emaishoaib/hop), a standalone window switcher.
 
 **Windows** -- snaps the window in front to halves, thirds, corners or the whole screen, either from a shortcut or by dragging it to the edge of the screen.
 
 **Rules** -- do something when something happens like choosing a menu item from a mouse button or quitting an app when another one opens. A rule can work in every app or only in the ones you pick.
 
 **Key swaps** -- trades two keys on the Mac's built-in keyboard and leaves an external keyboard as it is.
+
+**Shell** -- keeps your zsh aliases, startup lines and prompt in Anvil and writes them to a zsh file that `~/.zshrc` loads, then the next terminal you open picks up any change you made in the bar.
 
 **Mouse** -- makes a plain mouse wheel scroll smoothly like a trackpad. Logitech mice also get their speed, wheel and extra buttons set from Anvil.
 
@@ -41,7 +43,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Bluetooth** -- to read AirPods batteries
 - **Administrator password** -- when uninstalling an app from the Mac App Store or keeping the Mac awake with the lid closed
 
-**Where settings are kept** -- rules, key swaps and mouse settings can live as files in a folder you choose such as one that syncs between Macs.
+**Where settings are kept** -- rules, key swaps, mouse settings and the shell setup can live as files in a folder you choose such as one that syncs between Macs.
 
 **What reaches the internet** -- only a few places and only for these things:
 
@@ -50,6 +52,8 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Updates** -- Anvil checks its own website for new versions
 
 **Where AI chats run** -- a chat runs through Claude Code on the Mac and your Claude account, so what you type goes to Anthropic the same way it would from a terminal. Each chat is a Claude Code session kept where Claude Code keeps all its sessions.
+
+**Your zshrc** -- turning the Shell tool on adds a small block to `~/.zshrc` that loads Anvil's zsh file and turning it off takes the block out again. Anvil never touches the rest of the file and leaves it alone if it can't read it.
 
 **AirPods batteries** -- macOS doesn't publish each earbud's battery so Anvil reads properties Apple doesn't document and a macOS update could stop them showing.
 
