@@ -11,3 +11,4 @@ releases/
 .wrangler/
 Package.resolved
 PLAN.md
+RELEASING.md
