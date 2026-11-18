@@ -8,11 +8,6 @@ import Observation
 
     private(set) var state = ListenerState.idle
 
-    var isListening: Bool {
-        guard case .listening = state else { return false }
-        return true
-    }
-
     func toggle() {
         switch state {
         case .idle:

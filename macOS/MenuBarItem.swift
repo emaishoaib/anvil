@@ -31,9 +31,13 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
         StrikeAnimation.play(on: button)
     }
 
-    /// What Anvil is doing, with listening first since it is what the glow most likely means, or nothing while Anvil is idle.
+    /// What Anvil is doing, with listening first since it is what the glow most likely means, or nothing while Anvil is idle. The glow starts as soon as the listening shortcut is pressed, since getting ready to listen can take a while the first time.
     private static var activityTitle: String? {
-        if Listener.shared.isListening { return "Listening…" }
+        switch Listener.shared.state {
+        case .starting: return "Getting ready to listen…"
+        case .listening: return "Listening…"
+        case .idle, .stopping: break
+        }
         if LogitechDevices.shared.isBusy { return "Setting up Logitech devices…" }
         return nil
     }
