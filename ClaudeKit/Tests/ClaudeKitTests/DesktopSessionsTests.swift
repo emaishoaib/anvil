@@ -49,6 +49,18 @@ struct DesktopSessionsTests {
         #expect(!DesktopSessions.contains(UUID(), in: [Self.record()]))
     }
 
+    @Test func theLastSessionIsTheOneWhoseTranscriptChangedLast() {
+        let older = DesktopSessions.newestFirst(from: [Self.record(desktopID: "local_older", sessionID: "11111111-1111-1111-1111-111111111111", lastActivityAt: 2_000)])
+        let newer = DesktopSessions.newestFirst(from: [Self.record(desktopID: "local_newer", sessionID: "22222222-2222-2222-2222-222222222222", lastActivityAt: 1_000)])
+        let changes = [older[0].sessionID: Date(timeIntervalSince1970: 1), newer[0].sessionID: Date(timeIntervalSince1970: 2)]
+        #expect(DesktopSessions.lastUsed(of: older + newer, changedAt: { changes[$0] })?.desktopID == "local_newer")
+    }
+
+    @Test func aSessionWithoutATranscriptIsNeverTheLastOne() {
+        let sessions = DesktopSessions.newestFirst(from: [Self.record()])
+        #expect(DesktopSessions.lastUsed(of: sessions, changedAt: { _ in nil }) == nil)
+    }
+
     @Test func aSessionWithoutATitleHasAnEmptyOne() {
         let untitled = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","cwd":"/","lastActivityAt":1}"#.utf8)
         #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == [""])

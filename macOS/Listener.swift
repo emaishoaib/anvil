@@ -2,12 +2,11 @@ import AppKit
 import AVFoundation
 import Observation
 
-/// Listens to the microphone between two presses of the listening shortcut. The first press starts listening once the microphone is allowed, and the second stops it and keeps what was heard. Presses while it is still starting or stopping are ignored. If the microphone is not allowed, or speech cannot be turned into text in the Mac's language, it beeps and stays quiet.
+/// Listens to the microphone between two presses of the listening shortcut. The first press starts listening once the microphone is allowed, and the second stops it and sends what was heard to Claude through the search bar. Presses while it is still starting or stopping are ignored. If the microphone is not allowed, speech cannot be turned into text in the Mac's language, or nothing was heard, it beeps.
 @MainActor @Observable final class Listener {
     static let shared = Listener()
 
     private(set) var state = ListenerState.idle
-    private(set) var heard = ""
 
     var isListening: Bool {
         guard case .listening = state else { return false }
@@ -36,8 +35,10 @@ import Observation
     }
 
     private func stop(_ recording: SpeechRecording) async {
-        heard = await recording.stop()
+        let said = await recording.stop()
         state = .idle
+        guard !said.isEmpty else { return NSSound.beep() }
+        SearchBar.shared.sendSpoken(said)
     }
 }
 

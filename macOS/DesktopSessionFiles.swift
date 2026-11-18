@@ -10,6 +10,12 @@ nonisolated enum DesktopSessionFiles {
         DesktopSessions.newestFirst(from: records())
     }
 
+    static func lastUsed() -> DesktopSession? {
+        DesktopSessions.lastUsed(of: newestFirst()) { sessionID in
+            ClaudeSessionFiles.transcript(of: sessionID).flatMap { try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate }
+        }
+    }
+
     static func contains(_ sessionID: UUID) -> Bool {
         DesktopSessions.contains(sessionID, in: records())
     }

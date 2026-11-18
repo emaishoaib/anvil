@@ -1,4 +1,5 @@
 import AppKit
+import ClaudeKit
 import LauncherKit
 import Observation
 import ShellKit
@@ -503,15 +504,42 @@ import ShellKit
 
     private func continueSelectedChat() {
         guard let session = desktopSessionList?.selectedSession(matching: query) else { return NSSound.beep() }
+        let chat = carryOn(session)
+        Task { await chat.loadHistory() }
+    }
+
+    private func carryOn(_ session: DesktopSession) -> ClaudeChatSession {
         let chat = ClaudeChatSession(resuming: session, update: claudeUpdate)
         self.chat = chat
         isChatSaved = true
-        Task { await chat.loadHistory() }
         desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude
         query = ""
         claudeSignIn.check()
+        return chat
+    }
+
+    /// Sends what was said by voice. A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, whose earlier turns are read first so they show above it, or to a new chat if there is no session at all. While Claude is still answering, or Claude Code is being updated, it waits in the field instead.
+    func sendSpoken(_ prompt: String) {
+        if chat == nil, let session = DesktopSessionFiles.lastUsed() {
+            let chat = carryOn(session)
+            Task {
+                await chat.loadHistory()
+                sendOrHold(prompt)
+            }
+            return
+        }
+        mode = .askClaude
+        sendOrHold(prompt)
+    }
+
+    private func sendOrHold(_ prompt: String) {
+        guard canSend else {
+            query = prompt
+            return
+        }
+        send(prompt)
     }
 
     /// Opens AI mode's first page, where a chat is started or loaded. It only opens from the launcher, and only while the AI tool is on.

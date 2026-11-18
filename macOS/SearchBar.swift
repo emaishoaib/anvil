@@ -40,6 +40,13 @@ final class SearchBar {
         return ContinuousClock.now - hiddenAt < SearchMemory.current.duration
     }
 
+    /// Sends what was said by voice to Claude and shows the bar in AI mode with the chat it went to, opening the bar first if it is hidden.
+    func sendSpoken(_ prompt: String) {
+        if !panel.isVisible { show() }
+        model.sendSpoken(prompt)
+        panel.makeKeyAndOrderFront(nil)
+    }
+
     func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {
         model.showRuleForm(draft, in: group, isNew: isNew)
     }

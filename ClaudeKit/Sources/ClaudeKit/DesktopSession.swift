@@ -47,6 +47,14 @@ public enum DesktopSessions {
         decoded(records).contains { $0.sessionID == sessionID }
     }
 
+    /// The session used last, going by when its Claude Code transcript last changed, so a turn sent from outside Claude desktop counts too. A session whose transcript cannot be found is never the last one.
+    public static func lastUsed(of sessions: [DesktopSession], changedAt: (UUID) -> Date?) -> DesktopSession? {
+        sessions
+            .compactMap { session in changedAt(session.sessionID).map { (session, $0) } }
+            .max { $0.1 < $1.1 }?
+            .0
+    }
+
     private static func decoded(_ records: [Data]) -> [DesktopSession] {
         records.compactMap { try? JSONDecoder().decode(DesktopSession.self, from: $0) }
     }

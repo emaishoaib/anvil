@@ -28,7 +28,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **Keep Awake** -- keeps the Mac from sleeping for a while, even with the lid closed if you want.
 
-**AI** -- turns the bar into a chat with Claude Code about a folder you pick and asks you before Claude runs a command or makes a change. A chat can be saved into Claude desktop, and any Claude desktop Code session can be carried on from the bar.
+**AI** -- turns the bar into a chat with Claude Code about a folder you pick and asks you before Claude runs a command or makes a change. A chat can be saved into Claude desktop, and any Claude desktop Code session can be carried on from the bar. From any app, the listening shortcut, Option Shift Space by default, listens until it is pressed again, then sends what you said to the last session and shows it in the bar. Speech is turned into text on the Mac.
 
 **Uninstaller** -- removes an app along with the files it leaves across the Mac. You untick anything you want to keep and the rest goes to the Trash, so a mistake can be undone.
 
