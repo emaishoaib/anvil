@@ -15,7 +15,7 @@ struct QueryRow: View {
                 BackButton { _ = model.goBack() }
             }
             if model.mode.hasSearchField {
-                TextField(model.mode.placeholder, text: query, axis: model.mode == .askClaude ? .vertical : .horizontal)
+                TextField(model.placeholder, text: query, axis: model.mode == .askClaude ? .vertical : .horizontal)
                     .lineLimit(1...Self.promptLineLimit)
                     .textFieldStyle(.plain)
                     .font(.system(size: Self.fontSize))

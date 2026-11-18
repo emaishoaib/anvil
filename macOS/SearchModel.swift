@@ -79,6 +79,11 @@ import ShellKit
         }
     }
 
+    /// The field's hint for the current mode, left out while a loaded chat's earlier turns are still being read, so nothing reads as ready to type into before the chat shows.
+    var placeholder: String {
+        chat?.isLoadingHistory == true ? "" : mode.placeholder
+    }
+
     var isQueryEmpty: Bool {
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }

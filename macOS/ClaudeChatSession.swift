@@ -13,6 +13,7 @@ import Observation
     private(set) var mode: PermissionMode?
     private(set) var transcript = ChatTranscript()
     private(set) var approvals: [Approval] = []
+    private(set) var isLoadingHistory = false
     @ObservationIgnored private var process: ClaudeProcess?
     @ObservationIgnored private var isStopping = false
     @ObservationIgnored private var resumes: Bool
@@ -36,11 +37,13 @@ import Observation
         self.update = update
         sessionID = session.sessionID
         resumes = true
+        isLoadingHistory = true
         savedTitle = session.title
     }
 
-    /// Reads the earlier turns of a resumed chat from its transcript, away from the main thread, since a long chat's file can be large. They only show if no new prompt was sent in the meantime.
+    /// Reads the earlier turns of a resumed chat from its transcript, away from the main thread, since a long chat's file can be large. They only show if no new prompt was sent in the meantime. A resumed chat counts as loading from the moment it is made until this finishes, however it finishes.
     func loadHistory() async {
+        defer { isLoadingHistory = false }
         guard let file = ClaudeSessionFiles.transcript(of: sessionID) else { return }
         let turns = await Task.detached { (try? String(contentsOf: file, encoding: .utf8)).map(SessionHistory.turns) ?? [] }.value
         guard mode == nil else { return }

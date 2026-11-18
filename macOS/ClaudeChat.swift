@@ -1,7 +1,7 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, the offer to update Claude Code when it is too old, or the question about leaving an unsaved chat, at the end. A chat opens scrolled to its end, so a loaded chat shows its latest turn, and it keeps the newest text in view as the answer streams in, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, the offer to update Claude Code when it is too old, or the question about leaving an unsaved chat, at the end. A chat opens scrolled to its end, so a loaded chat shows its latest turn, and it keeps the newest text in view as the answer streams in, shows a spinner while a loaded chat's earlier turns are read, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
@@ -20,7 +20,10 @@ struct ClaudeChat: View {
     }
 
     @ViewBuilder private var content: some View {
-        if let chat, !chat.turns.isEmpty {
+        if let chat, chat.isLoadingHistory, chat.turns.isEmpty {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let chat, !chat.turns.isEmpty {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
