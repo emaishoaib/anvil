@@ -10,6 +10,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
     case dockWidgets
     case uninstaller
     case ai
+    case shell
 
     var id: Self { self }
 
@@ -36,6 +37,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: "Dock Widgets"
         case .uninstaller: "Uninstaller"
         case .ai: "AI"
+        case .shell: "Shell"
         }
     }
 
@@ -50,6 +52,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: "Show your next meeting in the space beside the Dock."
         case .uninstaller: "Remove apps along with the files they leave in your Library."
         case .ai: "Ask Claude Code about a folder from the search bar."
+        case .shell: "Keep your zsh aliases, startup lines and prompt in Anvil."
         }
     }
 
@@ -71,6 +74,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: .symbol("dock.rectangle")
         case .uninstaller: .symbol("trash")
         case .ai: .symbol("point.3.connected.trianglepath.dotted")
+        case .shell: .symbol("terminal")
         }
     }
 
@@ -86,6 +90,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .ai: 6
         case .dockWidgets: 7
         case .uninstaller: 8
+        case .shell: 9
         }
     }
 

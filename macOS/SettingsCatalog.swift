@@ -20,6 +20,7 @@ enum SettingsCatalog {
         case .mouse: MouseCatalog.settings(systemShortcuts: systemShortcuts)
         case .uninstaller: UninstallerCatalog.settings()
         case .ai: AICatalog.settings()
+        case .shell: ShellCatalog.settings()
         default: []
         }
     }

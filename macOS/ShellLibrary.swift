@@ -54,8 +54,10 @@ import ShellKit
         writeZsh()
     }
 
-    private func writeZsh() {
+    /// Writes the zsh file from the setup, or with nothing but its header while the Shell tool is off.
+    func writeZsh() {
+        let written = Tool.shell.isOn ? setup : ShellSetup()
         try? FileManager.default.createDirectory(at: Self.zshFile.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? Data(setup.zsh.utf8).write(to: Self.zshFile, options: .atomic)
+        try? Data(written.zsh.utf8).write(to: Self.zshFile, options: .atomic)
     }
 }

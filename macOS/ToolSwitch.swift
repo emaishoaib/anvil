@@ -7,6 +7,7 @@ import Foundation
         switch self {
         case .mouse: LogitechDevices.shared.applyMouseTool()
         case .keepAwake where !isOn: Task { await KeepAwake.shared.setActive(false) }
+        case .shell: ShellLibrary.shared.writeZsh()
         default: break
         }
     }
