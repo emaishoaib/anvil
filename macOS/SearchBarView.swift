@@ -72,6 +72,9 @@ struct SearchBarView: View {
         } else if case .keySwapForm = model.mode {
             Divider()
             KeySwapForm(draft: $model.keySwapDraft)
+        } else if case .aliasForm = model.mode {
+            Divider()
+            AliasForm(draft: $model.aliasDraft, field: $model.aliasField)
         } else if case .uninstallReview = model.mode, let review = model.review {
             Divider()
             UninstallReviewList(review: review, query: model.query)

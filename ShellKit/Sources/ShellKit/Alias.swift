@@ -12,6 +12,14 @@ public struct Alias: Identifiable, Hashable, Codable, Sendable {
         self.command = command
     }
 
+    /// Whether the alias can be saved: a name of letters, digits, dashes, underscores and dots, and a command that isn't blank.
+    public var isComplete: Bool {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_."))
+        return !name.isEmpty
+            && name.unicodeScalars.allSatisfy(allowed.contains)
+            && !command.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var zshLine: String {
         "alias \(name)='\(command.replacing("'", with: #"'\''"#))'"
     }

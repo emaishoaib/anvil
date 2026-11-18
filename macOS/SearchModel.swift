@@ -1,6 +1,7 @@
 import AppKit
 import LauncherKit
 import Observation
+import ShellKit
 
 @Observable final class SearchModel {
     private(set) var mode = SearchMode.launcher
@@ -16,6 +17,8 @@ import Observation
     var quickLinkField = QuickLinkField.name
     var ruleDraft = RuleDraft()
     var keySwapDraft = KeySwapDraft()
+    var aliasDraft = Alias(name: "", command: "")
+    var aliasField = AliasField.name
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var savedChatList: SavedChatList?
@@ -93,6 +96,8 @@ import Observation
         draft = QuickLink()
         ruleDraft = RuleDraft()
         keySwapDraft = KeySwapDraft()
+        aliasDraft = Alias(name: "", command: "")
+        aliasField = .name
         entryPage = ""
         field = .query
         mode = .launcher
@@ -129,9 +134,12 @@ import Observation
         return true
     }
 
-    func moveQuickLinkFocus(by offset: Int) -> Bool {
-        guard case .quickLinkForm = mode else { return false }
-        quickLinkField = quickLinkField.moved(by: offset)
+    func moveFormFocus(by offset: Int) -> Bool {
+        switch mode {
+        case .quickLinkForm: quickLinkField = quickLinkField.moved(by: offset)
+        case .aliasForm: aliasField = aliasField.moved(by: offset)
+        default: return false
+        }
         return true
     }
 
@@ -216,6 +224,14 @@ import Observation
         query = ""
     }
 
+    func showAliasForm() {
+        settings.finishEditing()
+        aliasDraft = Alias(name: "", command: "")
+        aliasField = .name
+        mode = .aliasForm(query: query)
+        query = ""
+    }
+
     func clearSelectedShortcut() -> Bool {
         mode == .settings && settings.clearSelectedShortcut()
     }
@@ -258,7 +274,7 @@ import Observation
             if settings.goUp() { return true }
             mode = .launcher
             query = ""
-        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery):
+        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery):
             settings.reload()
             mode = .settings
             query = previousQuery
@@ -281,6 +297,7 @@ import Observation
     func saveDraft() {
         if case .ruleForm = mode { return saveRuleDraft() }
         if case .keySwapForm = mode { return saveKeySwapDraft() }
+        if case .aliasForm = mode { return saveAliasDraft() }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
         _ = goBack()
@@ -320,6 +337,12 @@ import Observation
     private func saveKeySwapDraft() {
         guard let keySwap = keySwapDraft.keySwap else { return NSSound.beep() }
         KeySwapLibrary.shared.add(keySwap)
+        _ = goBack()
+    }
+
+    private func saveAliasDraft() {
+        guard aliasDraft.isComplete else { return NSSound.beep() }
+        ShellLibrary.shared.save(aliasDraft)
         _ = goBack()
     }
 
@@ -380,7 +403,7 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .askClaude:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .askClaude:
             results = []
         case .savedChats:
             results = []

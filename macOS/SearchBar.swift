@@ -52,6 +52,10 @@ final class SearchBar {
         model.showKeySwapForm()
     }
 
+    func showAliasForm() {
+        model.showAliasForm()
+    }
+
     func presentModal<Result>(_ present: () -> Result) -> Result {
         isPresentingModal = true
         panel.level = .floating
@@ -253,7 +257,7 @@ final class SearchBar {
             guard modifiers.contains(.command) else { return false }
             model.saveDraft()
         case kVK_Tab:
-            return model.moveQuickLinkFocus(by: modifiers.contains(.shift) ? -1 : 1)
+            return model.moveFormFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_Escape:
             _ = model.goBack()
         default:

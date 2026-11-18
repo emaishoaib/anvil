@@ -50,7 +50,7 @@ struct QuickLinkForm: View {
     }
 }
 
-private struct FormLabel: View {
+struct FormLabel: View {
     let text: String
 
     var body: some View {

@@ -67,6 +67,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .settings)
                     Text("Add Key Swap")
                         .foregroundStyle(.secondary)
+                case .aliasForm:
+                    CommandIcon(command: .settings)
+                    Text("Add Alias")
+                        .foregroundStyle(.secondary)
                 case .settings:
                     CommandIcon(command: .settings)
                     if let message {
@@ -201,6 +205,7 @@ struct SearchFooter: View {
         if case .wordEntry = mode { return "Open in Dictionary" }
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         if case .keySwapForm = mode { return "Add Key Swap" }
+        if case .aliasForm = mode { return "Add Alias" }
         if case .ruleForm(let group, let isNew, _) = mode { return "\(isNew ? "Create" : "Update") \(group.itemName)" }
         return switch selected {
         case .answer: "Copy Answer"
