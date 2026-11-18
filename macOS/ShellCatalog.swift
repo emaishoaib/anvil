@@ -2,7 +2,7 @@ import Foundation
 import LauncherKit
 import ShellKit
 
-/// The Shell tool's rows in the search bar: a row each for the startup lines and the prompt, showing their first line, then a row to add an alias, then a row per alias showing its command, which deletes it. While the shell file can't be read, its problem shows as a warning row and the other rows can't be used.
+/// The Shell tool's rows in the search bar: a switch for loading the setup in new shells, a row each for the startup lines and the prompt, showing their first line, then a row to add an alias, then a row per alias showing its command, which deletes it. While the shell file can't be read, its problem shows as a warning row and the other rows can't be used.
 enum ShellCatalog {
     private static let aliasesName = "Aliases"
 
@@ -10,10 +10,18 @@ enum ShellCatalog {
         let library = ShellLibrary.shared
         let isBroken = library.loadProblem != nil
         let aliases = library.setup.aliases
-        return problem + ShellText.allCases.map { row(for: $0, isDisabled: isBroken) } + Setting.subgroup(aliasesName,
+        return problem + [loadInNewShells] + ShellText.allCases.map { row(for: $0, isDisabled: isBroken) } + Setting.subgroup(aliasesName,
             [addAlias(isDisabled: isBroken)]
                 + (aliases.isEmpty && !isBroken ? [.info("No aliases yet", id: "shell.aliases.empty", toolName: Tool.shell.name)] : [])
                 + aliases.map { row(for: $0, isDisabled: isBroken) }
+        )
+    }
+
+    private static var loadInNewShells: Setting {
+        Setting(
+            entry: SettingEntry(id: "shell.loadInNewShells", title: "Load in New Shells", toolName: Tool.shell.name, keywords: ["zshrc"]),
+            subtitle: "Adds a block to ~/.zshrc that loads Anvil's shell file.",
+            row: .toggle(isOn: ShellLoading.isOn, set: ShellLoading.set)
         )
     }
 
