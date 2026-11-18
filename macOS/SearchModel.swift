@@ -36,6 +36,7 @@ import ShellKit
     private var highlightedChoice: CardChoice?
     private(set) var isChatSaved = false
     private var wantsExpanded = false
+    private var promptAfterLeaving: String?
 
     var isExpanded: Bool {
         mode == .askClaude && wantsExpanded
@@ -520,20 +521,47 @@ import ShellKit
         return chat
     }
 
-    /// Sends what was said by voice. A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, whose earlier turns are read first so they show above it, or to a new chat if there is no session at all. While Claude is still answering, or Claude Code is being updated, it waits in the field instead.
-    func sendSpoken(_ prompt: String) {
-        if chat == nil, let session = DesktopSessionFiles.lastUsed() {
-            let chat = carryOn(session)
-            Task {
-                await chat.loadHistory()
-                sendOrHold(prompt)
-            }
+    /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped.
+    func sendSpoken(_ said: String) {
+        let spoken = SpokenPrompt(said)
+        guard !spoken.text.isEmpty else { return NSSound.beep() }
+        switch spoken.session {
+        case .new: sendToNewChat(spoken.text)
+        case .last: sendToLastSession(spoken.text)
+        }
+    }
+
+    /// A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, whose earlier turns are read first so they show above it, or to a new chat if there is no session at all.
+    private func sendToLastSession(_ prompt: String) {
+        guard chat == nil, let session = DesktopSessionFiles.lastUsed() else { return startNewChat(prompt) }
+        let chat = carryOn(session)
+        Task {
+            await chat.loadHistory()
+            sendOrHold(prompt)
+        }
+    }
+
+    /// A chat going on in AI mode is left first. A saved one is left straight away, and an unsaved one asks the usual question, with the new chat starting once it is left, or the prompt moving into the field to send here if chatting goes on.
+    private func sendToNewChat(_ prompt: String) {
+        guard let chat else { return startNewChat(prompt) }
+        guard isChatSaved else {
+            promptAfterLeaving = prompt
+            chatQuestion = .leave
             return
         }
+        ClaudeDesktop.save(chat.sessionID)
+        endChat()
+        startNewChat(prompt)
+    }
+
+    private func startNewChat(_ prompt: String) {
+        desktopSessionList = nil
         mode = .askClaude
+        query = ""
         sendOrHold(prompt)
     }
 
+    /// Sends the prompt, unless Claude is still answering or Claude Code is being updated, in which case it waits in the field.
     private func sendOrHold(_ prompt: String) {
         guard canSend else {
             query = prompt
@@ -587,6 +615,8 @@ import ShellKit
 
     func keepChatting() {
         chatQuestion = nil
+        if let promptAfterLeaving { query = promptAfterLeaving }
+        promptAfterLeaving = nil
     }
 
     /// The buttons of the question card at the end of the chat, left to right, or none when no card is asking.
@@ -629,26 +659,32 @@ import ShellKit
 
     func saveChat() {
         guard let chat else { return }
+        let waiting = promptAfterLeaving
         ClaudeDesktop.save(chat.sessionID)
         endChat()
         mode = .aiChoice
         query = ""
+        if let waiting { startNewChat(waiting) }
     }
 
     func discardChat() {
         guard let chat else { return }
+        let waiting = promptAfterLeaving
         self.chat = nil
         chatQuestion = nil
+        promptAfterLeaving = nil
         isChatSaved = false
         Task { await chat.discard() }
         mode = .aiChoice
         query = ""
+        if let waiting { startNewChat(waiting) }
     }
 
     private func endChat() {
         chat?.end()
         chat = nil
         chatQuestion = nil
+        promptAfterLeaving = nil
         isChatSaved = false
     }
 
