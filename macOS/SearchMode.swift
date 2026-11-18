@@ -11,6 +11,7 @@ enum SearchMode: Equatable {
     case ruleForm(RuleGroup, isNew: Bool, query: String)
     case keySwapForm(query: String)
     case aliasForm(query: String)
+    case shellTextForm(ShellText, query: String)
     case aiChoice
     case askClaude
     case savedChats
@@ -25,13 +26,13 @@ enum SearchMode: Equatable {
         case .settings: "Search settings…"
         case .askClaude: "Ask Claude…"
         case .savedChats: "Search saved chats…"
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm: ""
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm: ""
         }
     }
 
     var hasSearchField: Bool {
         switch self {
-        case .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm: false
+        case .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm: false
         default: true
         }
     }

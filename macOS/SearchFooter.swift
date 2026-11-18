@@ -71,6 +71,10 @@ struct SearchFooter: View {
                     CommandIcon(command: .settings)
                     Text("Add Alias")
                         .foregroundStyle(.secondary)
+                case .shellTextForm(let text, _):
+                    CommandIcon(command: .settings)
+                    Text("Edit \(text.title)")
+                        .foregroundStyle(.secondary)
                 case .settings:
                     CommandIcon(command: .settings)
                     if let message {
@@ -206,6 +210,7 @@ struct SearchFooter: View {
         if case .quickLinkForm(let kind, _) = mode { return kind.saveTitle }
         if case .keySwapForm = mode { return "Add Key Swap" }
         if case .aliasForm = mode { return "Add Alias" }
+        if case .shellTextForm(let text, _) = mode { return "Save \(text.title)" }
         if case .ruleForm(let group, let isNew, _) = mode { return "\(isNew ? "Create" : "Update") \(group.itemName)" }
         return switch selected {
         case .answer: "Copy Answer"

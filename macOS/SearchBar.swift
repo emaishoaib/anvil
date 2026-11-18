@@ -56,6 +56,10 @@ final class SearchBar {
         model.showAliasForm()
     }
 
+    func showShellTextForm(_ text: ShellText) {
+        model.showShellTextForm(text)
+    }
+
     func presentModal<Result>(_ present: () -> Result) -> Result {
         isPresentingModal = true
         panel.level = .floating

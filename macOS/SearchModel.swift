@@ -19,6 +19,7 @@ import ShellKit
     var keySwapDraft = KeySwapDraft()
     var aliasDraft = Alias(name: "", command: "")
     var aliasField = AliasField.name
+    var shellTextDraft = ""
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var savedChatList: SavedChatList?
@@ -98,6 +99,7 @@ import ShellKit
         keySwapDraft = KeySwapDraft()
         aliasDraft = Alias(name: "", command: "")
         aliasField = .name
+        shellTextDraft = ""
         entryPage = ""
         field = .query
         mode = .launcher
@@ -232,6 +234,13 @@ import ShellKit
         query = ""
     }
 
+    func showShellTextForm(_ text: ShellText) {
+        settings.finishEditing()
+        shellTextDraft = text.current
+        mode = .shellTextForm(text, query: query)
+        query = ""
+    }
+
     func clearSelectedShortcut() -> Bool {
         mode == .settings && settings.clearSelectedShortcut()
     }
@@ -274,7 +283,7 @@ import ShellKit
             if settings.goUp() { return true }
             mode = .launcher
             query = ""
-        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery):
+        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery), .shellTextForm(_, let previousQuery):
             settings.reload()
             mode = .settings
             query = previousQuery
@@ -298,6 +307,7 @@ import ShellKit
         if case .ruleForm = mode { return saveRuleDraft() }
         if case .keySwapForm = mode { return saveKeySwapDraft() }
         if case .aliasForm = mode { return saveAliasDraft() }
+        if case .shellTextForm(let text, _) = mode { return saveShellTextDraft(text) }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
         _ = goBack()
@@ -343,6 +353,11 @@ import ShellKit
     private func saveAliasDraft() {
         guard aliasDraft.isComplete else { return NSSound.beep() }
         ShellLibrary.shared.save(aliasDraft)
+        _ = goBack()
+    }
+
+    private func saveShellTextDraft(_ text: ShellText) {
+        text.save(shellTextDraft)
         _ = goBack()
     }
 
@@ -403,7 +418,7 @@ import ShellKit
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .askClaude:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm, .askClaude:
             results = []
         case .savedChats:
             results = []

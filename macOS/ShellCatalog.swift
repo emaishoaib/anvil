@@ -1,7 +1,8 @@
+import Foundation
 import LauncherKit
 import ShellKit
 
-/// The Shell tool's rows in the search bar: a row to add an alias at the top, then a row per alias showing its command, which deletes it. While the shell file can't be read, its problem shows as a warning row and the other rows can't be used.
+/// The Shell tool's rows in the search bar: a row each for the startup lines and the prompt, showing their first line, then a row to add an alias, then a row per alias showing its command, which deletes it. While the shell file can't be read, its problem shows as a warning row and the other rows can't be used.
 enum ShellCatalog {
     private static let aliasesName = "Aliases"
 
@@ -9,11 +10,22 @@ enum ShellCatalog {
         let library = ShellLibrary.shared
         let isBroken = library.loadProblem != nil
         let aliases = library.setup.aliases
-        return problem + Setting.subgroup(aliasesName,
+        return problem + ShellText.allCases.map { row(for: $0, isDisabled: isBroken) } + Setting.subgroup(aliasesName,
             [addAlias(isDisabled: isBroken)]
                 + (aliases.isEmpty && !isBroken ? [.info("No aliases yet", id: "shell.aliases.empty", toolName: Tool.shell.name)] : [])
                 + aliases.map { row(for: $0, isDisabled: isBroken) }
         )
+    }
+
+    private static func row(for text: ShellText, isDisabled: Bool) -> Setting {
+        .action(text.title, id: "shell.\(text)", toolName: Tool.shell.name, subtitle: firstLine(of: text.current), actionTitle: "Edit", isDisabled: isDisabled) {
+            SearchBar.shared.showShellTextForm(text)
+            return nil
+        }
+    }
+
+    private static func firstLine(of text: String) -> String {
+        text.split(separator: "\n").first { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.map(String.init) ?? "Nothing yet"
     }
 
     private static func addAlias(isDisabled: Bool) -> Setting {
