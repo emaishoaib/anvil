@@ -10,3 +10,4 @@ Config/Release.xcconfig
 releases/
 .wrangler/
 Package.resolved
+PLAN.md
