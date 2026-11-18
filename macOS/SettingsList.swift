@@ -8,6 +8,7 @@ struct SettingsList: View {
     private static let padding: CGFloat = 8
     private static let listHeight: CGFloat = 380
     private static let indentStep: CGFloat = 14
+    static let height = listHeight + padding * 2
 
     let model: SettingsBarModel
     let open: (Setting) -> Void
@@ -29,7 +30,7 @@ struct SettingsList: View {
                 }
                 .padding(Self.padding)
             }
-            .frame(height: Self.listHeight + Self.padding * 2)
+            .frame(height: Self.height)
             .overlay { if model.sections.isEmpty { NoResults() } }
             .onChange(of: model.selected) {
                 if let id = model.selectedSetting?.id { proxy.scrollTo(id) }

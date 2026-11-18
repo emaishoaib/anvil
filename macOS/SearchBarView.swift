@@ -87,8 +87,14 @@ struct SearchBarView: View {
             ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
         } else if model.mode == .settings {
             Divider()
-            SettingsList(model: model.settings, open: { model.open($0) })
-                .overlay(alignment: actionPanelAlignment) { actionPanel }
+            Group {
+                if model.settings.isShowingGrid {
+                    SettingsGrid(model: model.settings, open: { model.open($0) })
+                } else {
+                    SettingsList(model: model.settings, open: { model.open($0) })
+                }
+            }
+            .overlay(alignment: actionPanelAlignment) { actionPanel }
         } else {
             Divider()
             SearchResults(model: model)

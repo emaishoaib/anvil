@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import LauncherKit
 import Observation
 
-/// Settings mode in the search bar: with nothing typed, the page being looked at, and otherwise the settings that match the query, grouped by tool. It also holds which row is selected, and the number being adjusted or the shortcut being recorded, if any. Shortcut clashes with macOS are worked out against the system shortcuts read once when settings mode opens.
+/// Settings mode in the search bar: with nothing typed, the page being looked at, and otherwise the settings that match the query, grouped by tool. The first page shows the tools as a grid, where Up and Down move a row and Left and Right move one tool. It also holds which row is selected, and the number being adjusted or the shortcut being recorded, if any. Shortcut clashes with macOS are worked out against the system shortcuts read once when settings mode opens.
 @MainActor @Observable final class SettingsBarModel {
     struct Section: Identifiable {
         let title: String
@@ -26,6 +26,7 @@ import Observation
     }
 
     private static let requiredModifiers: KeyModifiers = [.control, .option, .command]
+    static let gridColumns = 5
 
     let recording = ShortcutRecording()
     private(set) var sections: [Section] = []
@@ -35,7 +36,7 @@ import Observation
     private(set) var page = SettingsBarPage.tools
     private var shown: [Setting] = []
     @ObservationIgnored private var settings: [Setting] = []
-    @ObservationIgnored private var query = ""
+    private var query = ""
     @ObservationIgnored private var systemShortcuts: Set<KeyCombo> = []
 
     var selectedSetting: Setting? {
@@ -43,6 +44,10 @@ import Observation
     }
 
     var isAdjusting: Bool { adjustment != nil }
+
+    var isShowingGrid: Bool {
+        page == .tools && query.trimmingCharacters(in: .whitespaces).isEmpty
+    }
 
     var selectedActionTitle: String? {
         guard let selectedSetting, !selectedSetting.isDisabled, !isRecording(selectedSetting) else { return nil }
@@ -80,7 +85,15 @@ import Observation
         selected = 0
     }
 
+    /// Moves up or down a row. In the grid that is a whole row of tools, and a move past the first or last row stays put.
     func moveSelection(by offset: Int) {
+        guard isShowingGrid else { return moveAcross(by: offset) }
+        let target = selected + offset * Self.gridColumns
+        if shown.indices.contains(target) { selected = target }
+    }
+
+    /// Moves one setting along, which in the grid is the tool beside the selected one.
+    func moveAcross(by offset: Int) {
         guard !shown.isEmpty else { return }
         selected = min(max(selected + offset, 0), shown.count - 1)
     }
@@ -209,7 +222,7 @@ import Observation
     private func rows(on page: SettingsBarPage) -> [Setting] {
         switch page {
         case .tools:
-            return Self.inOrder(settings.map(\.entry.toolName)).map { Setting.page(.tool($0)) }
+            return Self.inOrder(settings.map(\.entry.toolName)).map { Setting.page(.tool($0), isDisabled: Tool.named($0)?.isBuilt == false) }
         case .tool(let tool):
             let toolSettings = settings.filter { $0.entry.toolName == tool }
             let subgroups = Self.inOrder(toolSettings.compactMap(\.entry.subgroup))

@@ -6,9 +6,9 @@ extension Setting {
         Setting(entry: SettingEntry(id: id, title: title, toolName: toolName), subtitle: subtitle, isDisabled: isDisabled, row: .action(title: actionTitle, run: run))
     }
 
-    /// A row that opens a page of settings, such as a tool's page or one of its subgroups.
-    static func page(_ page: SettingsBarPage) -> Setting {
-        Setting(entry: SettingEntry(id: page.id, title: page.title, toolName: ""), row: .page(page))
+    /// A row that opens a page of settings, such as a tool's page or one of its subgroups. A disabled one is shown greyed out and does not open.
+    static func page(_ page: SettingsBarPage, isDisabled: Bool = false) -> Setting {
+        Setting(entry: SettingEntry(id: page.id, title: page.title, toolName: ""), isDisabled: isDisabled, row: .page(page))
     }
 
     /// A row that only shows something, such as a fixed shortcut or a device's battery.

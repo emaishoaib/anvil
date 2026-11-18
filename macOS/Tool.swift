@@ -53,6 +53,13 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         }
     }
 
+    static func named(_ name: String) -> Tool? {
+        allCases.first { $0.name == name }
+    }
+
+    /// Whether there is anything behind the tool yet. Dock Widgets has its switch but nothing that uses it, so its settings page is greyed out.
+    var isBuilt: Bool { self != .dockWidgets }
+
     var icon: ToolIcon {
         switch self {
         case .switcher: .hop

@@ -98,6 +98,10 @@ final class SearchBar {
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }
+        if model.mode == .settings, model.settings.isShowingGrid, keyCode == kVK_LeftArrow || keyCode == kVK_RightArrow {
+            model.settings.moveAcross(by: keyCode == kVK_LeftArrow ? -1 : 1)
+            return true
+        }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
