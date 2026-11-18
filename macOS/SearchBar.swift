@@ -118,10 +118,6 @@ final class SearchBar {
             model.choose(.deny)
             return true
         }
-        if model.mode == .savedChats, Self.onlyCommand(in: modifiers), keyCode == kVK_Delete {
-            model.trashSelectedChat()
-            return true
-        }
         if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_E {
             toggleExpanded()
             return true

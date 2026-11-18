@@ -44,7 +44,7 @@ struct SearchFooter: View {
                     CommandIcon(command: .enterAIMode)
                     Text("AI Mode")
                         .foregroundStyle(.secondary)
-                case .savedChats:
+                case .desktopSessions:
                     SymbolIcon(symbol: AIChoice.loadChat.symbol, colour: .orange)
                     Text(AIChoice.loadChat.title)
                         .foregroundStyle(.secondary)
@@ -92,11 +92,6 @@ struct SearchFooter: View {
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_R, modifiers: .command))
                     FooterDivider()
-                }
-                if mode == .savedChats {
-                    Text("Move to Trash")
-                        .foregroundStyle(.secondary)
-                    KeyCaps(combo: KeyCombo(keyCode: kVK_Delete, modifiers: .command))
                 }
                 if mode == .askClaude, chatState == .answering {
                     Text("Stop")
@@ -192,7 +187,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
-        if mode == .savedChats { return "Continue Chat" }
+        if mode == .desktopSessions { return "Continue Chat" }
         if mode == .aiChoice { return "Open" }
         if mode == .askClaude {
             return switch chatState {

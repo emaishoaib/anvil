@@ -81,9 +81,9 @@ struct SearchBarView: View {
         } else if case .uninstallReview = model.mode, let review = model.review {
             Divider()
             UninstallReviewList(review: review, query: model.query)
-        } else if model.mode == .savedChats, let list = model.savedChatList {
+        } else if model.mode == .desktopSessions, let list = model.desktopSessionList {
             Divider()
-            SavedChatListView(list: list, query: model.query)
+            DesktopSessionListView(list: list, query: model.query)
         } else if model.mode == .aiChoice {
             Divider()
             AIChoiceList(choices: model.aiChoices, selected: model.aiChoiceSelection, select: model.selectAIChoice)

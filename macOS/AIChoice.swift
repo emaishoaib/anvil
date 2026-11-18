@@ -15,7 +15,7 @@ enum AIChoice: CaseIterable {
     var subtitle: String {
         switch self {
         case .startChat: "Ask Claude Code something new"
-        case .loadChat: "Carry on with a saved chat"
+        case .loadChat: "Carry on with a Claude desktop session"
         }
     }
 

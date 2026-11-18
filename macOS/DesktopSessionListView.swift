@@ -1,21 +1,22 @@
+import ClaudeKit
 import SwiftUI
 
-/// The rows of the saved chats page, newest first: each chat's title, the folder it ran in, and how long ago it was saved. Clicking a row selects it. With nothing saved, or nothing matching the search, the page says so.
-struct SavedChatListView: View {
+/// The rows of the Load Chat page, newest first: each Claude desktop session's title, the folder it works in, and how long ago it was last active. Clicking a row selects it. With no sessions, or nothing matching the search, the page says so.
+struct DesktopSessionListView: View {
     private static let rowHeight: CGFloat = 44
     private static let padding: CGFloat = 8
     private static let listHeight: CGFloat = 380
 
-    let list: SavedChatList
+    let list: DesktopSessionList
     let query: String
 
     var body: some View {
-        let chats = list.chats(matching: query)
+        let sessions = list.sessions(matching: query)
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(chats.enumerated()), id: \.element.id) { index, chat in
-                        SavedChatRow(chat: chat, isSelected: index == list.selected)
+                    ForEach(Array(sessions.enumerated()), id: \.element.desktopID) { index, session in
+                        DesktopSessionRow(session: session, isSelected: index == list.selected)
                             .frame(height: Self.rowHeight)
                             .id(index)
                             .onTapGesture { list.select(index) }
@@ -24,19 +25,19 @@ struct SavedChatListView: View {
                 .padding(Self.padding)
             }
             .frame(height: Self.listHeight + Self.padding * 2)
-            .overlay { if chats.isEmpty { emptyMessage } }
+            .overlay { if sessions.isEmpty { emptyMessage } }
             .onChange(of: list.selected) { proxy.scrollTo(list.selected) }
         }
     }
 
     private var emptyMessage: some View {
-        Text(list.chats.isEmpty ? "No Saved Chats" : "No Results")
+        Text(list.sessions.isEmpty ? "No Claude Desktop Sessions" : "No Results")
             .foregroundStyle(.secondary)
     }
 }
 
-private struct SavedChatRow: View {
-    let chat: SavedChat
+private struct DesktopSessionRow: View {
+    let session: DesktopSession
     let isSelected: Bool
 
     var body: some View {
@@ -45,17 +46,17 @@ private struct SavedChatRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
-                Text(chat.title)
+                Text(session.title)
                     .foregroundStyle(Color(nsColor: .textColor))
                     .lineLimit(1)
-                Text((chat.folder.path as NSString).abbreviatingWithTildeInPath)
+                Text((session.folder.path as NSString).abbreviatingWithTildeInPath)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
             Spacer()
-            Text(chat.savedAt, format: .relative(presentation: .named))
+            Text(session.lastActivity, format: .relative(presentation: .named))
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 8)

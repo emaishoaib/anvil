@@ -14,7 +14,7 @@ enum SearchMode: Equatable {
     case shellTextForm(ShellText, query: String)
     case aiChoice
     case askClaude
-    case savedChats
+    case desktopSessions
 
     var placeholder: String {
         switch self {
@@ -25,7 +25,7 @@ enum SearchMode: Equatable {
         case .uninstallReview: "Search files…"
         case .settings: "Search settings…"
         case .askClaude: "Ask Claude…"
-        case .savedChats: "Search saved chats…"
+        case .desktopSessions: "Search Claude desktop sessions…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm: ""
         }
     }

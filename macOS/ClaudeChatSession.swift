@@ -31,12 +31,12 @@ import Observation
         savedTitle = nil
     }
 
-    init(resuming saved: SavedChat, update: ClaudeUpdate) {
-        folder = saved.folder
+    init(resuming session: DesktopSession, update: ClaudeUpdate) {
+        folder = session.folder
         self.update = update
-        sessionID = saved.id
+        sessionID = session.sessionID
         resumes = true
-        savedTitle = saved.title
+        savedTitle = session.title
     }
 
     /// Reads the earlier turns of a resumed chat from its transcript, away from the main thread, since a long chat's file can be large. They only show if no new prompt was sent in the meantime.

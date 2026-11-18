@@ -22,7 +22,7 @@ import ShellKit
     var shellTextDraft = ""
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
-    private(set) var savedChatList: SavedChatList?
+    private(set) var desktopSessionList: DesktopSessionList?
     private(set) var aiChoiceSelection = 0
     private(set) var timesOpened = 0
     private(set) var isPinned = false
@@ -95,7 +95,7 @@ import ShellKit
         launchCounts = SavedLaunchCounts.load()
         actionPanel = nil
         review = nil
-        savedChatList = nil
+        desktopSessionList = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -120,8 +120,8 @@ import ShellKit
             review?.moveSelection(by: offset, matching: query)
             return
         }
-        if mode == .savedChats {
-            savedChatList?.moveSelection(by: offset, matching: query)
+        if mode == .desktopSessions {
+            desktopSessionList?.moveSelection(by: offset, matching: query)
             return
         }
         if mode == .aiChoice {
@@ -156,7 +156,7 @@ import ShellKit
 
     func openSelected() {
         if mode == .askClaude { return sendPrompt() }
-        if mode == .savedChats { return continueSelectedChat() }
+        if mode == .desktopSessions { return continueSelectedChat() }
         if mode == .aiChoice { return openSelectedAIChoice() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
@@ -255,8 +255,8 @@ import ShellKit
         case .defineWord, .uninstallApp, .aiChoice:
             mode = .launcher
             query = ""
-        case .savedChats:
-            savedChatList = nil
+        case .desktopSessions:
+            desktopSessionList = nil
             mode = .aiChoice
             query = ""
         case .askClaude:
@@ -423,9 +423,9 @@ import ShellKit
             settings.filter(query)
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm, .askClaude:
             results = []
-        case .savedChats:
+        case .desktopSessions:
             results = []
-            savedChatList?.select(0)
+            desktopSessionList?.select(0)
         case .aiChoice:
             results = []
             aiChoiceSelection = 0
@@ -504,12 +504,12 @@ import ShellKit
     }
 
     private func continueSelectedChat() {
-        guard let saved = savedChatList?.selectedChat(matching: query) else { return NSSound.beep() }
-        let chat = ClaudeChatSession(resuming: saved, update: claudeUpdate)
+        guard let session = desktopSessionList?.selectedSession(matching: query) else { return NSSound.beep() }
+        let chat = ClaudeChatSession(resuming: session, update: claudeUpdate)
         self.chat = chat
         isChatSaved = true
         Task { await chat.loadHistory() }
-        savedChatList = nil
+        desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude
         query = ""
@@ -533,7 +533,7 @@ import ShellKit
         guard choices.indices.contains(aiChoiceSelection) else { return NSSound.beep() }
         switch choices[aiChoiceSelection] {
         case .startChat: startChat()
-        case .loadChat: showSavedChats()
+        case .loadChat: showDesktopSessions()
         }
         query = ""
     }
@@ -544,13 +544,9 @@ import ShellKit
         claudeSignIn.check()
     }
 
-    private func showSavedChats() {
-        savedChatList = SavedChatList()
-        mode = .savedChats
-    }
-
-    func trashSelectedChat() {
-        savedChatList?.trashSelected(matching: query)
+    private func showDesktopSessions() {
+        desktopSessionList = DesktopSessionList()
+        mode = .desktopSessions
     }
 
     func setExpanded(_ expanded: Bool) {
