@@ -42,7 +42,7 @@ import Observation
             switch claudeUpdate.state {
             case .needed, .failed: return .outdated
             case .updating: return .updating
-            case .notNeeded, .updated: break
+            case .notNeeded: break
             }
             return switch chatQuestion {
             case .leave: .askingToLeave
@@ -419,13 +419,42 @@ import Observation
 
     private func sendPrompt() {
         let prompt = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !prompt.isEmpty, chat?.isAnswering != true, claudeUpdate.state != .updating else { return NSSound.beep() }
+        guard !prompt.isEmpty, canSend else { return NSSound.beep() }
+        send(prompt)
+        query = ""
+    }
+
+    private var canSend: Bool {
+        chat?.isAnswering != true && claudeUpdate.state != .updating
+    }
+
+    private func send(_ prompt: String) {
         let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder, update: claudeUpdate)
         self.chat = chat
         claudeUpdate.forget()
         chat.send(prompt, mode: chatSetup.mode)
         if isChatSaved { SavedChats.save(chat) }
-        query = ""
+    }
+
+    /// Whether the search bar should come back as it was however long it was hidden, because a chat is going on or a sign-in is still waiting on the browser.
+    var isHoldingChat: Bool {
+        chat != nil || claudeSignIn.state == .signingIn
+    }
+
+    /// Signs Claude Code in, and once it is signed in, sends the prompt waiting in the field, if AI mode is still open and there is one.
+    func signInToClaude() {
+        claudeSignIn.signIn { [weak self] in
+            guard let self, mode == .askClaude, !isQueryEmpty else { return }
+            sendPrompt()
+        }
+    }
+
+    /// Updates Claude Code, and once it is updated, sends again the prompt that found it too old.
+    func updateClaude() {
+        claudeUpdate.update { [weak self] in
+            guard let self, let prompt = chat?.turns.last?.prompt, canSend else { return }
+            send(prompt)
+        }
     }
 
     func leaveChat() {

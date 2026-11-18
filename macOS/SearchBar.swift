@@ -26,7 +26,7 @@ final class SearchBar {
         model.isPinned ? panel.makeKeyAndOrderFront(nil) : hide()
     }
 
-    /// Hides the search bar, unless it is pinned. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows. A chat with Claude is always brought back, however long the bar was hidden, and keeps running while it is.
+    /// Hides the search bar, unless it is pinned. Unless told to forget, it is remembered as it was, so opening it again soon brings it back as it was, for as long as the search memory setting allows. A chat with Claude is always brought back, however long the bar was hidden, and keeps running while it is. So is AI mode while a sign-in waits on the browser, with the prompt still in the field.
     func hide(remembering: Bool = true) {
         guard panel.isVisible, !isPresentingModal, !model.isPinned else { return }
         model.settings.finishEditing()
@@ -204,7 +204,7 @@ final class SearchBar {
 
     private func handleSignInKey(_ keyCode: Int) -> Bool {
         switch (model.chatState, keyCode) {
-        case (.signedOut, kVK_Return), (.signedOut, kVK_ANSI_KeypadEnter): model.claudeSignIn.signIn()
+        case (.signedOut, kVK_Return), (.signedOut, kVK_ANSI_KeypadEnter): model.signInToClaude()
         case (.signingIn, kVK_Escape): model.claudeSignIn.cancel()
         default: return false
         }
@@ -213,7 +213,7 @@ final class SearchBar {
 
     private func handleUpdateKey(_ keyCode: Int) -> Bool {
         switch (model.chatState, keyCode) {
-        case (.outdated, kVK_Return), (.outdated, kVK_ANSI_KeypadEnter): model.claudeUpdate.update()
+        case (.outdated, kVK_Return), (.outdated, kVK_ANSI_KeypadEnter): model.updateClaude()
         case (.updating, kVK_Escape): model.claudeUpdate.cancel()
         default: return false
         }
@@ -280,7 +280,7 @@ final class SearchBar {
     private func show() {
         guard let screen = NSScreen.main else { return }
         CurrencyRatesStore.shared.refreshIfStale()
-        if remembersLastState || model.chat != nil { model.reopen() } else { model.reset() }
+        if remembersLastState || model.isHoldingChat { model.reopen() } else { model.reset() }
         attachContent()
         content.layoutSubtreeIfNeeded()
         let frame = model.isExpanded ? PanelResizing.expandedFrame(on: screen) : PanelResizing.usualFrame(for: content.fittingSize, on: screen)

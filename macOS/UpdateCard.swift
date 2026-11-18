@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The card at the end of a chat when Claude Code is too old for the options Anvil starts it with. It offers to update Claude Code with Return, shows the update while it runs, and then says to send the prompt again, or that the update failed and how to try again.
+/// The card at the end of a chat when Claude Code is too old for the options Anvil starts it with. It offers to update Claude Code with Return, after which the prompt is sent again, shows the update while it runs, and says if the update failed and how to try again.
 struct UpdateCard: View {
     private static let cornerRadius: CGFloat = 10
 
@@ -28,16 +28,14 @@ struct UpdateCard: View {
         switch state {
         case .notNeeded, .needed: "Claude Code needs an update"
         case .updating: "Updating Claude Code"
-        case .updated: "Claude Code is up to date"
         case .failed: "Claude Code couldn't update"
         }
     }
 
     private var detail: String {
         switch state {
-        case .notNeeded, .needed: "This version is too old for Anvil. Press Return to update it."
-        case .updating: "This can take a minute."
-        case .updated: "Send your prompt again."
+        case .notNeeded, .needed: "This version is too old for Anvil. Press Return to update it and send your prompt again."
+        case .updating: "Your prompt is sent again once this is done."
         case .failed: "Press Return to try again, or run claude update in Terminal."
         }
     }
@@ -45,7 +43,6 @@ struct UpdateCard: View {
     private var symbol: String {
         switch state {
         case .notNeeded, .needed, .updating: "arrow.down.circle"
-        case .updated: "checkmark.circle"
         case .failed: "exclamationmark.triangle"
         }
     }
