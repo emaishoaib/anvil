@@ -81,6 +81,9 @@ targets:
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSAppleEventsUsageDescription: Anvil asks Finder to move apps from the Mac App Store to the Trash because only Finder can ask for your password to do it.
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Anvil reads the battery levels of your AirPods to show them in the search bar.
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Anvil listens between two presses of the listening shortcut, so you can talk to Claude.
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Anvil turns what you say to Claude into text on your Mac, without sending your voice anywhere.
+        ENABLE_RESOURCE_ACCESS_AUDIO_INPUT: YES
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
       configs:
         Release:

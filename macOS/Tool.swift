@@ -100,6 +100,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .launcher: LauncherKeys.shared
         case .windows: WindowKeys.shared
         case .rules: RuleKeys.shared
+        case .ai: AIKeys.shared
         default: nil
         }
     }

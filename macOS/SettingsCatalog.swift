@@ -19,7 +19,7 @@ enum SettingsCatalog {
                 + Setting.subgroup("Key Swaps", KeySwapsCatalog.settings())
         case .mouse: MouseCatalog.settings(systemShortcuts: systemShortcuts)
         case .uninstaller: UninstallerCatalog.settings()
-        case .ai: AICatalog.settings()
+        case .ai: AICatalog.settings(systemShortcuts: systemShortcuts)
         case .shell: ShellCatalog.settings()
         default: []
         }
