@@ -53,6 +53,20 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         }
     }
 
+    var icon: ToolIcon {
+        switch self {
+        case .switcher: .hop
+        case .launcher: .symbol("magnifyingglass")
+        case .windows: .symbol("rectangle.split.2x1")
+        case .keepAwake: .symbol("cup.and.saucer")
+        case .rules: .symbol("arrow.triangle.branch")
+        case .mouse: .symbol("computermouse")
+        case .dockWidgets: .symbol("dock.rectangle")
+        case .uninstaller: .symbol("trash")
+        case .ai: .symbol("point.3.connected.trianglepath.dotted")
+        }
+    }
+
     /// Where the tool comes on the settings page, after General. It is kept apart from the order of the cases, which decides which tool answers a key first.
     var settingsPosition: Int {
         switch self {

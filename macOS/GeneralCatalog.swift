@@ -3,6 +3,7 @@ import LauncherKit
 /// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General". The search bar's own settings are its shortcut and how long it remembers where you left it. The folder panel opens through the search bar, which stays open behind it.
 enum GeneralCatalog {
     static let name = "General"
+    static let icon = ToolIcon.symbol("gearshape")
 
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
         Setting.subgroup("Search Bar", [searchBarShortcut(systemShortcuts: systemShortcuts), searchMemory])
