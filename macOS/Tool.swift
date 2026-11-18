@@ -53,6 +53,21 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Where the tool comes on the settings page, after General. It is kept apart from the order of the cases, which decides which tool answers a key first.
+    var settingsPosition: Int {
+        switch self {
+        case .launcher: 0
+        case .switcher: 1
+        case .windows: 2
+        case .rules: 3
+        case .mouse: 4
+        case .keepAwake: 5
+        case .ai: 6
+        case .dockWidgets: 7
+        case .uninstaller: 8
+        }
+    }
+
     var keyResponder: (any KeyResponder)? {
         switch self {
         case .switcher: SwitcherKeys.shared

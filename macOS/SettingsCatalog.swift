@@ -1,9 +1,9 @@
 import LauncherKit
 
-/// Every setting the search bar can show, in the order of the settings window's sidebar, read afresh each time so every row holds its current value. Shortcuts are checked for clashes against the system shortcuts passed in, so macOS is asked only once.
+/// Every setting the search bar can show, General first and then each tool in its settings position, read afresh each time so every row holds its current value. Shortcuts are checked for clashes against the system shortcuts passed in, so macOS is asked only once.
 enum SettingsCatalog {
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
-        GeneralCatalog.settings(systemShortcuts: systemShortcuts) + Tool.allCases.flatMap { tool in
+        GeneralCatalog.settings(systemShortcuts: systemShortcuts) + Tool.allCases.sorted { $0.settingsPosition < $1.settingsPosition }.flatMap { tool in
             (tool.canBeTurnedOff ? [toolSwitch(for: tool)] : []) + settings(of: tool, systemShortcuts: systemShortcuts)
         }
     }

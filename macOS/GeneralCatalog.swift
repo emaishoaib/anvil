@@ -1,6 +1,6 @@
 import LauncherKit
 
-/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General", as in the settings window's sidebar. The search bar's own settings are its shortcut and how long it remembers where you left it. The folder panel opens through the search bar, which stays open behind it.
+/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General". The search bar's own settings are its shortcut and how long it remembers where you left it. The folder panel opens through the search bar, which stays open behind it.
 enum GeneralCatalog {
     static let name = "General"
 
