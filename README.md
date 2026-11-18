@@ -22,8 +22,6 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **Key swaps** -- trades two keys on the Mac's built-in keyboard and leaves an external keyboard as it is.
 
-**Shell** -- keeps your zsh aliases, startup lines and prompt in Anvil and writes them to a zsh file that `~/.zshrc` loads, then the next terminal you open picks up any change you made in the bar.
-
 **Mouse** -- makes a plain mouse wheel scroll smoothly like a trackpad. Logitech mice also get their speed, wheel and extra buttons set from Anvil.
 
 **Keep Awake** -- keeps the Mac from sleeping for a while, even with the lid closed if you want.
@@ -45,7 +43,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Speech recognition** -- macOS may ask for it alongside the microphone, even though speech is turned into text on the Mac
 - **Administrator password** -- when uninstalling an app from the Mac App Store or keeping the Mac awake with the lid closed
 
-**Where settings are kept** -- rules, key swaps, mouse settings and the shell setup can live as files in a folder you choose such as one that syncs between Macs.
+**Where settings are kept** -- rules, key swaps and mouse settings can live as files in a folder you choose such as one that syncs between Macs.
 
 **What reaches the internet** -- only a few places and only for these things:
 
@@ -55,8 +53,6 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Speech model** -- Apple's speech recognition downloads its model for your language once, the first time you listen, and your voice is never sent
 
 **Where AI chats run** -- a chat runs through Claude Code on the Mac and your Claude account, so what you type goes to Anthropic the same way it would from a terminal. Each chat is a Claude Code session kept where Claude Code keeps all its sessions. What you say by voice becomes text on the Mac, and only that text is sent. Anvil lists Claude desktop's sessions by reading the records Claude desktop keeps for them, and saves or opens a session there through links Claude desktop answers. Neither is documented, so a Claude desktop update could stop them working.
-
-**Your zshrc** -- turning the Shell tool on adds a small block to `~/.zshrc` that loads Anvil's zsh file and turning it off takes the block out again. Anvil never touches the rest of the file and leaves it alone if it can't read it.
 
 **AirPods batteries** -- macOS doesn't publish each earbud's battery so Anvil reads properties Apple doesn't document and a macOS update could stop them showing.
 

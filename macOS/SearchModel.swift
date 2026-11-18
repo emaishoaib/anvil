@@ -2,7 +2,6 @@ import AppKit
 import ClaudeKit
 import LauncherKit
 import Observation
-import ShellKit
 
 @Observable final class SearchModel {
     private(set) var mode = SearchMode.launcher
@@ -18,9 +17,6 @@ import ShellKit
     var quickLinkField = QuickLinkField.name
     var ruleDraft = RuleDraft()
     var keySwapDraft = KeySwapDraft()
-    var aliasDraft = Alias(name: "", command: "")
-    var aliasField = AliasField.name
-    var shellTextDraft = ""
     var phraseDraft = ""
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
@@ -102,9 +98,6 @@ import ShellKit
         draft = QuickLink()
         ruleDraft = RuleDraft()
         keySwapDraft = KeySwapDraft()
-        aliasDraft = Alias(name: "", command: "")
-        aliasField = .name
-        shellTextDraft = ""
         phraseDraft = ""
         entryPage = ""
         field = .query
@@ -138,12 +131,9 @@ import ShellKit
         return true
     }
 
-    func moveFormFocus(by offset: Int) -> Bool {
-        switch mode {
-        case .quickLinkForm: quickLinkField = quickLinkField.moved(by: offset)
-        case .aliasForm: aliasField = aliasField.moved(by: offset)
-        default: return false
-        }
+    func moveQuickLinkFocus(by offset: Int) -> Bool {
+        guard case .quickLinkForm = mode else { return false }
+        quickLinkField = quickLinkField.moved(by: offset)
         return true
     }
 
@@ -227,21 +217,6 @@ import ShellKit
         query = ""
     }
 
-    func showAliasForm() {
-        settings.finishEditing()
-        aliasDraft = Alias(name: "", command: "")
-        aliasField = .name
-        mode = .aliasForm(query: query)
-        query = ""
-    }
-
-    func showShellTextForm(_ text: ShellText) {
-        settings.finishEditing()
-        shellTextDraft = text.current
-        mode = .shellTextForm(text, query: query)
-        query = ""
-    }
-
     func showPhraseForm(_ phrase: SpokenPhrase) {
         settings.finishEditing()
         phraseDraft = phrase.current
@@ -290,7 +265,7 @@ import ShellKit
             if settings.goUp() { return true }
             mode = .launcher
             query = ""
-        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .aliasForm(let previousQuery), .shellTextForm(_, let previousQuery), .phraseForm(_, let previousQuery):
+        case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .phraseForm(_, let previousQuery):
             settings.reload()
             mode = .settings
             query = previousQuery
@@ -313,8 +288,6 @@ import ShellKit
     func saveDraft() {
         if case .ruleForm = mode { return saveRuleDraft() }
         if case .keySwapForm = mode { return saveKeySwapDraft() }
-        if case .aliasForm = mode { return saveAliasDraft() }
-        if case .shellTextForm(let text, _) = mode { return saveShellTextDraft(text) }
         if case .phraseForm(let phrase, _) = mode { return savePhraseDraft(phrase) }
         guard draft.isComplete else { return NSSound.beep() }
         QuickLinkLibrary.shared.save(draft)
@@ -359,17 +332,6 @@ import ShellKit
     private func saveKeySwapDraft() {
         guard let keySwap = keySwapDraft.keySwap else { return NSSound.beep() }
         KeySwapLibrary.shared.add(keySwap)
-        _ = goBack()
-    }
-
-    private func saveAliasDraft() {
-        guard aliasDraft.isComplete else { return NSSound.beep() }
-        ShellLibrary.shared.save(aliasDraft)
-        _ = goBack()
-    }
-
-    private func saveShellTextDraft(_ text: ShellText) {
-        text.save(shellTextDraft)
         _ = goBack()
     }
 
@@ -435,7 +397,7 @@ import ShellKit
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .aliasForm, .shellTextForm, .phraseForm, .askClaude:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm, .askClaude:
             results = []
         case .desktopSessions:
             results = []

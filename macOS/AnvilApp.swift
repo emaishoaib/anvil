@@ -21,7 +21,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         KeepAwake.shared.restore()
         AppCatalog.shared.start()
         CurrencyRatesStore.shared.start()
-        ShellLibrary.shared.start()
         AppUpdater.shared.start()
         EntryWebView.warmUp()
         Task { SearchBar.shared.warmUp() }

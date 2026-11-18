@@ -65,14 +65,6 @@ final class SearchBar {
         model.showKeySwapForm()
     }
 
-    func showAliasForm() {
-        model.showAliasForm()
-    }
-
-    func showShellTextForm(_ text: ShellText) {
-        model.showShellTextForm(text)
-    }
-
     func showPhraseForm(_ phrase: SpokenPhrase) {
         model.showPhraseForm(phrase)
     }
@@ -275,7 +267,7 @@ final class SearchBar {
             guard modifiers.contains(.command) else { return false }
             model.saveDraft()
         case kVK_Tab:
-            return model.moveFormFocus(by: modifiers.contains(.shift) ? -1 : 1)
+            return model.moveQuickLinkFocus(by: modifiers.contains(.shift) ? -1 : 1)
         case kVK_Escape:
             _ = model.goBack()
         default:

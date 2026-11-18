@@ -43,7 +43,6 @@ import Observation
         RuleLibrary.shared.reload()
         KeySwapLibrary.shared.reload()
         MouseSettingsLibrary.shared.reload()
-        ShellLibrary.shared.reload()
     }
 
     private func watch() {
