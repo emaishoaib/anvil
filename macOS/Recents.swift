@@ -7,8 +7,11 @@ final class Recents {
     private static let focusRetries = 20
     private static let focusRetryInterval = Duration.milliseconds(100)
     private static let focusSettleDelay = Duration.milliseconds(60)
+    private static let savedKey = "switcher.recentWindows"
 
-    private var order: [CGWindowID] = []
+    private var order = (UserDefaults.standard.array(forKey: savedKey) as? [Int] ?? []).map(CGWindowID.init) {
+        didSet { UserDefaults.standard.set(order.map(Int.init), forKey: Self.savedKey) }
+    }
     private var settling: [pid_t: Task<Void, Never>] = [:]
 
     func start() {
@@ -22,9 +25,7 @@ final class Recents {
     }
 
     func record(_ id: CGWindowID) {
-        order.removeAll { $0 == id }
-        order.insert(id, at: 0)
-        if order.count > Self.remembered { order.removeLast() }
+        order = Array(([id] + order.filter { $0 != id }).prefix(Self.remembered))
     }
 
     func sorted(_ windows: [Window]) -> [Window] {
