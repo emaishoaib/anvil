@@ -154,7 +154,7 @@ import os
 
     private func notified(_ report: [UInt8], on channel: HIDPPChannel) {
         guard report.count > 1 else { return }
-        let index = report[1]
+        let index = channel.isBluetooth ? HIDPPRequest.directDeviceIndex : report[1]
         let id = LogitechDevice.id(channel: channel.id, deviceIndex: index)
         let known = devices.first { $0.id == id }
         switch HIDPPNotification(

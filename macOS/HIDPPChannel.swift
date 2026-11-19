@@ -32,6 +32,11 @@ final class HIDPPChannel {
         }, Unmanaged.passUnretained(self).toOpaque())
     }
 
+    /// Whether the channel is a device connected over Bluetooth, which Anvil talks to directly and which is never a receiver, since receivers plug in over USB.
+    var isBluetooth: Bool {
+        (IOHIDDeviceGetProperty(device, kIOHIDTransportKey as CFString) as? String)?.contains("Bluetooth") == true
+    }
+
     func stop() {
         isStopped = true
         IOHIDDeviceRegisterInputReportCallback(device, reportBuffer, Self.reportCapacity, nil, nil)
