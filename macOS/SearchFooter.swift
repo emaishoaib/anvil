@@ -15,6 +15,7 @@ struct SearchFooter: View {
     var cardChoice: CardChoice? = nil
     var isChatSaved = false
     var chatName: ChatName? = nil
+    var closeChat: (() -> Void)? = nil
     var dividerEdge = VerticalEdge.top
 
     var body: some View {
@@ -46,7 +47,11 @@ struct SearchFooter: View {
                     Text("AI Mode")
                         .foregroundStyle(.secondary)
                 case .askClaude:
-                    CommandIcon(command: .enterAIMode)
+                    if let closeChat {
+                        CloseChatButton(action: closeChat)
+                    } else {
+                        CommandIcon(command: .enterAIMode)
+                    }
                     chatName
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)
@@ -242,5 +247,22 @@ private struct AnvilMenuButton: View {
         }
         .buttonStyle(.plain)
         .help("Anvil")
+    }
+}
+
+/// Leaves a chat shown in a window of its own, which closes the window, asking first when the chat is not saved.
+private struct CloseChatButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 22, height: 22)
+                .background(.primary.opacity(0.08), in: .circle)
+        }
+        .buttonStyle(.plain)
+        .help("Close Chat")
     }
 }

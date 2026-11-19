@@ -121,8 +121,9 @@ import Observation
         session?.stop()
     }
 
-    /// Leaves straight away when the chat is saved, and otherwise asks first.
+    /// Leaves straight away when the chat is saved or nothing was sent yet, and otherwise asks first.
     func leave() {
+        guard isStarted else { return finishLeaving() }
         guard !isSaved else { return save() }
         question = .leave
     }

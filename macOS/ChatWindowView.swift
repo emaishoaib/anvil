@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What a chat window shows, laid out like a chat in the search bar: the name and the keys at the top, which also drag the window, the chat filling the middle with any skills offered over its end, the folder and mode under it, and the prompt at the bottom.
+/// What a chat window shows, laid out like a chat in the search bar: a button that closes it, the name and the keys at the top, which also drag the window, the chat filling the middle with any skills offered over its end, the folder and mode under it, and the prompt at the bottom.
 struct ChatWindowView: View {
     private static let skillsPadding: CGFloat = 8
 
@@ -8,7 +8,7 @@ struct ChatWindowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SearchFooter(mode: .askClaude, selected: nil, toggleAnvilActions: {}, chatState: chat.state, cardChoice: chat.cardChoice, isChatSaved: chat.isSaved, chatName: ChatName(chat: chat), dividerEdge: .bottom)
+            SearchFooter(mode: .askClaude, selected: nil, toggleAnvilActions: {}, chatState: chat.state, cardChoice: chat.cardChoice, isChatSaved: chat.isSaved, chatName: ChatName(chat: chat), closeChat: chat.leave, dividerEdge: .bottom)
                 .gesture(WindowDragGesture())
             ClaudeChat(chat: chat.session, state: chat.state, update: chat.update.state, isExpanded: true, cardChoice: chat.cardChoice, choose: chat.choose)
                 .overlay(alignment: .bottom) {
