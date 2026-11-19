@@ -300,8 +300,16 @@ import Observation
         isPinned.toggle()
     }
 
-    func pin() {
-        isPinned = true
+    /// Lets go of the chat in AI mode without ending it, so it can carry on in a window of its own, and goes back to the launcher, unpinned.
+    func releaseChat() -> ChatModel? {
+        guard mode == .askClaude, let chat = chatModel else { return nil }
+        chat.onLeave = { _ in }
+        chatModel = nil
+        isPinned = false
+        wantsExpanded = false
+        mode = .launcher
+        query = ""
+        return chat
     }
 
     private func saveRuleDraft() {

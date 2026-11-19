@@ -34,7 +34,7 @@ struct QueryRow: View {
             if model.mode == .askClaude {
                 ExpandButton(isExpanded: model.isExpanded, action: SearchBar.shared.toggleExpanded)
             }
-            PinButton(isPinned: model.isPinned, action: model.togglePin)
+            PinButton(isPinned: model.isPinned, popsOut: model.mode == .askClaude, action: SearchBar.shared.togglePin)
         }
     }
 
@@ -86,8 +86,10 @@ private struct ArgumentField: View {
     }
 }
 
+/// Pins the bar, or in AI mode pops the chat out into a window of its own.
 private struct PinButton: View {
     let isPinned: Bool
+    let popsOut: Bool
     let action: () -> Void
 
     var body: some View {
@@ -99,7 +101,7 @@ private struct PinButton: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .help(isPinned ? "Unpin" : "Pin")
+        .help(popsOut ? "Pop Out Chat" : isPinned ? "Unpin" : "Pin")
     }
 }
 

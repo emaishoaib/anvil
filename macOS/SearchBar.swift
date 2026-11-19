@@ -57,7 +57,7 @@ final class SearchBar {
         return ContinuousClock.now - hiddenAt < SearchMemory.current.duration
     }
 
-    /// Sends what was said by voice to Claude, then shows the chat it went to where the after-sending setting says: in the bar in AI mode, pinned or not, or in Claude desktop. When the bar is needed to go on, it shows in the bar whatever the setting.
+    /// Sends what was said by voice to Claude, then shows the chat it went to where the after-sending setting says: in the bar in AI mode, in a chat window of its own, or in Claude desktop. When the bar is needed to go on, Claude desktop is passed over for the bar.
     func sendSpoken(_ said: String) {
         if !panel.isVisible { refreshModel() }
         guard model.sendSpoken(said) else { return }
@@ -65,9 +65,34 @@ final class SearchBar {
             hide()
             return model.handOverToClaudeDesktop()
         }
+        if AfterSending.current == .chatWindow, popOutChat() { return }
         if !panel.isVisible { show(refreshingModel: false) }
-        if AfterSending.current == .pinnedBar { model.pin() }
         panel.makeKeyAndOrderFront(nil)
+    }
+
+    /// Pins the bar, or unpins it. In AI mode the chat pops out into a window of its own instead.
+    func togglePin() {
+        guard popOutChat() else { return model.togglePin() }
+    }
+
+    /// Moves the chat in AI mode into a window of its own, where the bar was, and closes the bar, so it opens as the launcher next time. The bar closes before the window takes the keyboard, since closing it while it still had the keyboard would hide Anvil. Whether there was a chat to move.
+    private func popOutChat() -> Bool {
+        let frame = chatWindowFrame
+        guard let chat = model.releaseChat() else { return false }
+        isHoldingOpen = true
+        panel.orderOut(nil)
+        isHoldingOpen = false
+        hiddenAt = nil
+        collapsedFrame = nil
+        ChatWindows.shared.open(chat, at: frame)
+        return true
+    }
+
+    /// Where a popped-out chat opens: where the bar is, at its usual size rather than expanded, or where the bar would be when it is not showing.
+    private var chatWindowFrame: NSRect {
+        if panel.isVisible { return collapsedFrame ?? panel.frame }
+        guard let screen = NSScreen.main else { return .zero }
+        return PanelResizing.usualFrame(for: content.fittingSize, on: screen)
     }
 
     func showRuleForm(_ draft: RuleDraft, in group: RuleGroup, isNew: Bool) {
@@ -126,7 +151,7 @@ final class SearchBar {
     func handleKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
         model.settings.dismissMessage()
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_P {
-            model.togglePin()
+            togglePin()
             return true
         }
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
