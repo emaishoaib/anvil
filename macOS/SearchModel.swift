@@ -25,43 +25,14 @@ import Observation
     private(set) var isPinned = false
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
-    let slashCommands = SlashCommandPicker()
-    private(set) var chat: ClaudeChatSession?
-    private(set) var chatQuestion: ChatQuestion? {
-        didSet { highlightedChoice = nil }
-    }
-    private var highlightedChoice: CardChoice?
-    private(set) var isChatSaved = false
-    var chatNameDraft: String?
+    private(set) var chatModel: ChatModel?
     private var wantsExpanded = false
-    private var promptAfterLeaving: String?
 
     var isExpanded: Bool {
         mode == .askClaude && wantsExpanded
     }
     let claudeSignIn = ClaudeSignIn()
     let claudeUpdate = ClaudeUpdate()
-
-    var chatState: ChatState {
-        if let chat {
-            if !chat.approvals.isEmpty { return .awaitingApproval }
-            if chat.isAnswering { return .answering }
-            switch claudeUpdate.state {
-            case .needed, .failed: return .outdated
-            case .updating: return .updating
-            case .notNeeded: break
-            }
-            return switch chatQuestion {
-            case .leave: .askingToLeave
-            case nil: .started
-            }
-        }
-        return switch claudeSignIn.state {
-        case .signedOut: .signedOut
-        case .signingIn: .signingIn
-        case .signedIn, .unknown: .notStarted
-        }
-    }
     @ObservationIgnored private var wordLookup: Task<Void, Never>?
     @ObservationIgnored private var launchCounts = SavedLaunchCounts.load()
 
@@ -78,18 +49,26 @@ import Observation
         }
     }
 
-    /// The field's hint for the current mode, left out while a loaded chat's earlier turns are still being read, so nothing reads as ready to type into before the chat shows.
+    /// The field's hint for the current mode, or the chat's own hint in AI mode.
     var placeholder: String {
-        chat?.isLoadingHistory == true ? "" : mode.placeholder
+        guard mode == .askClaude, let chatModel else { return mode.placeholder }
+        return chatModel.placeholder
     }
 
     var isQueryEmpty: Bool {
         query.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
+    /// Whether the field is empty, which in AI mode means the chat's prompt.
+    var isFieldEmpty: Bool {
+        guard mode == .askClaude, let chatModel else { return query.isEmpty }
+        return chatModel.prompt.isEmpty
+    }
+
     func reset() {
         settings.finishEditing()
-        endChat()
+        chatModel?.end()
+        chatModel = nil
         wantsExpanded = false
         LeftoverIndexStore.shared.forget()
         launchCounts = SavedLaunchCounts.load()
@@ -146,7 +125,7 @@ import Observation
     }
 
     func openSelected() {
-        if mode == .askClaude { return sendPrompt() }
+        if mode == .askClaude { return chatModel?.sendPrompt() ?? () }
         if mode == .desktopSessions { return continueSelectedChat() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
@@ -242,11 +221,11 @@ import Observation
             mode = .launcher
             query = ""
         case .askClaude:
-            guard chat == nil else {
-                leaveChat()
+            if let chatModel, chatModel.isStarted {
+                chatModel.leave()
                 return true
             }
-            isChatSaved = false
+            chatModel = nil
             showDesktopSessions()
         case .uninstallReview(let previousQuery):
             review = nil
@@ -399,10 +378,7 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .askClaude:
-            results = []
-            slashCommands.update(for: query, in: chat?.folder ?? chatSetup.folder)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm:
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm, .askClaude:
             results = []
         case .desktopSessions:
             results = []
@@ -436,48 +412,9 @@ import Observation
         query = ""
     }
 
-    private func sendPrompt() {
-        let prompt = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !prompt.isEmpty, canSend else { return NSSound.beep() }
-        send(prompt)
-        query = ""
-    }
-
-    private var canSend: Bool {
-        chat?.isAnswering != true && claudeUpdate.state != .updating
-    }
-
-    private func send(_ prompt: String) {
-        let chat = chat ?? ClaudeChatSession(folder: chatSetup.folder, update: claudeUpdate)
-        self.chat = chat
-        claudeUpdate.forget()
-        chat.send(prompt, mode: chatSetup.mode)
-    }
-
     /// Whether the search bar should come back as it was however long it was hidden, because a chat is going on or a sign-in is still waiting on the browser.
     var isHoldingChat: Bool {
-        chat != nil || claudeSignIn.state == .signingIn
-    }
-
-    /// Signs Claude Code in, and once it is signed in, sends the prompt waiting in the field, if AI mode is still open and there is one.
-    func signInToClaude() {
-        claudeSignIn.signIn { [weak self] in
-            guard let self, mode == .askClaude, !isQueryEmpty else { return }
-            sendPrompt()
-        }
-    }
-
-    /// Updates Claude Code, and once it is updated, sends again the prompt that found it too old.
-    func updateClaude() {
-        claudeUpdate.update { [weak self] in
-            guard let self, let prompt = chat?.turns.last?.prompt, canSend else { return }
-            send(prompt)
-        }
-    }
-
-    func leaveChat() {
-        guard !isChatSaved else { return saveChat() }
-        chatQuestion = .leave
+        chatModel?.isStarted == true || claudeSignIn.state == .signingIn
     }
 
     private func continueSelectedChat() {
@@ -486,15 +423,30 @@ import Observation
         Task { await chat.loadHistory() }
     }
 
-    private func carryOn(_ session: DesktopSession) -> ClaudeChatSession {
-        let chat = ClaudeChatSession(resuming: session, update: claudeUpdate)
-        self.chat = chat
-        isChatSaved = true
+    private func carryOn(_ session: DesktopSession) -> ChatModel {
+        let chat = hold(ChatModel(resuming: session, setup: chatSetup, signIn: claudeSignIn, update: claudeUpdate))
         desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude
         query = ""
         claudeSignIn.check()
+        return chat
+    }
+
+    @discardableResult
+    private func newChat() -> ChatModel {
+        hold(ChatModel(setup: chatSetup, signIn: claudeSignIn, update: claudeUpdate))
+    }
+
+    /// Makes the chat the one AI mode shows, and goes back to the chat list once it is left, starting a new chat with any prompt that was waiting for it to be left.
+    private func hold(_ chat: ChatModel) -> ChatModel {
+        chat.onLeave = { [weak self, weak chat] waiting in
+            guard let self, let chat, chatModel === chat else { return }
+            chatModel = nil
+            showDesktopSessions()
+            if let waiting { startNewChat(waiting) }
+        }
+        chatModel = chat
         return chat
     }
 
@@ -515,17 +467,18 @@ import Observation
 
     /// Whether what was said by voice needs the search bar to go on: a question waits before leaving the chat, or the prompt waits in the field while Claude is busy.
     var needsBarAfterSpeaking: Bool {
-        chat == nil || chatQuestion != nil || !isQueryEmpty
+        guard let chatModel, chatModel.isStarted else { return true }
+        return chatModel.question != nil || !chatModel.isPromptEmpty
     }
 
     /// Opens the chat in Claude desktop and lets go of it once Claude has answered, so Claude desktop alone carries the session on from there, and the next prompt said by voice reads it afresh from its file.
     func handOverToClaudeDesktop() {
-        guard let chat else { return }
-        Task { await ClaudeDesktop.open(chat.sessionID) }
+        guard let chat = chatModel, let session = chat.session else { return }
+        Task { await ClaudeDesktop.open(session.sessionID) }
         Task {
-            await Self.answered(chat)
-            guard self.chat === chat, chatQuestion == nil else { return }
-            saveChat()
+            await Self.answered(session)
+            guard chatModel === chat, chat.question == nil else { return }
+            chat.save()
         }
     }
 
@@ -543,41 +496,27 @@ import Observation
 
     /// A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, whose earlier turns are read first so they show above it, or to a new chat if there is no session at all.
     private func sendToLastSession(_ prompt: String) {
-        guard chat == nil, let session = DesktopSessionFiles.lastUsed() else { return startNewChat(prompt) }
+        if let chatModel, chatModel.isStarted { return chatModel.sendOrHold(prompt) }
+        guard let session = DesktopSessionFiles.lastUsed() else { return startNewChat(prompt) }
         let chat = carryOn(session)
         Task {
             await chat.loadHistory()
-            sendOrHold(prompt)
+            chat.sendOrHold(prompt)
         }
     }
 
     /// A chat going on in AI mode is left first. A saved one is left straight away, and an unsaved one asks the usual question, with the new chat starting once it is left, or the prompt moving into the field to send here if chatting goes on.
     private func sendToNewChat(_ prompt: String) {
-        guard let chat else { return startNewChat(prompt) }
-        guard isChatSaved else {
-            promptAfterLeaving = prompt
-            chatQuestion = .leave
-            return
-        }
-        ClaudeDesktop.save(chat.sessionID)
-        endChat()
-        startNewChat(prompt)
+        guard let chatModel, chatModel.isStarted else { return startNewChat(prompt) }
+        chatModel.leave(thenSending: prompt)
     }
 
     private func startNewChat(_ prompt: String) {
+        let chat = newChat()
         desktopSessionList = nil
         mode = .askClaude
         query = ""
-        sendOrHold(prompt)
-    }
-
-    /// Sends the prompt, unless Claude is still answering or Claude Code is being updated, in which case it waits in the field.
-    private func sendOrHold(_ prompt: String) {
-        guard canSend else {
-            query = prompt
-            return
-        }
-        send(prompt)
+        chat.sendOrHold(prompt)
     }
 
     /// Opens AI mode on the list of Claude desktop sessions, where typing narrows it and Tab starts a new chat. It only opens from the launcher, and only while the AI tool is on.
@@ -588,6 +527,7 @@ import Observation
     }
 
     func startChat() {
+        newChat()
         desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude
@@ -603,114 +543,6 @@ import Observation
 
     func setExpanded(_ expanded: Bool) {
         wantsExpanded = expanded
-    }
-
-    /// Saves the chat into Claude desktop, so leaving it no longer asks. Before the first prompt there is nothing for Claude desktop to take yet, so it is saved when the chat is left.
-    func startSavingChat() {
-        isChatSaved = true
-        if let chat { ClaudeDesktop.save(chat.sessionID) }
-    }
-
-    /// Puts the selected skill or command in the prompt, followed by a space so anything after it can be typed straight away, which also closes the list.
-    func completeSlashCommand() {
-        guard let command = slashCommands.selectedCommand else { return }
-        query = "/\(command.name) "
-    }
-
-    func dismissSlashCommands() {
-        slashCommands.dismiss(prompt: query)
-    }
-
-    func startRenamingChat() {
-        guard let chat else { return }
-        chatNameDraft = chat.title
-    }
-
-    /// Gives the chat the name being typed, unless it was left empty or unchanged.
-    func renameChat() {
-        guard let chat, let name = chatNameDraft?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
-        chatNameDraft = nil
-        guard !name.isEmpty, name != chat.title else { return }
-        chat.rename(to: name)
-    }
-
-    func cancelRenamingChat() {
-        chatNameDraft = nil
-    }
-
-    func keepChatting() {
-        chatQuestion = nil
-        if let promptAfterLeaving { query = promptAfterLeaving }
-        promptAfterLeaving = nil
-    }
-
-    /// The buttons of the question card at the end of the chat, left to right, or none when no card is asking.
-    var cardChoices: [CardChoice] {
-        switch chatState {
-        case .awaitingApproval: CardChoice.approving
-        case .askingToLeave: CardChoice.leaving
-        default: []
-        }
-    }
-
-    /// The button Return presses on the question card, which is the rightmost one until the arrows move the highlight.
-    var cardChoice: CardChoice? {
-        guard let highlightedChoice, cardChoices.contains(highlightedChoice) else { return cardChoices.last }
-        return highlightedChoice
-    }
-
-    func moveCardChoice(by offset: Int) -> Bool {
-        guard let cardChoice, let index = cardChoices.firstIndex(of: cardChoice) else { return false }
-        highlightedChoice = cardChoices[min(max(index + offset, 0), cardChoices.count - 1)]
-        return true
-    }
-
-    func chooseCardChoice() -> Bool {
-        guard let cardChoice else { return false }
-        choose(cardChoice)
-        return true
-    }
-
-    func choose(_ choice: CardChoice) {
-        highlightedChoice = nil
-        switch choice {
-        case .keepChatting: keepChatting()
-        case .saveAndLeave: saveChat()
-        case .leave: discardChat()
-        case .deny: chat?.answerApproval(allowed: false)
-        case .allow: chat?.answerApproval(allowed: true)
-        }
-    }
-
-    func saveChat() {
-        guard let chat else { return }
-        let waiting = promptAfterLeaving
-        ClaudeDesktop.save(chat.sessionID)
-        endChat()
-        showDesktopSessions()
-        if let waiting { startNewChat(waiting) }
-    }
-
-    func discardChat() {
-        guard let chat else { return }
-        let waiting = promptAfterLeaving
-        self.chat = nil
-        chatQuestion = nil
-        promptAfterLeaving = nil
-        isChatSaved = false
-        chatNameDraft = nil
-        Task { await chat.discard() }
-        showDesktopSessions()
-        if let waiting { startNewChat(waiting) }
-    }
-
-    private func endChat() {
-        chat?.end()
-        chat = nil
-        chatQuestion = nil
-        promptAfterLeaving = nil
-        isChatSaved = false
-        chatNameDraft = nil
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {

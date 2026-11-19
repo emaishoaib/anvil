@@ -39,7 +39,7 @@ struct SearchBarView: View {
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focusReturningField() } }
         .onChange(of: focus) { if let focus { model.field = focus } }
-        .onChange(of: model.chatNameDraft == nil) { if model.chatNameDraft == nil { focusReturningField() } }
+        .onChange(of: model.chatModel?.nameDraft == nil) { if model.chatModel?.nameDraft == nil { focusReturningField() } }
     }
 
     /// Puts the cursor back in the search field as a form closes. It waits until the field is in the window again, because a field can't take focus before then.
@@ -82,16 +82,16 @@ struct SearchBarView: View {
         } else if model.mode == .desktopSessions, let list = model.desktopSessionList {
             Divider()
             DesktopSessionListView(list: list, query: model.query)
-        } else if model.mode == .askClaude {
-            ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, cardChoice: model.cardChoice, choose: model.choose)
+        } else if model.mode == .askClaude, let chat = model.chatModel {
+            ClaudeChat(chat: chat.session, state: chat.state, update: chat.update.state, isExpanded: model.isExpanded, cardChoice: chat.cardChoice, choose: chat.choose)
                 .overlay(alignment: .bottom) {
-                    if model.slashCommands.isShowing {
-                        SlashCommandList(picker: model.slashCommands, complete: model.completeSlashCommand)
+                    if chat.slashCommands.isShowing {
+                        SlashCommandList(picker: chat.slashCommands, complete: chat.completeSlashCommand)
                             .padding(Self.actionPanelPadding)
                     }
                 }
             Divider()
-            ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
+            ChatSetupRow(setup: chat.setup, chat: chat.session, isSaved: chat.isSaved)
         } else if model.mode == .settings {
             Divider()
             Group {
@@ -112,8 +112,8 @@ struct SearchBarView: View {
     @ViewBuilder private var footer: some View {
         if case .uninstallReview = model.mode, let review = model.review {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
-        } else if model.mode == .askClaude {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, chatName: ChatName(model: model), dividerEdge: .bottom)
+        } else if model.mode == .askClaude, let chat = model.chatModel {
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: chat.state, cardChoice: chat.cardChoice, isChatSaved: chat.isSaved, chatName: ChatName(chat: chat), dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else {

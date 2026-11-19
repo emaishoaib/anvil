@@ -48,9 +48,16 @@ struct QueryRow: View {
 
     /// Writes to the model only when the text really changed, because the field
     /// writes its unchanged text back whenever it loses focus, and that would
-    /// re-run the search and reset the selected result.
+    /// re-run the search and reset the selected result. In AI mode the field
+    /// holds the chat's prompt.
     private var query: Binding<String> {
-        Binding(
+        if model.mode == .askClaude, let chat = model.chatModel {
+            return Binding(
+                get: { chat.prompt },
+                set: { if $0 != chat.prompt { chat.prompt = $0 } }
+            )
+        }
+        return Binding(
             get: { model.query },
             set: { if $0 != model.query { model.query = $0 } }
         )
