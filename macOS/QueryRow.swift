@@ -18,7 +18,7 @@ struct QueryRow: View {
                 TextField(model.placeholder, text: query, axis: model.mode == .askClaude ? .vertical : .horizontal)
                     .lineLimit(1...Self.promptLineLimit)
                     .textFieldStyle(.plain)
-                    .font(.system(size: Self.fontSize))
+                    .font(model.mode == .askClaude ? .body : .system(size: Self.fontSize))
                     .focused(focus, equals: .query)
                     .frame(width: hasArguments ? queryWidth : nil)
             } else {
