@@ -135,6 +135,7 @@ final class SearchBar {
             editor.insertNewlineIgnoringFieldEditor(nil)
             return true
         }
+        if model.mode == .askClaude, keyCode == kVK_UpArrow || keyCode == kVK_DownArrow { return false }
         if model.mode == .askClaude, handleSignInKey(keyCode) { return true }
         if model.mode == .askClaude, handleUpdateKey(keyCode) { return true }
         if model.mode == .askClaude, handleEndingKey(keyCode, modifiers: modifiers) { return true }
