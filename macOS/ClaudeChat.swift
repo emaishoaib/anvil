@@ -64,12 +64,7 @@ private struct TurnView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(turn.prompt)
-                .fontWeight(.medium)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(.primary.opacity(0.06), in: .rect(cornerRadius: 8))
-                .textSelection(.enabled)
+            PromptBubble(prompt: turn.prompt)
             if !turn.tools.isEmpty {
                 ChatToolList(tools: turn.tools, isFinished: turn.isFinished)
             }
@@ -91,5 +86,25 @@ private struct TurnView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// A prompt the user sent, kept on the right in a bubble tinted with the accent colour so it stands apart from Claude's answers on the left. A long prompt wraps before it reaches the left edge.
+private struct PromptBubble: View {
+    private static let cornerRadius: CGFloat = 12
+    private static let roomOnLeft: CGFloat = 60
+    private static let tintOpacity = 0.18
+
+    let prompt: String
+
+    var body: some View {
+        Text(prompt)
+            .fontWeight(.medium)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.tint.opacity(Self.tintOpacity), in: .rect(cornerRadius: Self.cornerRadius))
+            .textSelection(.enabled)
+            .padding(.leading, Self.roomOnLeft)
+            .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
