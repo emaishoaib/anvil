@@ -25,6 +25,7 @@ import Observation
     private(set) var isPinned = false
     let settings = SettingsBarModel()
     let chatSetup = ChatSetup()
+    let slashCommands = SlashCommandPicker()
     private(set) var chat: ClaudeChatSession?
     private(set) var chatQuestion: ChatQuestion? {
         didSet { highlightedChoice = nil }
@@ -398,7 +399,10 @@ import Observation
         case .settings:
             results = []
             settings.filter(query)
-        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm, .askClaude:
+        case .askClaude:
+            results = []
+            slashCommands.update(for: query, in: chat?.folder ?? chatSetup.folder)
+        case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm:
             results = []
         case .desktopSessions:
             results = []
@@ -605,6 +609,16 @@ import Observation
     func startSavingChat() {
         isChatSaved = true
         if let chat { ClaudeDesktop.save(chat.sessionID) }
+    }
+
+    /// Puts the selected skill or command in the prompt, followed by a space so anything after it can be typed straight away, which also closes the list.
+    func completeSlashCommand() {
+        guard let command = slashCommands.selectedCommand else { return }
+        query = "/\(command.name) "
+    }
+
+    func dismissSlashCommands() {
+        slashCommands.dismiss(prompt: query)
     }
 
     func startRenamingChat() {

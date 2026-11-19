@@ -132,6 +132,7 @@ final class SearchBar {
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
         if model.mode == .askClaude, model.chatNameDraft != nil { return handleRenamingKey(keyCode) }
+        if model.mode == .askClaude, model.slashCommands.isShowing, handleSlashCommandKey(keyCode, modifiers: modifiers) { return true }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }
         if model.mode == .settings, model.settings.isShowingGrid, keyCode == kVK_LeftArrow || keyCode == kVK_RightArrow {
             model.settings.moveAcross(by: keyCode == kVK_LeftArrow ? -1 : 1)
@@ -234,6 +235,18 @@ final class SearchBar {
         case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
             guard Self.onlyCommand(in: modifiers) else { return false }
             model.startSavingChat()
+        default: return false
+        }
+        return true
+    }
+
+    private func handleSlashCommandKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags) -> Bool {
+        guard modifiers.intersection([.command, .shift, .option, .control]).isEmpty else { return false }
+        switch keyCode {
+        case kVK_UpArrow: model.slashCommands.moveSelection(by: -1)
+        case kVK_DownArrow: model.slashCommands.moveSelection(by: 1)
+        case kVK_Return, kVK_ANSI_KeypadEnter, kVK_Tab: model.completeSlashCommand()
+        case kVK_Escape: model.dismissSlashCommands()
         default: return false
         }
         return true

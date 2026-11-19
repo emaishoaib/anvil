@@ -84,6 +84,12 @@ struct SearchBarView: View {
             DesktopSessionListView(list: list, query: model.query)
         } else if model.mode == .askClaude {
             ClaudeChat(chat: model.chat, state: model.chatState, update: model.claudeUpdate.state, isExpanded: model.isExpanded, cardChoice: model.cardChoice, choose: model.choose)
+                .overlay(alignment: .bottom) {
+                    if model.slashCommands.isShowing {
+                        SlashCommandList(picker: model.slashCommands, complete: model.completeSlashCommand)
+                            .padding(Self.actionPanelPadding)
+                    }
+                }
             Divider()
             ChatSetupRow(setup: model.chatSetup, chat: model.chat, isSaved: model.isChatSaved)
         } else if model.mode == .settings {
