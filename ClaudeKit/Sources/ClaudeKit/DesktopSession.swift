@@ -1,6 +1,6 @@
 import Foundation
 
-/// A Code session as Claude desktop records it: its own id, the Claude Code session it runs on, its title, the folder it works in, when it was last active, and whether it was archived. Claude desktop writes one record per session as a JSON file, with the last activity in milliseconds.
+/// A Code session as Claude desktop records it: its own id, the Claude Code session it runs on, its title, or the name of its folder when it has none as Claude desktop shows it, the folder it works in, when it was last active, and whether it was archived. Claude desktop writes one record per session as a JSON file, with the last activity in milliseconds.
 public struct DesktopSession: Decodable, Equatable, Sendable {
     public let desktopID: String
     public let sessionID: UUID
@@ -26,8 +26,10 @@ public struct DesktopSession: Decodable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         desktopID = try container.decode(String.self, forKey: .sessionId)
         sessionID = try container.decode(UUID.self, forKey: .cliSessionId)
-        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
-        folder = URL(filePath: try container.decode(String.self, forKey: .cwd))
+        let folder = URL(filePath: try container.decode(String.self, forKey: .cwd))
+        let savedTitle = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        self.folder = folder
+        title = savedTitle.isEmpty ? folder.lastPathComponent : savedTitle
         lastActivity = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .lastActivityAt) / 1000)
         isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
     }

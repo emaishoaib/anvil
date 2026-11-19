@@ -61,8 +61,12 @@ struct DesktopSessionsTests {
         #expect(DesktopSessions.lastUsed(of: sessions, changedAt: { _ in nil }) == nil)
     }
 
-    @Test func aSessionWithoutATitleHasAnEmptyOne() {
-        let untitled = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","cwd":"/","lastActivityAt":1}"#.utf8)
-        #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == [""])
+    @Test func aSessionWithoutATitleIsNamedAfterItsFolder() {
+        let untitled = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","cwd":"/Users/me/anvil","lastActivityAt":1}"#.utf8)
+        #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == ["anvil"])
+    }
+
+    @Test func aSessionWithAnEmptyTitleIsNamedAfterItsFolder() {
+        #expect(DesktopSessions.newestFirst(from: [Self.record(title: "")]).map(\.title) == ["docs"])
     }
 }
