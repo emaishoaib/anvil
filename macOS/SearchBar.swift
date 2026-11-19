@@ -131,9 +131,14 @@ final class SearchBar {
         }
         guard model.mode.hasSearchField else { return handleFormKey(keyCode, modifiers: modifiers) }
         guard model.actionPanel == nil else { return handleActionKey(keyCode, modifiers: modifiers) }
-        let chat = model.mode == .askClaude ? model.chatModel : nil
-        if let chat, chat.nameDraft != nil { return handleRenamingKey(keyCode, in: chat) }
-        if let chat, chat.slashCommands.isShowing, handleSlashCommandKey(keyCode, modifiers: modifiers, in: chat) { return true }
+        if model.mode == .askClaude, let chat = model.chatModel {
+            let editor = panel.firstResponder as? NSTextView
+            switch ChatKeys.handle(keyCode, modifiers: modifiers, in: chat, editor: editor, chooseFolder: { presentModal(chat.setup.chooseFolder) }) {
+            case .handled: return true
+            case .leftToField: return false
+            case .notForChat: break
+            }
+        }
         if model.mode == .settings, model.settings.isAdjusting { return handleAdjustingKey(keyCode) }
         if model.mode == .settings, model.settings.isShowingGrid, keyCode == kVK_LeftArrow || keyCode == kVK_RightArrow {
             model.settings.moveAcross(by: keyCode == kVK_LeftArrow ? -1 : 1)
@@ -142,24 +147,10 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_K { return model.toggleActions() }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_Return || keyCode == kVK_ANSI_KeypadEnter, model.moveTickedToTrash() { return true }
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
-        if let chat, handleCardKey(keyCode, in: chat) { return true }
-        if let chat, chat.state == .awaitingApproval, keyCode == kVK_Escape {
-            chat.choose(.deny)
-            return true
-        }
         if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_E {
             toggleExpanded()
             return true
         }
-        if model.mode == .askClaude, keyCode == kVK_Return, modifiers.contains(.shift), let editor = panel.firstResponder as? NSTextView {
-            editor.insertNewlineIgnoringFieldEditor(nil)
-            return true
-        }
-        if model.mode == .askClaude, keyCode == kVK_UpArrow || keyCode == kVK_DownArrow { return false }
-        if let chat, handleSignInKey(keyCode, in: chat) { return true }
-        if let chat, handleUpdateKey(keyCode, in: chat) { return true }
-        if let chat, handleEndingKey(keyCode, modifiers: modifiers, in: chat) { return true }
-        if let chat, chat.session?.mode == nil, handleChatSetupKey(keyCode, modifiers: modifiers, in: chat) { return true }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
         if let action = AnvilAction.forShortcut(Self.combo(keyCode, modifiers)) {
             model.perform(.anvil(action))
@@ -218,79 +209,12 @@ final class SearchBar {
         return true
     }
 
-    private func handleCardKey(_ keyCode: Int, in chat: ChatModel) -> Bool {
-        switch keyCode {
-        case kVK_LeftArrow: chat.moveCardChoice(by: -1)
-        case kVK_RightArrow: chat.moveCardChoice(by: 1)
-        case kVK_Return, kVK_ANSI_KeypadEnter: chat.chooseCardChoice()
-        default: false
-        }
-    }
 
-    private func handleEndingKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags, in chat: ChatModel) -> Bool {
-        switch (chat.state, keyCode) {
-        case (.answering, kVK_Escape): chat.stop()
-        case (.started, kVK_Escape), (.outdated, kVK_Escape): chat.leave()
-        case (.askingToLeave, kVK_Escape): chat.keepChatting()
-        case (.askingToLeave, kVK_ANSI_S) where Self.onlyCommand(in: modifiers): chat.save()
-        case (.notStarted, kVK_ANSI_S), (.started, kVK_ANSI_S), (.answering, kVK_ANSI_S):
-            guard Self.onlyCommand(in: modifiers) else { return false }
-            chat.startSaving()
-        default: return false
-        }
-        return true
-    }
 
-    private func handleSlashCommandKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags, in chat: ChatModel) -> Bool {
-        guard modifiers.intersection([.command, .shift, .option, .control]).isEmpty else { return false }
-        switch keyCode {
-        case kVK_UpArrow: chat.slashCommands.moveSelection(by: -1)
-        case kVK_DownArrow: chat.slashCommands.moveSelection(by: 1)
-        case kVK_Return, kVK_ANSI_KeypadEnter, kVK_Tab: chat.completeSlashCommand()
-        case kVK_Escape: chat.dismissSlashCommands()
-        default: return false
-        }
-        return true
-    }
 
-    private func handleRenamingKey(_ keyCode: Int, in chat: ChatModel) -> Bool {
-        switch keyCode {
-        case kVK_Return, kVK_ANSI_KeypadEnter: chat.rename()
-        case kVK_Escape: chat.cancelRenaming()
-        default: return false
-        }
-        return true
-    }
 
-    private func handleSignInKey(_ keyCode: Int, in chat: ChatModel) -> Bool {
-        switch (chat.state, keyCode) {
-        case (.signedOut, kVK_Return), (.signedOut, kVK_ANSI_KeypadEnter): chat.signInToClaude()
-        case (.signingIn, kVK_Escape): chat.signIn.cancel()
-        default: return false
-        }
-        return true
-    }
 
-    private func handleUpdateKey(_ keyCode: Int, in chat: ChatModel) -> Bool {
-        switch (chat.state, keyCode) {
-        case (.outdated, kVK_Return), (.outdated, kVK_ANSI_KeypadEnter): chat.updateClaude()
-        case (.updating, kVK_Escape): chat.update.cancel()
-        default: return false
-        }
-        return true
-    }
 
-    private func handleChatSetupKey(_ keyCode: Int, modifiers: NSEvent.ModifierFlags, in chat: ChatModel) -> Bool {
-        let shortcut = modifiers.intersection([.command, .shift, .option, .control])
-        switch (keyCode, shortcut) {
-        case (kVK_ANSI_O, .command):
-            guard !chat.isStarted else { return false }
-            presentModal(chat.setup.chooseFolder)
-        case (kVK_Tab, .shift): chat.setup.useNextMode()
-        default: return false
-        }
-        return true
-    }
 
     private func handleAdjustingKey(_ keyCode: Int) -> Bool {
         switch keyCode {
