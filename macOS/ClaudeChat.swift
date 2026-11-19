@@ -69,6 +69,7 @@ private struct TurnView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(.primary.opacity(0.06), in: .rect(cornerRadius: 8))
+                .textSelection(.enabled)
             if !turn.tools.isEmpty {
                 ChatToolList(tools: turn.tools, isFinished: turn.isFinished)
             }
