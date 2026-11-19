@@ -22,7 +22,8 @@ import Observation
 
     var turns: [ChatTurn] { transcript.turns }
     var isAnswering: Bool { transcript.isAnswering }
-    var title: String { transcript.title.isEmpty ? savedTitle ?? "" : transcript.title }
+    /// The name Claude desktop gave a loaded chat, or for a new chat its first prompt's first line, or its folder's name until a prompt is sent.
+    var title: String { savedTitle ?? (transcript.title.isEmpty ? folder.lastPathComponent : transcript.title) }
 
     init(folder: URL, update: ClaudeUpdate) {
         self.folder = folder

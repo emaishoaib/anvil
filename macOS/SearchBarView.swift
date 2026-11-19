@@ -106,7 +106,7 @@ struct SearchBarView: View {
         if case .uninstallReview = model.mode, let review = model.review {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
         } else if model.mode == .askClaude {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, dividerEdge: .bottom)
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, chatTitle: model.chat?.title, dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else {
