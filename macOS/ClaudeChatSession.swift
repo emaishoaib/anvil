@@ -17,12 +17,13 @@ import Observation
     @ObservationIgnored private var process: ClaudeProcess?
     @ObservationIgnored private var isStopping = false
     @ObservationIgnored private var resumes: Bool
-    @ObservationIgnored private let savedTitle: String?
+    private var savedTitle: String?
+    @ObservationIgnored private var unwrittenTitle: String?
     @ObservationIgnored private let update: ClaudeUpdate
 
     var turns: [ChatTurn] { transcript.turns }
     var isAnswering: Bool { transcript.isAnswering }
-    /// The name Claude desktop gave a loaded chat, or for a new chat its first prompt's first line, or its folder's name until a prompt is sent.
+    /// The name the chat was given, by renaming it or by Claude desktop for a loaded chat, or for a new chat its first prompt's first line, or its folder's name until a prompt is sent.
     var title: String { savedTitle ?? (transcript.title.isEmpty ? folder.lastPathComponent : transcript.title) }
 
     init(folder: URL, update: ClaudeUpdate) {
@@ -76,6 +77,20 @@ import Observation
         }
     }
 
+    /// Names the chat. The name is written to its transcript, and to Claude desktop's record when Claude desktop has the chat, once Claude Code is not writing an answer and the transcript exists, so a chat renamed before its first prompt gets its name after the first answer.
+    func rename(to title: String) {
+        savedTitle = title
+        unwrittenTitle = title
+        writeTitle()
+    }
+
+    private func writeTitle() {
+        guard !isAnswering, let unwrittenTitle, let file = ClaudeSessionFiles.transcript(of: sessionID) else { return }
+        ClaudeSessionFiles.append(TranscriptTitle.line(unwrittenTitle, sessionID: sessionID), to: file)
+        DesktopSessionFiles.rename(sessionID, to: unwrittenTitle)
+        self.unwrittenTitle = nil
+    }
+
     func end() {
         let process = process
         self.process = nil
@@ -120,12 +135,14 @@ import Observation
         guard !isStopping else { return finishStopping() }
         approvals.removeAll()
         transcript.finish(answer: answer, failed: failed)
+        writeTitle()
     }
 
     private func finishStopping() {
         guard isStopping else { return }
         isStopping = false
         transcript.markStopped()
+        writeTitle()
     }
 
     private func stopped(printing errors: String) {

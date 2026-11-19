@@ -57,6 +57,14 @@ public enum DesktopSessions {
             .0
     }
 
+    /// The record with a new title, marked as named by the user so Claude desktop does not name it again, keeping everything else in it. A record for any other session, or one that cannot be read, gives nothing back.
+    public static func renamed(_ record: Data, running sessionID: UUID, to title: String) -> Data? {
+        guard decoded([record]).first?.sessionID == sessionID, var fields = try? JSONSerialization.jsonObject(with: record) as? [String: Any] else { return nil }
+        fields["title"] = title
+        fields["titleSource"] = "user"
+        return try? JSONSerialization.data(withJSONObject: fields, options: .withoutEscapingSlashes)
+    }
+
     private static func decoded(_ records: [Data]) -> [DesktopSession] {
         records.compactMap { try? JSONDecoder().decode(DesktopSession.self, from: $0) }
     }

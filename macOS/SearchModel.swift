@@ -31,6 +31,7 @@ import Observation
     }
     private var highlightedChoice: CardChoice?
     private(set) var isChatSaved = false
+    var chatNameDraft: String?
     private var wantsExpanded = false
     private var promptAfterLeaving: String?
 
@@ -606,6 +607,23 @@ import Observation
         if let chat { ClaudeDesktop.save(chat.sessionID) }
     }
 
+    func startRenamingChat() {
+        guard let chat else { return }
+        chatNameDraft = chat.title
+    }
+
+    /// Gives the chat the name being typed, unless it was left empty or unchanged.
+    func renameChat() {
+        guard let chat, let name = chatNameDraft?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+        chatNameDraft = nil
+        guard !name.isEmpty, name != chat.title else { return }
+        chat.rename(to: name)
+    }
+
+    func cancelRenamingChat() {
+        chatNameDraft = nil
+    }
+
     func keepChatting() {
         chatQuestion = nil
         if let promptAfterLeaving { query = promptAfterLeaving }
@@ -666,6 +684,7 @@ import Observation
         chatQuestion = nil
         promptAfterLeaving = nil
         isChatSaved = false
+        chatNameDraft = nil
         Task { await chat.discard() }
         showDesktopSessions()
         if let waiting { startNewChat(waiting) }
@@ -677,6 +696,7 @@ import Observation
         chatQuestion = nil
         promptAfterLeaving = nil
         isChatSaved = false
+        chatNameDraft = nil
     }
 
     private var appsOtherThanAnvil: [InstalledApp] {

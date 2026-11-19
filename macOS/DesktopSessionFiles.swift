@@ -20,6 +20,14 @@ nonisolated enum DesktopSessionFiles {
         DesktopSessions.session(running: sessionID, in: records())
     }
 
+    /// Gives the session Claude desktop runs on the given Claude Code session a new title in its record. Nothing changes when Claude desktop does not have the session.
+    static func rename(_ sessionID: UUID, to title: String) {
+        for file in recordFiles() {
+            guard let record = try? Data(contentsOf: file), let renamed = DesktopSessions.renamed(record, running: sessionID, to: title) else { continue }
+            try? renamed.write(to: file, options: .atomic)
+        }
+    }
+
     private static func records() -> [Data] {
         recordFiles().compactMap { try? Data(contentsOf: $0) }
     }

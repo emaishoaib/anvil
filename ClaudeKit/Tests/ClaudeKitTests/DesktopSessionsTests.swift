@@ -66,6 +66,20 @@ struct DesktopSessionsTests {
         #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == ["anvil"])
     }
 
+    @Test func aRenamedRecordHasTheNewTitleSetByTheUser() throws {
+        let renamed = try #require(DesktopSessions.renamed(Self.record(), running: UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!, to: "UI/UX fixes"))
+        let fields = try #require(try JSONSerialization.jsonObject(with: renamed) as? [String: Any])
+        #expect(fields["title"] as? String == "UI/UX fixes")
+        #expect(fields["titleSource"] as? String == "user")
+        #expect(fields["model"] as? String == "claude-opus-5-5")
+        #expect(fields["isArchived"] as? Bool == false)
+        #expect(DesktopSessions.newestFirst(from: [renamed]).map(\.title) == ["UI/UX fixes"])
+    }
+
+    @Test func aRecordForAnotherSessionIsNotRenamed() {
+        #expect(DesktopSessions.renamed(Self.record(), running: UUID(), to: "Other") == nil)
+    }
+
     @Test func aSessionWithAnEmptyTitleIsNamedAfterItsFolder() {
         #expect(DesktopSessions.newestFirst(from: [Self.record(title: "")]).map(\.title) == ["docs"])
     }

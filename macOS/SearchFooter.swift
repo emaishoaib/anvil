@@ -14,7 +14,7 @@ struct SearchFooter: View {
     var chatState = ChatState.notStarted
     var cardChoice: CardChoice? = nil
     var isChatSaved = false
-    var chatTitle: String? = nil
+    var chatName: ChatName? = nil
     var dividerEdge = VerticalEdge.top
 
     var body: some View {
@@ -47,10 +47,7 @@ struct SearchFooter: View {
                         .foregroundStyle(.secondary)
                 case .askClaude:
                     CommandIcon(command: .enterAIMode)
-                    Text(chatTitle ?? "Chat")
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
+                    chatName
                 case .wordEntry(let word, _):
                     CommandIcon(command: .defineWord)
                     Text(word.text)

@@ -16,6 +16,14 @@ nonisolated enum ClaudeSessionFiles {
         urls(of: sessionID).first { $0.pathExtension == "jsonl" }
     }
 
+    /// Adds a line to the end of a transcript, leaving everything already in it as it was.
+    static func append(_ line: Data, to transcript: URL) {
+        guard let handle = try? FileHandle(forWritingTo: transcript) else { return }
+        defer { try? handle.close() }
+        _ = try? handle.seekToEnd()
+        try? handle.write(contentsOf: line)
+    }
+
     /// Moves the chat's files to the Trash, so Claude Code no longer lists the chat but it can still be brought back from the Trash.
     static func trash(_ sessionID: UUID) {
         for url in urls(of: sessionID) {

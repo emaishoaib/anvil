@@ -39,6 +39,7 @@ struct SearchBarView: View {
         .onChange(of: model.field) { focus = model.field }
         .onChange(of: model.mode.hasSearchField) { if model.mode.hasSearchField { focusReturningField() } }
         .onChange(of: focus) { if let focus { model.field = focus } }
+        .onChange(of: model.chatNameDraft == nil) { if model.chatNameDraft == nil { focusReturningField() } }
     }
 
     /// Puts the cursor back in the search field as a form closes. It waits until the field is in the window again, because a field can't take focus before then.
@@ -106,7 +107,7 @@ struct SearchBarView: View {
         if case .uninstallReview = model.mode, let review = model.review {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, message: review.summary, performAction: { _ = model.moveTickedToTrash() })
         } else if model.mode == .askClaude {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, chatTitle: model.chat?.title, dividerEdge: .bottom)
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: model.chatState, cardChoice: model.cardChoice, isChatSaved: model.isChatSaved, chatName: ChatName(model: model), dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else {
