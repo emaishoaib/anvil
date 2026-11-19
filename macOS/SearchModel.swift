@@ -425,8 +425,10 @@ import Observation
         chatModel?.isStarted == true || claudeSignIn.state == .signingIn
     }
 
+    /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one.
     private func continueSelectedChat() {
         guard let session = desktopSessionList?.selectedSession(matching: query) else { return NSSound.beep() }
+        if let window = ChatWindows.shared.window(running: session.sessionID) { return SearchBar.shared.bringForward(window) }
         let chat = carryOn(session)
         Task { await chat.loadHistory() }
     }
@@ -458,19 +460,27 @@ import Observation
         return chat
     }
 
-    /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped. Whether anything was sent, or is about to be.
-    @discardableResult
-    func sendSpoken(_ said: String) -> Bool {
+    /// Where a prompt said by voice went: nowhere, to the chat in the bar, or to a chat already showing in a window of its own.
+    enum SentTo {
+        case nowhere
+        case bar
+        case chatWindow(ChatWindow)
+    }
+
+    /// Sends what was said by voice to the session it names, beeping if nothing is left once the session's name is dropped.
+    func sendSpoken(_ said: String) -> SentTo {
         let spoken = SpokenPhrase.prompt(in: said)
         guard !spoken.text.isEmpty else {
             NSSound.beep()
-            return false
+            return .nowhere
         }
         switch spoken.session {
-        case .new: sendToNewChat(spoken.text)
-        case .last: sendToLastSession(spoken.text)
+        case .new:
+            sendToNewChat(spoken.text)
+            return .bar
+        case .last:
+            return sendToLastSession(spoken.text)
         }
-        return true
     }
 
     /// Whether what was said by voice needs the search bar to go on: a question waits before leaving the chat, or the prompt waits in the field while Claude is busy.
@@ -502,15 +512,26 @@ import Observation
         }
     }
 
-    /// A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, whose earlier turns are read first so they show above it, or to a new chat if there is no session at all.
-    private func sendToLastSession(_ prompt: String) {
-        if let chatModel, chatModel.isStarted { return chatModel.sendOrHold(prompt) }
-        guard let session = DesktopSessionFiles.lastUsed() else { return startNewChat(prompt) }
+    /// A chat already going on in AI mode gets it, since leaving that chat for another could lose it. Otherwise it goes to the Claude desktop session used last, in the window already showing it if there is one, or else here with its earlier turns read first so they show above it, or to a new chat if there is no session at all.
+    private func sendToLastSession(_ prompt: String) -> SentTo {
+        if let chatModel, chatModel.isStarted {
+            chatModel.sendOrHold(prompt)
+            return .bar
+        }
+        guard let session = DesktopSessionFiles.lastUsed() else {
+            startNewChat(prompt)
+            return .bar
+        }
+        if let window = ChatWindows.shared.window(running: session.sessionID) {
+            window.chat.sendOrHold(prompt)
+            return .chatWindow(window)
+        }
         let chat = carryOn(session)
         Task {
             await chat.loadHistory()
             chat.sendOrHold(prompt)
         }
+        return .bar
     }
 
     /// A chat going on in AI mode is left first. A saved one is left straight away, and an unsaved one asks the usual question, with the new chat starting once it is left, or the prompt moving into the field to send here if chatting goes on.

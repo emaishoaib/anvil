@@ -57,10 +57,14 @@ final class SearchBar {
         return ContinuousClock.now - hiddenAt < SearchMemory.current.duration
     }
 
-    /// Sends what was said by voice to Claude, then shows the chat it went to where the after-sending setting says: in the bar in AI mode, in a chat window of its own, or in Claude desktop. When the bar is needed to go on, Claude desktop is passed over for the bar.
+    /// Sends what was said by voice to Claude, then shows the chat it went to where the after-sending setting says: in the bar in AI mode, in a chat window of its own, or in Claude desktop. When the bar is needed to go on, Claude desktop is passed over for the bar, and a prompt that went to a chat already in a window brings that window forward whatever the setting.
     func sendSpoken(_ said: String) {
         if !panel.isVisible { refreshModel() }
-        guard model.sendSpoken(said) else { return }
+        switch model.sendSpoken(said) {
+        case .nowhere: return
+        case .chatWindow(let window): return bringForward(window)
+        case .bar: break
+        }
         if AfterSending.current == .claudeDesktop, !model.needsBarAfterSpeaking {
             hide()
             return model.handOverToClaudeDesktop()
@@ -75,17 +79,28 @@ final class SearchBar {
         guard popOutChat() else { return model.togglePin() }
     }
 
-    /// Moves the chat in AI mode into a window of its own, where the bar was, and closes the bar, so it opens as the launcher next time. The bar closes before the window takes the keyboard, since closing it while it still had the keyboard would hide Anvil. Whether there was a chat to move.
+    /// Moves the chat in AI mode into a window of its own, where the bar was, and closes the bar, so it opens as the launcher next time. Whether there was a chat to move.
     private func popOutChat() -> Bool {
         let frame = chatWindowFrame
         guard let chat = model.releaseChat() else { return false }
+        closeQuietly()
+        ChatWindows.shared.open(chat, at: frame)
+        return true
+    }
+
+    /// Closes the bar and brings forward a chat window, as when the chat picked in the list is already showing in one.
+    func bringForward(_ window: ChatWindow) {
+        closeQuietly()
+        window.show()
+    }
+
+    /// Closes the bar without hiding Anvil, so a chat window can take the keyboard straight after, and forgets how the bar was.
+    private func closeQuietly() {
         isHoldingOpen = true
         panel.orderOut(nil)
         isHoldingOpen = false
         hiddenAt = nil
         collapsedFrame = nil
-        ChatWindows.shared.open(chat, at: frame)
-        return true
     }
 
     /// Where a popped-out chat opens: where the bar is, at its usual size rather than expanded, or where the bar would be when it is not showing.

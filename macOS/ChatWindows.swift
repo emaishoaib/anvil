@@ -16,4 +16,9 @@ final class ChatWindows {
         windows.append(window)
         window.show()
     }
+
+    /// The window already showing the given Claude Code session, so the same session is never carried on in two places at once.
+    func window(running sessionID: UUID) -> ChatWindow? {
+        windows.first { $0.chat.session?.sessionID == sessionID }
+    }
 }
