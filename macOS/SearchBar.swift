@@ -10,6 +10,7 @@ final class SearchBar {
     private let model = SearchModel()
     private lazy var content = NSHostingView(rootView: SearchBarView(model: model))
     private var isPresentingModal = false
+    private var isHoldingOpen = false
     private var hiddenAt: ContinuousClock.Instant?
     private var collapsedFrame: NSRect?
 
@@ -33,6 +34,22 @@ final class SearchBar {
         panel.orderOut(nil)
         hiddenAt = remembering ? .now : nil
         if NSApp.isActive { NSApp.hide(nil) }
+    }
+
+    /// Hides the search bar when another app takes the keyboard, unless the bar is being held open.
+    func lostFocus() {
+        guard !isHoldingOpen else { return }
+        hide()
+    }
+
+    /// Keeps the search bar open while another app comes forward for a moment, then takes the keyboard back, unless the bar was hidden in the meantime.
+    func holdOpen(while work: () async -> Void) async {
+        isHoldingOpen = true
+        await work()
+        isHoldingOpen = false
+        guard panel.isVisible else { return }
+        NSApp.activate()
+        panel.makeKeyAndOrderFront(nil)
     }
 
     private var remembersLastState: Bool {

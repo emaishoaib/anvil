@@ -33,6 +33,6 @@ final class SearchPanel: NSPanel {
     override func resignKey() {
         super.resignKey()
         RuleKeys.shared.searchBarFocusChanged(false)
-        SearchBar.shared.hide()
+        SearchBar.shared.lostFocus()
     }
 }
