@@ -1,10 +1,11 @@
 import ClaudeKit
 import SwiftUI
 
-/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, the offer to update Claude Code when it is too old, or the question about leaving an unsaved chat, at the end. A chat opens scrolled to its end, so a loaded chat shows its latest turn, and it keeps the newest text in view as the answer streams in, shows a spinner while a loaded chat's earlier turns are read, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
+/// The area under the prompt in AI mode, where the chat with Claude Code appears, each prompt above its answer, with any approval Claude is waiting for, the offer to update Claude Code when it is too old, or the question about leaving an unsaved chat, at the end. A chat opens scrolled to its end, so a loaded chat shows its latest turn, and while it is scrolled to its end it keeps the newest text in view as the answer streams in. Scrolling up leaves it where it is until it is scrolled back down, or until a prompt is sent or a card shows, which bring the end back into view. It shows a spinner while a loaded chat's earlier turns are read, and says what the field is for until a prompt is sent, or asks to sign in when Claude Code is signed out. In the expanded search bar it takes all the height there is.
 struct ClaudeChat: View {
     private static let height: CGFloat = 364
     private static let bottomID = "bottom"
+    private static let followDistance: CGFloat = 40
 
     let chat: ClaudeChatSession?
     let state: ChatState
@@ -12,6 +13,8 @@ struct ClaudeChat: View {
     let isExpanded: Bool
     let cardChoice: CardChoice?
     let choose: (CardChoice) -> Void
+
+    @State private var isFollowing = true
 
     var body: some View {
         content
@@ -42,12 +45,16 @@ struct ClaudeChat: View {
                     .padding(16)
                 }
                 .defaultScrollAnchor(.bottom, for: .initialOffset)
-                .onChange(of: chat.turns.last?.answer) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
-                .onChange(of: chat.turns.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
-                .onChange(of: chat.turns.last?.tools.count) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
-                .onChange(of: chat.approvals.first?.requestID) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
-                .onChange(of: state) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
-                .onChange(of: update) { proxy.scrollTo(Self.bottomID, anchor: .bottom) }
+                .onScrollGeometryChange(for: ScrollGeometry.self, of: { $0 }) { old, new in
+                    guard old.contentSize == new.contentSize else { return }
+                    isFollowing = new.contentSize.height - new.visibleRect.maxY < Self.followDistance
+                }
+                .onChange(of: chat.turns.last?.answer) { follow(proxy) }
+                .onChange(of: chat.turns.last?.tools.count) { follow(proxy) }
+                .onChange(of: chat.turns.count) { scrollToEnd(proxy) }
+                .onChange(of: chat.approvals.first?.requestID) { scrollToEnd(proxy) }
+                .onChange(of: state) { scrollToEnd(proxy) }
+                .onChange(of: update) { scrollToEnd(proxy) }
             }
         } else if state == .signedOut || state == .signingIn {
             SignInPrompt(isSigningIn: state == .signingIn)
@@ -56,6 +63,16 @@ struct ClaudeChat: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+
+    private func follow(_ proxy: ScrollViewProxy) {
+        guard isFollowing else { return }
+        proxy.scrollTo(Self.bottomID, anchor: .bottom)
+    }
+
+    private func scrollToEnd(_ proxy: ScrollViewProxy) {
+        isFollowing = true
+        proxy.scrollTo(Self.bottomID, anchor: .bottom)
     }
 }
 
