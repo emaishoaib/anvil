@@ -230,8 +230,7 @@ private struct ActionLabel: View {
 
 private struct SearchingTheMac: View {
     var body: some View {
-        ProgressView()
-            .controlSize(.small)
+        AnvilLoader()
         Text("Searching the Mac for leftovers…")
             .foregroundStyle(.secondary)
     }

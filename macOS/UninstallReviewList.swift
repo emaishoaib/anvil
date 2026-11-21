@@ -2,7 +2,7 @@ import CleanerKit
 import LauncherKit
 import SwiftUI
 
-/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A file that couldn't be moved to the Trash shows why in place of where it lives. A row is ticked or unticked by clicking it. Without Full Disk Access, a notice above the rows says some leftovers may be missing. While the files are being found or moved to the Trash, a spinner stands in for the rows.
+/// The rows of the uninstall page: the app and each leftover file, with a tick box, where it lives and its size. A file that couldn't be moved to the Trash shows why in place of where it lives. A row is ticked or unticked by clicking it. Without Full Disk Access, a notice above the rows says some leftovers may be missing. While the files are being found or moved to the Trash, the anvil loader stands in for the rows.
 struct UninstallReviewList: View {
     private static let rowHeight: CGFloat = 40
     private static let padding: CGFloat = 8
@@ -15,8 +15,7 @@ struct UninstallReviewList: View {
         Group {
             switch review.state {
             case .searching, .movingToTrash:
-                ProgressView()
-                    .controlSize(.small)
+                AnvilLoader()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .ready:
                 rows

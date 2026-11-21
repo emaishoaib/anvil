@@ -7,8 +7,7 @@ struct SignInPrompt: View {
     var body: some View {
         VStack(spacing: 8) {
             if isSigningIn {
-                ProgressView()
-                    .controlSize(.small)
+                AnvilLoader()
                 Text("Finish signing in in your browser")
                     .font(.headline)
                 Text("Anvil carries on once Claude Code is signed in.")

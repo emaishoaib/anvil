@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The tools Claude used for one turn. While Claude is still answering, each one shows as a line with a spinner, a tick or a cross. Once the turn is finished they fold into one line that can be opened again, so the answer stays the focus.
+/// The tools Claude used for one turn. While Claude is still answering, each one shows as a line with the anvil loader, a tick or a cross. Once the turn is finished they fold into one line that can be opened again, so the answer stays the focus.
 struct ChatToolList: View {
     let tools: [ChatTool]
     let isFinished: Bool
@@ -46,8 +46,7 @@ private struct ToolLine: View {
     @ViewBuilder private var icon: some View {
         switch tool.state {
         case .running:
-            ProgressView()
-                .controlSize(.mini)
+            AnvilLoader(size: .mini)
         case .finished:
             Image(systemName: "checkmark")
                 .foregroundStyle(.green)

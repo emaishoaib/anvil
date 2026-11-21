@@ -12,8 +12,7 @@ struct UpdateCard: View {
                 .font(.headline)
             HStack(spacing: 8) {
                 if state == .updating {
-                    ProgressView()
-                        .controlSize(.small)
+                    AnvilLoader()
                 }
                 Text(detail)
                     .foregroundStyle(.secondary)

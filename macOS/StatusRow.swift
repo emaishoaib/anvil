@@ -28,8 +28,7 @@ struct StatusRow: View {
 private struct SettingUpLogitechStatus: View {
     var body: some View {
         HStack(spacing: 4) {
-            ProgressView()
-                .controlSize(.mini)
+            AnvilLoader(size: .mini)
             Text("Setting up Logitech devices…")
                 .foregroundStyle(.secondary)
         }
