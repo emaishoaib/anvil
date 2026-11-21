@@ -81,7 +81,7 @@ private struct TurnView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            PromptBubble(prompt: turn.prompt)
+            PromptBubble(prompt: turn.prompt, image: turn.image)
             if !turn.tools.isEmpty {
                 ChatToolList(tools: turn.tools, isFinished: turn.isFinished)
             }
@@ -105,22 +105,35 @@ private struct TurnView: View {
     }
 }
 
-/// A prompt the user sent, kept on the right in a bubble tinted with the accent colour so it stands apart from Claude's answers on the left. A long prompt wraps before it reaches the left edge.
+/// A prompt the user sent, kept on the right in a bubble tinted with the accent colour so it stands apart from Claude's answers on the left, with the image sent alongside it above the bubble. A long prompt wraps before it reaches the left edge, and an image sent without text shows on its own.
 private struct PromptBubble: View {
     private static let cornerRadius: CGFloat = 12
     private static let roomOnLeft: CGFloat = 60
     private static let tintOpacity = 0.18
+    private static let imageHeight: CGFloat = 160
 
     let prompt: String
+    let image: Data?
 
     var body: some View {
-        Text(prompt)
-            .fontWeight(.medium)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.tint.opacity(Self.tintOpacity), in: .rect(cornerRadius: Self.cornerRadius))
-            .textSelection(.enabled)
-            .padding(.leading, Self.roomOnLeft)
-            .frame(maxWidth: .infinity, alignment: .trailing)
+        VStack(alignment: .trailing, spacing: 6) {
+            if let image, let picture = NSImage(data: image) {
+                Image(nsImage: picture)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: Self.imageHeight)
+                    .clipShape(.rect(cornerRadius: Self.cornerRadius))
+            }
+            if !prompt.isEmpty {
+                Text(prompt)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.tint.opacity(Self.tintOpacity), in: .rect(cornerRadius: Self.cornerRadius))
+                    .textSelection(.enabled)
+            }
+        }
+        .padding(.leading, Self.roomOnLeft)
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }

@@ -93,6 +93,9 @@ struct SearchBarView: View {
                 }
             Divider()
             ChatSetupRow(setup: chat.setup, chat: chat.session, isSaved: chat.isSaved)
+            if let png = chat.attachedImage {
+                AttachedImageRow(png: png, remove: chat.removeAttachedImage)
+            }
         } else if model.mode == .settings {
             Divider()
             Group {

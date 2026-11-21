@@ -54,12 +54,13 @@ import Observation
         transcript = past
     }
 
-    func send(_ prompt: String, mode chosenMode: PermissionMode) {
+    func send(_ prompt: String, image: Data? = nil, mode chosenMode: PermissionMode) {
         guard !isAnswering else { return }
         mode = mode ?? chosenMode
-        transcript.start(prompt)
+        transcript.start(prompt, image: image)
         guard let command = ClaudeCommand.url else { return finish(answer: Self.notInstalled, failed: true) }
-        guard let process = process ?? start(command), process.send(ClaudePrompt.line(prompt)) else { return finish(answer: Self.stoppedUnexpectedly, failed: true) }
+        let line = ClaudePrompt.line(prompt, pngImages: image.map { [$0] } ?? [])
+        guard let process = process ?? start(command), process.send(line) else { return finish(answer: Self.stoppedUnexpectedly, failed: true) }
     }
 
     func answerApproval(allowed: Bool) {

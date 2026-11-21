@@ -2,7 +2,7 @@ import AppKit
 import ClaudeKit
 import Observation
 
-/// One chat in AI mode, from before its first prompt is sent until it is left: the prompt being typed, the session once there is one, whether it is saved into Claude desktop, the question asked before leaving, the name being typed while renaming, and the skills offered after a slash. Leaving saves the chat into Claude desktop or moves its files to the Trash, and then tells whoever holds the chat, passing on any prompt that was waiting to start a new chat.
+/// One chat in AI mode, from before its first prompt is sent until it is left: the prompt being typed, an image waiting to go with it, the session once there is one, whether it is saved into Claude desktop, the question asked before leaving, the name being typed while renaming, and the skills offered after a slash. Leaving saves the chat into Claude desktop or moves its files to the Trash, and then tells whoever holds the chat, passing on any prompt that was waiting to start a new chat.
 @Observable final class ChatModel {
     let setup: ChatSetup
     let signIn: ClaudeSignIn
@@ -17,6 +17,8 @@ import Observation
     var prompt = "" {
         didSet { slashCommands.update(for: prompt, in: folder) }
     }
+    /// A PNG image, such as a screenshot, that goes with the next prompt sent from the field and is then let go.
+    private(set) var attachedImage: Data?
     private var highlightedChoice: CardChoice?
     @ObservationIgnored private var promptAfterLeaving: String?
     @ObservationIgnored var onLeave: (_ waitingPrompt: String?) -> Void = { _ in }
@@ -74,11 +76,21 @@ import Observation
         await session?.loadHistory(showingAfter: wait)
     }
 
+    func attach(_ png: Data) {
+        attachedImage = png
+    }
+
+    func removeAttachedImage() {
+        attachedImage = nil
+    }
+
+    /// Sends the prompt in the field with any image attached, so an image can go on its own without any text.
     func sendPrompt() {
         let text = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, canSend else { return NSSound.beep() }
-        send(text)
+        guard !text.isEmpty || attachedImage != nil, canSend else { return NSSound.beep() }
+        send(text, image: attachedImage)
         prompt = ""
+        attachedImage = nil
     }
 
     /// Sends the prompt, unless Claude is still answering or Claude Code is being updated, in which case it waits in the field.
@@ -94,26 +106,26 @@ import Observation
         session?.isAnswering != true && update.state != .updating
     }
 
-    private func send(_ text: String) {
+    private func send(_ text: String, image: Data? = nil) {
         let session = session ?? ClaudeChatSession(folder: setup.folder, update: update)
         self.session = session
         update.forget()
-        session.send(text, mode: setup.mode)
+        session.send(text, image: image, mode: setup.mode)
     }
 
-    /// Signs Claude Code in, and once it is signed in, sends the prompt waiting in the field, if there is one.
+    /// Signs Claude Code in, and once it is signed in, sends the prompt or image waiting in the field, if there is one.
     func signInToClaude() {
         signIn.signIn { [weak self] in
-            guard let self, !isPromptEmpty else { return }
+            guard let self, !isPromptEmpty || attachedImage != nil else { return }
             sendPrompt()
         }
     }
 
-    /// Updates Claude Code, and once it is updated, sends again the prompt that found it too old.
+    /// Updates Claude Code, and once it is updated, sends again the prompt that found it too old, with its image if it had one.
     func updateClaude() {
         update.update { [weak self] in
-            guard let self, let text = session?.turns.last?.prompt, canSend else { return }
-            send(text)
+            guard let self, let turn = session?.turns.last, canSend else { return }
+            send(turn.prompt, image: turn.image)
         }
     }
 

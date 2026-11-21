@@ -1,4 +1,5 @@
 import ClaudeKit
+import Foundation
 
 /// The turns of a chat in order, changed as Claude Code reports on the newest one. Only the newest turn can still be answering, so every change lands on it. The chat's title is its first prompt's first line.
 nonisolated struct ChatTranscript {
@@ -25,8 +26,8 @@ nonisolated struct ChatTranscript {
         return String(firstLine.prefix(Self.titleLength))
     }
 
-    mutating func start(_ prompt: String) {
-        turns.append(ChatTurn(id: turns.count, prompt: prompt))
+    mutating func start(_ prompt: String, image: Data? = nil) {
+        turns.append(ChatTurn(id: turns.count, prompt: prompt, image: image))
     }
 
     mutating func addText(_ text: String) {

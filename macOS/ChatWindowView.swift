@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What a chat window shows, laid out like a chat in the search bar: a button that closes it, the name and the keys at the top, which also drag the window, the chat filling the middle with any skills offered over its end, the folder and mode under it, and the prompt at the bottom.
+/// What a chat window shows, laid out like a chat in the search bar: a button that closes it, the name and the keys at the top, which also drag the window, the chat filling the middle with any skills offered over its end, the folder and mode under it, any image waiting to be sent, and the prompt at the bottom.
 struct ChatWindowView: View {
     private static let skillsPadding: CGFloat = 8
 
@@ -19,6 +19,9 @@ struct ChatWindowView: View {
                 }
             Divider()
             ChatSetupRow(setup: chat.setup, chat: chat.session, isSaved: chat.isSaved)
+            if let png = chat.attachedImage {
+                AttachedImageRow(png: png, remove: chat.removeAttachedImage)
+            }
             ChatPromptField(chat: chat)
         }
     }
