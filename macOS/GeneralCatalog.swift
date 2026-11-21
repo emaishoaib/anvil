@@ -1,13 +1,22 @@
 import LauncherKit
 
-/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General". The search bar's own settings are its shortcut and how long it remembers where you left it. The folder panel opens through the search bar, which stays open behind it.
+/// The settings that belong to Anvil as a whole rather than to one tool, listed first under "General". The search bar's own settings are its shortcut and how long it remembers where you left it. The animation setting picks how Anvil shows that it is working. The folder panel opens through the search bar, which stays open behind it.
 enum GeneralCatalog {
     static let name = "General"
     static let icon = ToolIcon.symbol("gearshape")
 
     static func settings(systemShortcuts: Set<KeyCombo>) -> [Setting] {
         Setting.subgroup("Search Bar", [searchBarShortcut(systemShortcuts: systemShortcuts), searchMemory])
+            + Setting.subgroup("Animation", [workingAnimation])
             + Setting.subgroup("Settings Folder", settingsFolder)
+    }
+
+    private static var workingAnimation: Setting {
+        let choices = WorkingAnimation.allCases
+        return Setting(
+            entry: SettingEntry(id: "general.workingAnimation", title: "While Anvil works", toolName: name, keywords: ["strike", "glow", "loading", "spinner"]),
+            row: .choice(selected: choices.firstIndex(of: .current) ?? 0, options: choices.map(\.name), pick: { WorkingAnimation.current = choices[$0] })
+        )
     }
 
     private static func searchBarShortcut(systemShortcuts: Set<KeyCombo>) -> Setting {

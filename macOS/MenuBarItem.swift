@@ -1,6 +1,6 @@
 import AppKit
 
-/// Anvil's icon in the menu bar and the small menu it opens, with a greyed line saying what Anvil is doing while it works, Check for Updates and Quit. It is a plain AppKit status item rather than a SwiftUI menu bar extra, so that the icon's layer can be animated: it strikes as the search bar opens, and glows while Anvil listens or sets up Logitech devices.
+/// Anvil's icon in the menu bar and the small menu it opens, with a greyed line saying what Anvil is doing while it works, Check for Updates and Quit. It is a plain AppKit status item rather than a SwiftUI menu bar extra, so that the icon's layer can be animated: it strikes as the search bar opens, and strikes over and over or glows, whichever is chosen in the settings, while Anvil listens or sets up Logitech devices. The choice is read each time Anvil starts or stops working.
 final class MenuBarItem: NSObject, NSMenuDelegate {
     static let shared = MenuBarItem()
 
@@ -8,6 +8,7 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
     private let checkForUpdates = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdatesChosen), keyEquivalent: "")
     private let activity = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let activitySeparator = NSMenuItem.separator()
+    private var strikes: StrikeLoop?
 
     func start() {
         guard let button = item.button else { return }
@@ -17,21 +18,25 @@ final class MenuBarItem: NSObject, NSMenuDelegate {
         button.wantsLayer = true
         item.menu = makeMenu()
         let heat = HeatAnimation(on: button)
+        let strikes = StrikeLoop(on: button)
+        self.strikes = strikes
         Task {
             for await activityTitle in Observations({ Self.activityTitle }) {
-                heat.set(activityTitle != nil)
+                let isWorking = activityTitle != nil
+                heat.set(isWorking && WorkingAnimation.current == .glow)
+                strikes.set(isWorking && WorkingAnimation.current == .strike)
                 showActivity(activityTitle)
             }
         }
     }
 
-    /// Plays the strike on the icon, as the search bar opens.
+    /// Plays the strike on the icon, as the search bar opens, unless it is already striking over and over.
     func strike() {
-        guard let button = item.button else { return }
+        guard let button = item.button, strikes?.isStriking != true else { return }
         StrikeAnimation.play(on: button)
     }
 
-    /// What Anvil is doing, with listening first since it is what the glow most likely means, or nothing while Anvil is idle. The glow starts as soon as the listening shortcut is pressed, since getting ready to listen can take a while the first time.
+    /// What Anvil is doing, with listening first since it is what the animation most likely means, or nothing while Anvil is idle. The animation starts as soon as the listening shortcut is pressed, since getting ready to listen can take a while the first time.
     private static var activityTitle: String? {
         switch Listener.shared.state {
         case .starting: return "Getting ready to listen…"

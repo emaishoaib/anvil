@@ -1,7 +1,8 @@
 import AppKit
 
-/// The strike the menu bar icon plays when the search bar opens: the anvil squashes down as if hit by a hammer, springs back up, and three small sparks fly off its top. It runs entirely in Core Animation, so once started it takes nothing from the main thread, and it is skipped when Reduce Motion is on. The sparks are made once and kept invisible between strikes.
+/// The strike the menu bar icon plays when the search bar opens: the anvil squashes down as if hit by a hammer, springs back up, and three small sparks fly off its top. It can also play over and over with a pause between hits, until it is stopped. It runs entirely in Core Animation, so once started it takes nothing from the main thread, and it is skipped when Reduce Motion is on. The sparks are made once and kept invisible between strikes.
 enum StrikeAnimation {
+    static let repeatSeconds = 0.9
     private static let strikeDuration = 0.32
     private static let sparkDuration = 0.4
     private static let squash = CGSize(width: 1.08, height: 0.82)
@@ -11,21 +12,28 @@ enum StrikeAnimation {
     private static let sparkName = "strikeSpark"
     private static let sparks: [(offsetPoints: CGFloat, delay: CFTimeInterval)] = [(-5, 0.03), (0, 0), (5, 0.05)]
 
-    static func play(on button: NSStatusBarButton) {
+    static func play(on button: NSStatusBarButton, repeating: Bool = false) {
         guard !PanelAnimation.isReduced, let layer = button.layer else { return }
         let up: CGFloat = button.isFlipped ? -1 : 1
         let halfIcon = (button.image?.size.height ?? 0) / 2
         let iconBottom = CGPoint(x: button.bounds.midX, y: button.bounds.midY - up * halfIcon)
         let iconTop = CGPoint(x: button.bounds.midX, y: button.bounds.midY + up * halfIcon)
-        strike(layer, pivot: iconBottom, up: up)
+        strike(layer, pivot: iconBottom, up: up, repeating: repeating)
         for (spark, flight) in zip(sparkLayers(in: layer), sparks) {
             let start = CGPoint(x: iconTop.x + flight.offsetPoints, y: iconTop.y + up * sparkSizePoints)
             let end = CGPoint(x: start.x + flight.offsetPoints * 0.6, y: start.y + up * sparkRisePoints)
-            fly(spark, from: start, to: end, delay: flight.delay)
+            fly(spark, from: start, to: end, delay: flight.delay, repeating: repeating)
         }
     }
 
-    private static func strike(_ layer: CALayer, pivot: CGPoint, up: CGFloat) {
+    /// Ends a strike playing over and over, leaving the icon and sparks as they are between strikes.
+    static func stop(on button: NSStatusBarButton) {
+        guard let layer = button.layer else { return }
+        layer.removeAnimation(forKey: "strike")
+        for spark in sparkLayers(in: layer) { spark.removeAnimation(forKey: "spark") }
+    }
+
+    private static func strike(_ layer: CALayer, pivot: CGPoint, up: CGFloat, repeating: Bool) {
         let pivotFromAnchor = CGPoint(x: pivot.x - layer.anchorPoint.x * layer.bounds.width, y: pivot.y - layer.anchorPoint.y * layer.bounds.height)
         let squashed = scaled(around: pivotFromAnchor, by: squash)
         let rebound = CATransform3DMakeTranslation(0, up * reboundPoints, 0)
@@ -34,10 +42,10 @@ enum StrikeAnimation {
         animation.keyTimes = [0, 0.3, 0.6, 1]
         animation.duration = strikeDuration
         animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        layer.add(animation, forKey: "strike")
+        layer.add(cycle(animation, lasting: strikeDuration, repeating: repeating), forKey: "strike")
     }
 
-    private static func fly(_ spark: CALayer, from start: CGPoint, to end: CGPoint, delay: CFTimeInterval) {
+    private static func fly(_ spark: CALayer, from start: CGPoint, to end: CGPoint, delay: CFTimeInterval, repeating: Bool) {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         spark.position = start
@@ -55,10 +63,19 @@ enum StrikeAnimation {
         let group = CAAnimationGroup()
         group.animations = [fade, grow, rise]
         group.duration = sparkDuration
-        group.beginTime = CACurrentMediaTime() + delay
+        group.beginTime = delay
         group.fillMode = .backwards
         group.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        spark.add(group, forKey: "spark")
+        spark.add(cycle(group, lasting: delay + sparkDuration, repeating: repeating), forKey: "spark")
+    }
+
+    /// Wraps part of the strike in one whole strike's time, played once or over and over, so a repeating strike pauses between hits and its sparks stay in step with it.
+    private static func cycle(_ animation: CAAnimation, lasting seconds: CFTimeInterval, repeating: Bool) -> CAAnimation {
+        let cycle = CAAnimationGroup()
+        cycle.animations = [animation]
+        cycle.duration = repeating ? repeatSeconds : seconds
+        cycle.repeatCount = repeating ? .infinity : 1
+        return cycle
     }
 
     private static func sparkLayers(in layer: CALayer) -> [CALayer] {
