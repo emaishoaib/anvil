@@ -55,6 +55,24 @@ struct QuickLinkTests {
         #expect(link.match(for: "twitter") == nil)
     }
 
+    @Test func aLinkMatchesWordsSpreadAcrossItsNameAndHost() {
+        let link = QuickLink(name: "asig uk tax", link: "https://www.tax.service.gov.uk/personal-account")
+        #expect(link.match(for: "asig uk gov") == .hostWordPrefix)
+        #expect(link.match(for: "gov") == .hostWordPrefix)
+        #expect(link.match(for: "asig tax") == .everyWordPrefix)
+    }
+
+    @Test func aLinkDoesNotMatchWordsOutsideItsHost() {
+        let link = QuickLink(name: "asig uk tax", link: "https://www.tax.service.gov.uk/personal-account")
+        #expect(link.match(for: "personal") == nil)
+        #expect(link.match(for: "www") == nil)
+        #expect(link.match(for: "https") == nil)
+    }
+
+    @Test func aFilePathMatchesOnlyByName() {
+        #expect(QuickLink(name: "Workshop", link: "~/docs/repos/workshop").match(for: "repos") == nil)
+    }
+
     @Test func placeholdersAreTheWordsInBracesInOrder() {
         let link = QuickLink(name: "Maps", link: "https://maps.example.com/{From}/{To}?from={From}")
         #expect(link.placeholders == ["From", "To"])

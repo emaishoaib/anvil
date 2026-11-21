@@ -69,7 +69,7 @@ public struct QuickLink: Identifiable, Hashable, Codable, Sendable {
     }
 
     public func match(for query: String) -> NameMatch? {
-        NameMatch(name: name, query: query)
+        NameMatch(name: name, query: query) ?? host.flatMap { NameMatch(name: name, host: $0, query: query) }
     }
 
     private static func encoded(_ value: String) -> String {

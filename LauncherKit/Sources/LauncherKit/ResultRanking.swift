@@ -9,7 +9,8 @@ public enum ResultRanking {
                 result.match(for: query).map { (result: result, match: $0, launches: launchCounts.count(for: result.launchKey ?? "")) }
             }
             .sorted {
-                (-$0.launches, $0.match.rawValue, $0.result.name.localizedLowercase) < (-$1.launches, $1.match.rawValue, $1.result.name.localizedLowercase)
+                ($0.match.isByName ? 0 : 1, -$0.launches, $0.match.rawValue, $0.result.name.localizedLowercase)
+                    < ($1.match.isByName ? 0 : 1, -$1.launches, $1.match.rawValue, $1.result.name.localizedLowercase)
             }
             .map(\.result)
     }

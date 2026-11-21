@@ -63,6 +63,14 @@ struct ResultRankingTests {
         #expect(results == [.app(codeWorkspace), .app(codeMyWorkshop)])
     }
 
+    @Test func hostMatchesComeAfterNameMatchesHoweverOftenTheyWereOpened() {
+        let tax = QuickLink(name: "asig uk tax", link: "https://www.tax.service.gov.uk")
+        let govNotes = QuickLink(name: "gov notes", link: "https://notes.example.com")
+        let counts = LaunchCounts([tax.launchKey: 9])
+        let results = ResultRanking.matches(for: "gov", in: [.quickLink(tax), .quickLink(govNotes)], launchCounts: counts)
+        #expect(results == [.quickLink(govNotes), .quickLink(tax)])
+    }
+
     @Test func aQueryOfOnlySymbolsDoesNotMatchEveryName() {
         #expect(names(for: "+").isEmpty)
     }
