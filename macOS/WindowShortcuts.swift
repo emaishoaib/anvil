@@ -14,6 +14,11 @@ nonisolated final class WindowShortcuts: Sendable {
         combos.withLock { combos in combos.first { $0.value == combo }?.key }
     }
 
+    /// Reads every shortcut again, as when the settings folder brings in new ones.
+    func reload() {
+        combos.withLock { $0 = Self.loaded() }
+    }
+
     func set(_ combo: KeyCombo?, for command: WindowCommand) {
         let previousOwners = combos.withLock { combos in
             let owners = combos.filter { $0.key != command && $0.value == combo }.map(\.key)

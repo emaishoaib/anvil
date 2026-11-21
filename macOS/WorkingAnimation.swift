@@ -4,7 +4,7 @@ import Foundation
 enum WorkingAnimation: String, CaseIterable {
     case strike, glow
 
-    private static let savedKey = "general.workingAnimation"
+    static let savedKey = "general.workingAnimation"
     private static let defaultChoice = WorkingAnimation.strike
 
     static var current: WorkingAnimation {

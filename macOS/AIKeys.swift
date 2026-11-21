@@ -6,7 +6,7 @@ import os
 nonisolated final class AIKeys: KeyResponder {
     static let shared = AIKeys()
 
-    private static let savedKey = "ai.listenShortcut"
+    static let savedKey = "ai.listenShortcut"
     private static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: [.option, .shift])
     private static let listenAction = "Start or stop listening"
 
@@ -15,6 +15,11 @@ nonisolated final class AIKeys: KeyResponder {
     var listenCombo: KeyCombo { combo.withLock { $0 } }
 
     var shortcuts: [Shortcut] { [Shortcut(combo: listenCombo, action: Self.listenAction)] }
+
+    /// Reads the shortcut again, as when the settings folder brings in a new one.
+    func reload() {
+        combo.withLock { $0 = Self.loaded() }
+    }
 
     func setListenCombo(_ newCombo: KeyCombo) {
         combo.withLock { $0 = newCombo }

@@ -4,7 +4,7 @@ import Foundation
 enum AfterSending: String, CaseIterable {
     case bar, chatWindow = "pinnedBar", claudeDesktop
 
-    private static let savedKey = "ai.afterSending"
+    static let savedKey = "ai.afterSending"
     private static let defaultChoice = AfterSending.bar
 
     static var current: AfterSending {

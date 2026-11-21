@@ -5,7 +5,7 @@ import os
 nonisolated final class LauncherKeys: KeyResponder {
     static let shared = LauncherKeys()
 
-    private static let savedKey = "launcher.shortcut"
+    static let savedKey = "launcher.shortcut"
     private static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: .option)
     private static let openSearchBarAction = "Open the search bar"
 
@@ -14,6 +14,11 @@ nonisolated final class LauncherKeys: KeyResponder {
     var openSearchBarCombo: KeyCombo { combo.withLock { $0 } }
 
     var shortcuts: [Shortcut] { [Shortcut(combo: openSearchBarCombo, action: Self.openSearchBarAction)] }
+
+    /// Reads the shortcut again, as when the settings folder brings in a new one.
+    func reload() {
+        combo.withLock { $0 = Self.loaded() }
+    }
 
     func setOpenSearchBarCombo(_ newCombo: KeyCombo) {
         combo.withLock { $0 = newCombo }

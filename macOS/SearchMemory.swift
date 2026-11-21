@@ -4,7 +4,7 @@ import Foundation
 enum SearchMemory: String, CaseIterable {
     case never, tenSeconds, thirtySeconds, oneMinute, fiveMinutes, fifteenMinutes
 
-    private static let savedKey = "launcher.searchMemory"
+    static let savedKey = "launcher.searchMemory"
     private static let defaultChoice = SearchMemory.oneMinute
 
     static var current: SearchMemory {

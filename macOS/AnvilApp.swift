@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             SettingsFolder.shared.start()
             MouseSettingsLibrary.shared.start()
             ScreenshotKeys.shared.reload()
+            SettingsMirror.shared.start()
             Keyboard.shared.start()
             MouseWheel.shared.start()
             LogitechDevices.shared.start()

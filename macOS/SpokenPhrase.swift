@@ -33,7 +33,7 @@ enum SpokenPhrase: CaseIterable {
         return true
     }
 
-    private var savedKey: String {
+    var savedKey: String {
         switch self {
         case .newSession: "ai.newSessionPhrase"
         case .lastSession: "ai.lastSessionPhrase"
@@ -55,7 +55,7 @@ enum SpokenPhrase: CaseIterable {
 
 /// Where a voice prompt goes when it starts with neither phrase: a new session unless set to the last one. The choice is saved in the user defaults.
 enum UnnamedSpeech {
-    private static let savedKey = "ai.unnamedSession"
+    static let savedKey = "ai.unnamedSession"
 
     static var session: SpokenPrompt.Session {
         get { UserDefaults.standard.string(forKey: savedKey).flatMap(SpokenPrompt.Session.init(rawValue:)) ?? .new }

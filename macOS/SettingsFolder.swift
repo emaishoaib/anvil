@@ -44,6 +44,7 @@ import Observation
         KeySwapLibrary.shared.reload()
         MouseSettingsLibrary.shared.reload()
         ScreenshotKeys.shared.reload()
+        SettingsMirror.shared.reload()
     }
 
     private func watch() {

@@ -46,7 +46,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 - **Speech recognition** -- macOS may ask for it alongside the microphone, even though speech is turned into text on the Mac
 - **Administrator password** -- when uninstalling an app from the Mac App Store or keeping the Mac awake with the lid closed
 
-**Where settings are kept** -- rules, key swaps and mouse settings can live as files in a folder you choose such as one that syncs between Macs.
+**Where settings are kept** -- your settings can live as files in a folder you choose such as one that syncs between Macs, with a file each for rules, key swaps, the mouse, screenshots, the general settings and tool switches, AI and windows. Quick links stay on the Mac and move between Macs by exporting and importing them, and so does what Anvil remembers as you use it such as recent windows and how often you open each app.
 
 **What reaches the internet** -- only a few places and only for these things:
 
