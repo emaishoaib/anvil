@@ -9,7 +9,7 @@ final class HeatAnimation {
         case cooling(from: CGFloat, since: CFTimeInterval)
     }
 
-    private static let cycleSeconds = 1.6
+    static let cycleSeconds = 1.6
     private static let startDelaySeconds = 0.3
     private static let coolSeconds = 0.3
     private static let tickSeconds = 1.0 / 30

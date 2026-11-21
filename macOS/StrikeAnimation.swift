@@ -1,6 +1,6 @@
 import AppKit
 
-/// The strike the menu bar icon plays when the search bar opens: the anvil squashes down as if hit by a hammer, springs back up, and three small sparks fly off its top. It can also play over and over with a pause between hits, until it is stopped. It runs entirely in Core Animation, so once started it takes nothing from the main thread, and it is skipped when Reduce Motion is on. The sparks are made once and kept invisible between strikes.
+/// The strike the menu bar icon plays when the search bar opens: the anvil squashes down as if hit by a hammer, springs back up, and three small sparks fly off its top. It can also play over and over with a pause between hits, until it is stopped, and on a smaller anvil anywhere else, such as the anvil shown while something loads, with its bounce and sparks scaled down to match. It runs entirely in Core Animation, so once started it takes nothing from the main thread, and it is skipped when Reduce Motion is on. The sparks are made once and kept invisible between strikes.
 enum StrikeAnimation {
     static let repeatSeconds = 0.9
     private static let strikeDuration = 0.32
@@ -13,15 +13,21 @@ enum StrikeAnimation {
     private static let sparks: [(offsetPoints: CGFloat, delay: CFTimeInterval)] = [(-5, 0.03), (0, 0), (5, 0.05)]
 
     static func play(on button: NSStatusBarButton, repeating: Bool = false) {
-        guard !PanelAnimation.isReduced, let layer = button.layer else { return }
+        guard let layer = button.layer else { return }
         let up: CGFloat = button.isFlipped ? -1 : 1
         let halfIcon = (button.image?.size.height ?? 0) / 2
-        let iconBottom = CGPoint(x: button.bounds.midX, y: button.bounds.midY - up * halfIcon)
-        let iconTop = CGPoint(x: button.bounds.midX, y: button.bounds.midY + up * halfIcon)
-        strike(layer, pivot: iconBottom, up: up, repeating: repeating)
-        for (spark, flight) in zip(sparkLayers(in: layer), sparks) {
-            let start = CGPoint(x: iconTop.x + flight.offsetPoints, y: iconTop.y + up * sparkSizePoints)
-            let end = CGPoint(x: start.x + flight.offsetPoints * 0.6, y: start.y + up * sparkRisePoints)
+        let base = CGPoint(x: button.bounds.midX, y: button.bounds.midY - up * halfIcon)
+        let top = CGPoint(x: button.bounds.midX, y: button.bounds.midY + up * halfIcon)
+        play(on: layer, base: base, top: top, up: up, scale: 1, repeating: repeating)
+    }
+
+    /// Plays the strike on any layer, given where the middle of the anvil's base and top sit in it, which way is up, and how large the anvil is next to the menu bar's.
+    static func play(on layer: CALayer, base: CGPoint, top: CGPoint, up: CGFloat, scale: CGFloat, repeating: Bool) {
+        guard !PanelAnimation.isReduced else { return }
+        strike(layer, pivot: base, up: up, scale: scale, repeating: repeating)
+        for (spark, flight) in zip(sparkLayers(in: layer, scale: scale), sparks) {
+            let start = CGPoint(x: top.x + flight.offsetPoints * scale, y: top.y + up * sparkSizePoints * scale)
+            let end = CGPoint(x: start.x + flight.offsetPoints * scale * 0.6, y: start.y + up * sparkRisePoints * scale)
             fly(spark, from: start, to: end, delay: flight.delay, repeating: repeating)
         }
     }
@@ -30,13 +36,13 @@ enum StrikeAnimation {
     static func stop(on button: NSStatusBarButton) {
         guard let layer = button.layer else { return }
         layer.removeAnimation(forKey: "strike")
-        for spark in sparkLayers(in: layer) { spark.removeAnimation(forKey: "spark") }
+        for spark in existingSparks(in: layer) { spark.removeAnimation(forKey: "spark") }
     }
 
-    private static func strike(_ layer: CALayer, pivot: CGPoint, up: CGFloat, repeating: Bool) {
+    private static func strike(_ layer: CALayer, pivot: CGPoint, up: CGFloat, scale: CGFloat, repeating: Bool) {
         let pivotFromAnchor = CGPoint(x: pivot.x - layer.anchorPoint.x * layer.bounds.width, y: pivot.y - layer.anchorPoint.y * layer.bounds.height)
         let squashed = scaled(around: pivotFromAnchor, by: squash)
-        let rebound = CATransform3DMakeTranslation(0, up * reboundPoints, 0)
+        let rebound = CATransform3DMakeTranslation(0, up * reboundPoints * scale, 0)
         let animation = CAKeyframeAnimation(keyPath: "transform")
         animation.values = [CATransform3DIdentity, squashed, rebound, CATransform3DIdentity].map { NSValue(caTransform3D: $0) }
         animation.keyTimes = [0, 0.3, 0.6, 1]
@@ -78,14 +84,19 @@ enum StrikeAnimation {
         return cycle
     }
 
-    private static func sparkLayers(in layer: CALayer) -> [CALayer] {
-        let existing = layer.sublayers?.filter { $0.name == sparkName } ?? []
+    private static func existingSparks(in layer: CALayer) -> [CALayer] {
+        layer.sublayers?.filter { $0.name == sparkName } ?? []
+    }
+
+    private static func sparkLayers(in layer: CALayer, scale: CGFloat) -> [CALayer] {
+        let existing = existingSparks(in: layer)
         guard existing.isEmpty else { return existing }
+        let size = sparkSizePoints * scale
         return sparks.map { _ in
             let spark = CALayer()
             spark.name = sparkName
-            spark.bounds = CGRect(x: 0, y: 0, width: sparkSizePoints, height: sparkSizePoints)
-            spark.cornerRadius = sparkSizePoints / 2
+            spark.bounds = CGRect(x: 0, y: 0, width: size, height: size)
+            spark.cornerRadius = size / 2
             spark.backgroundColor = NSColor.systemOrange.cgColor
             spark.opacity = 0
             layer.addSublayer(spark)
