@@ -425,12 +425,13 @@ import Observation
         chatModel?.isStarted == true || claudeSignIn.state == .signingIn
     }
 
-    /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one.
+    /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one. Its earlier turns show once the bar has finished sliding into AI mode.
     private func continueSelectedChat() {
         guard let session = desktopSessionList?.selectedSession(matching: query) else { return NSSound.beep() }
         if let window = ChatWindows.shared.window(running: session.sessionID) { return SearchBar.shared.bringForward(window) }
         let chat = carryOn(session)
-        Task { await chat.loadHistory() }
+        let swap = PanelAnimation.isReduced ? Duration.zero : .seconds(SearchBarView.swapSeconds)
+        Task { await chat.loadHistory(showingAfter: swap) }
     }
 
     private func carryOn(_ session: DesktopSession) -> ChatModel {

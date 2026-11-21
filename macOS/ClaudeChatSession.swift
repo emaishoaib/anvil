@@ -43,11 +43,13 @@ import Observation
         savedTitle = session.title
     }
 
-    /// Reads the earlier turns of a resumed chat from its transcript, away from the main thread, since a long chat's file can be large. They only show if no new prompt was sent in the meantime. A resumed chat counts as loading from the moment it is made until this finishes, however it finishes.
-    func loadHistory() async {
+    /// Reads the earlier turns of a resumed chat from its transcript, away from the main thread, since a long chat's file can be large. They show no sooner than the given wait after this starts, so laying out a long chat does not stall an animation still running, and only if no new prompt was sent in the meantime. A resumed chat counts as loading from the moment it is made until this finishes, however it finishes.
+    func loadHistory(showingAfter wait: Duration = .zero) async {
         defer { isLoadingHistory = false }
+        let showsAt = ContinuousClock.now + wait
         guard let file = ClaudeSessionFiles.transcript(of: sessionID) else { return }
         let turns = await Task.detached { (try? String(contentsOf: file, encoding: .utf8)).map(SessionHistory.turns) ?? [] }.value
+        try? await Task.sleep(until: showsAt)
         guard mode == nil else { return }
         transcript = ChatTranscript(past: turns)
     }

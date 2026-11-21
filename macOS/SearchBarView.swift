@@ -8,7 +8,8 @@ struct SearchBarView: View {
     private static let entryHeight: CGFloat = 420
     private static let actionPanelPadding: CGFloat = 8
     private static let pinnedOutlineWidth: CGFloat = 2
-    private static let swapAnimation = Animation.spring(duration: 0.35, bounce: 0.15)
+    static let swapSeconds = 0.35
+    private static let swapAnimation = Animation.spring(duration: swapSeconds, bounce: 0.15)
 
     @Bindable var model: SearchModel
     @FocusState private var focus: SearchField?

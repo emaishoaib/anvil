@@ -70,8 +70,8 @@ import Observation
         }
     }
 
-    func loadHistory() async {
-        await session?.loadHistory()
+    func loadHistory(showingAfter wait: Duration = .zero) async {
+        await session?.loadHistory(showingAfter: wait)
     }
 
     func sendPrompt() {
