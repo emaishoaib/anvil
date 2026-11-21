@@ -5,6 +5,7 @@ struct ResultRow: View {
     let result: SearchResult
     let isSelected: Bool
     var appDetail = "Application"
+    var query = ""
 
     var body: some View {
         HStack(spacing: 10) {
@@ -23,9 +24,11 @@ struct ResultRow: View {
                 Text("Command").foregroundStyle(.secondary)
             case .quickLink(let link):
                 QuickLinkIcon(link: link)
-                Text(link.name).foregroundStyle(Color(nsColor: .textColor))
+                HighlightedText(text: link.name, highlights: NameMatch.matchedWordStarts(in: link.name, query: query))
+                    .foregroundStyle(Color(nsColor: .textColor))
                 if let host = link.host {
-                    Text(host).foregroundStyle(.secondary)
+                    HighlightedText(text: host, highlights: NameMatch.matchedWordStarts(in: host, query: query))
+                        .foregroundStyle(.secondary)
                 }
                 Spacer()
                 Text("Quick Link").foregroundStyle(.secondary)
@@ -55,6 +58,26 @@ struct AppIcon: View {
         Image(nsImage: AppIcons.shared.icon(forFile: path))
             .resizable()
             .frame(width: Self.size, height: Self.size)
+    }
+}
+
+/// Text with the parts that matched the query drawn in the main text colour and bold, so it shows why a result came up. The rest takes whatever colour the caller gives it.
+private struct HighlightedText: View {
+    let text: String
+    let highlights: [Range<String.Index>]
+
+    var body: some View {
+        Text(attributed)
+    }
+
+    private var attributed: AttributedString {
+        var attributed = AttributedString(text)
+        for highlight in highlights {
+            guard let range = Range(highlight, in: attributed) else { continue }
+            attributed[range].foregroundColor = Color(nsColor: .textColor)
+            attributed[range].inlinePresentationIntent = .stronglyEmphasized
+        }
+        return attributed
     }
 }
 

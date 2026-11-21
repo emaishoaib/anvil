@@ -12,7 +12,7 @@ struct SearchResults: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(items, id: \.index) { item in
-                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected, appDetail: appDetail(for: item.result)) {
+                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected, appDetail: appDetail(for: item.result), query: model.query) {
                             model.open(item.result)
                         }
                     }
@@ -48,6 +48,7 @@ private struct ResultItem: View {
     let header: String?
     let isSelected: Bool
     let appDetail: String
+    let query: String
     let open: () -> Void
 
     var body: some View {
@@ -62,7 +63,7 @@ private struct ResultItem: View {
         case .answer(let answer):
             AnswerCard(answer: answer, isSelected: isSelected)
         default:
-            ResultRow(result: result, isSelected: isSelected, appDetail: appDetail)
+            ResultRow(result: result, isSelected: isSelected, appDetail: appDetail, query: query)
                 .frame(height: Self.rowHeight)
         }
     }

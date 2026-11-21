@@ -26,6 +26,14 @@ public enum NameMatch: Int, Sendable {
 
     var isByName: Bool { self != .hostWordPrefix }
 
+    /// The start of each word in the text that a word of the query begins, taking the longest when several do, for highlighting where a result matched.
+    public static func matchedWordStarts(in text: String, query: String) -> [Range<String.Index>] {
+        let queryWords = words(in: query)
+        return words(in: text).compactMap { word in
+            queryWords.compactMap { word.range(of: $0, options: options) }.max { $0.upperBound < $1.upperBound }
+        }
+    }
+
     private static func everyWord(of query: String, startsOneOf words: [Substring]) -> Bool {
         let queryWords = Self.words(in: query)
         guard !queryWords.isEmpty else { return false }
