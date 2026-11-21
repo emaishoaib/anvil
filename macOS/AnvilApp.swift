@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             KeySwapLibrary.shared.start()
             SettingsFolder.shared.start()
             MouseSettingsLibrary.shared.start()
+            ScreenshotKeys.shared.reload()
             Keyboard.shared.start()
             MouseWheel.shared.start()
             LogitechDevices.shared.start()

@@ -13,6 +13,7 @@ enum SearchMode: Equatable {
     case phraseForm(SpokenPhrase, query: String)
     case askClaude
     case desktopSessions
+    case screenshot
 
     var placeholder: String {
         switch self {
@@ -23,6 +24,7 @@ enum SearchMode: Equatable {
         case .settings: "Search settings…"
         case .askClaude: "Ask Claude…"
         case .desktopSessions: "Search chats, or press Tab for a new chat…"
+        case .screenshot: "Choose what to do with the screenshot…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm: ""
         }
     }

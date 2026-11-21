@@ -83,6 +83,9 @@ struct SearchBarView: View {
         } else if model.mode == .desktopSessions, let list = model.desktopSessionList {
             Divider()
             DesktopSessionListView(list: list, query: model.query)
+        } else if model.mode == .screenshot, let page = model.screenshot {
+            Divider()
+            ScreenshotView(page: page, query: model.query)
         } else if model.mode == .askClaude, let chat = model.chatModel {
             ClaudeChat(chat: chat.session, state: chat.state, update: chat.update.state, isExpanded: model.isExpanded, cardChoice: chat.cardChoice, choose: chat.choose)
                 .overlay(alignment: .bottom) {
@@ -120,6 +123,8 @@ struct SearchBarView: View {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, chatState: chat.state, cardChoice: chat.cardChoice, isChatSaved: chat.isSaved, chatName: ChatName(chat: chat), dividerEdge: .bottom)
         } else if model.mode == .settings {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
+        } else if model.mode == .screenshot {
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, screenshotAction: model.screenshot?.selectedAction(matching: model.query)?.title)
         } else {
             SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
         }

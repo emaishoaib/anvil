@@ -13,6 +13,7 @@ final class SearchBar {
     private var isHoldingOpen = false
     private var hiddenAt: ContinuousClock.Instant?
     private var collapsedFrame: NSRect?
+    private var isTakingScreenshot = false
 
     var isPinned: Bool { model.isPinned }
 
@@ -72,6 +73,25 @@ final class SearchBar {
         if AfterSending.current == .chatWindow, popOutChat() { return }
         if !panel.isVisible { show(refreshingModel: false) }
         panel.makeKeyAndOrderFront(nil)
+    }
+
+    /// Takes the bar off the screen so it stays out of the picture, lets you drag over part of the screen, and then shows the screenshot in the bar. Cancelling puts the bar back as it was, and pressing the shortcut again while a screenshot is being taken does nothing.
+    func takeScreenshot() {
+        guard !isTakingScreenshot else { return }
+        isTakingScreenshot = true
+        let wasShowing = panel.isVisible
+        panel.orderOut(nil)
+        Task {
+            let png = await ScreenCapture.dragged()
+            isTakingScreenshot = false
+            guard let png else {
+                if wasShowing { show(refreshingModel: false) }
+                return
+            }
+            if !wasShowing { refreshModel() }
+            model.showScreenshot(png)
+            show(refreshingModel: false)
+        }
     }
 
     /// Pins the bar, or unpins it. In AI mode the chat pops out into a window of its own instead.

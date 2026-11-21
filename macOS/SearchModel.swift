@@ -21,6 +21,7 @@ import Observation
     private(set) var actionPanel: ActionPanel?
     private(set) var review: UninstallReview?
     private(set) var desktopSessionList: DesktopSessionList?
+    private(set) var screenshot: ScreenshotPage?
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
@@ -75,6 +76,7 @@ import Observation
         actionPanel = nil
         review = nil
         desktopSessionList = nil
+        screenshot = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -99,6 +101,10 @@ import Observation
         }
         if mode == .desktopSessions {
             desktopSessionList?.moveSelection(by: offset, matching: query)
+            return
+        }
+        if mode == .screenshot {
+            screenshot?.moveSelection(by: offset, matching: query)
             return
         }
         guard !results.isEmpty else { return }
@@ -127,6 +133,7 @@ import Observation
     func openSelected() {
         if mode == .askClaude { return chatModel?.sendPrompt() ?? () }
         if mode == .desktopSessions { return continueSelectedChat() }
+        if mode == .screenshot { return runSelectedScreenshotAction() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -220,6 +227,8 @@ import Observation
             desktopSessionList = nil
             mode = .launcher
             query = ""
+        case .screenshot:
+            closeScreenshot()
         case .askClaude:
             if let chatModel, chatModel.isStarted {
                 chatModel.leave()
@@ -391,6 +400,9 @@ import Observation
         case .desktopSessions:
             results = []
             desktopSessionList?.select(0)
+        case .screenshot:
+            results = []
+            screenshot?.select(0)
         }
         showArguments()
     }
@@ -423,6 +435,31 @@ import Observation
     /// Whether the search bar should come back as it was however long it was hidden, because a chat is going on or a sign-in is still waiting on the browser.
     var isHoldingChat: Bool {
         chatModel?.isStarted == true || claudeSignIn.state == .signingIn
+    }
+
+    /// Shows a screenshot just taken on a page of its own, which goes back to the chat in AI mode afterwards when one was going on there.
+    func showScreenshot(_ png: Data) {
+        settings.finishEditing()
+        actionPanel = nil
+        screenshot = ScreenshotPage(png: png)
+        mode = .screenshot
+        query = ""
+    }
+
+    private func runSelectedScreenshotAction() {
+        guard let screenshot, let action = screenshot.selectedAction(matching: query) else { return NSSound.beep() }
+        switch action {
+        case .saveToDesktop:
+            guard DesktopScreenshot.save(screenshot.png) else { return NSSound.beep() }
+            closeScreenshot()
+            SearchBar.shared.hide()
+        }
+    }
+
+    private func closeScreenshot() {
+        screenshot = nil
+        mode = chatModel == nil ? .launcher : .askClaude
+        query = ""
     }
 
     /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one. Its earlier turns show once the bar has finished sliding into AI mode.

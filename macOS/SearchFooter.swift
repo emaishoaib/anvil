@@ -9,6 +9,7 @@ struct SearchFooter: View {
     let selected: SearchResult?
     let toggleAnvilActions: () -> Void
     var settingAction: String? = nil
+    var screenshotAction: String? = nil
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
@@ -45,6 +46,10 @@ struct SearchFooter: View {
                 case .desktopSessions:
                     CommandIcon(command: .enterAIMode)
                     Text("AI Mode")
+                        .foregroundStyle(.secondary)
+                case .screenshot:
+                    SymbolIcon(symbol: "camera.viewfinder", colour: .blue)
+                    Text(Tool.screenshots.name)
                         .foregroundStyle(.secondary)
                 case .askClaude:
                     if let closeChat {
@@ -178,6 +183,7 @@ struct SearchFooter: View {
 
     private var action: String? {
         if mode == .settings { return settingAction }
+        if mode == .screenshot { return screenshotAction }
         if mode == .desktopSessions { return "Continue Chat" }
         if mode == .askClaude {
             return switch chatState {

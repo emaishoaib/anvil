@@ -10,6 +10,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
     case dockWidgets
     case uninstaller
     case ai
+    case screenshots
 
     var id: Self { self }
 
@@ -36,6 +37,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: "Dock Widgets"
         case .uninstaller: "Uninstaller"
         case .ai: "AI"
+        case .screenshots: "Screenshots"
         }
     }
 
@@ -50,6 +52,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: "Show your next meeting in the space beside the Dock."
         case .uninstaller: "Remove apps along with the files they leave in your Library."
         case .ai: "Ask Claude Code about a folder from the search bar."
+        case .screenshots: "Drag over part of the screen to save it or send it to Claude."
         }
     }
 
@@ -71,6 +74,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .dockWidgets: .symbol("dock.rectangle")
         case .uninstaller: .symbol("trash")
         case .ai: .symbol("point.3.connected.trianglepath.dotted")
+        case .screenshots: .symbol("camera.viewfinder")
         }
     }
 
@@ -84,8 +88,9 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .mouse: 4
         case .keepAwake: 5
         case .ai: 6
-        case .dockWidgets: 7
-        case .uninstaller: 8
+        case .screenshots: 7
+        case .dockWidgets: 8
+        case .uninstaller: 9
         }
     }
 
@@ -96,6 +101,7 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
         case .windows: WindowKeys.shared
         case .rules: RuleKeys.shared
         case .ai: AIKeys.shared
+        case .screenshots: ScreenshotKeys.shared
         default: nil
         }
     }
