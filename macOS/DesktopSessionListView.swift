@@ -1,7 +1,7 @@
 import ClaudeKit
 import SwiftUI
 
-/// The rows of AI mode's chat list, newest first: each Claude desktop session's title, the folder it works in, and how long ago it was last active. Clicking a row selects it. With no sessions, or nothing matching the search, the page says so.
+/// The rows of AI mode's chat list, pinned sessions first and then the newest: each Claude desktop session's title with a pin when it is pinned, the folder it works in, and how long ago it was last active. Clicking a row selects it. With no sessions, or nothing matching the search, the page says so.
 struct DesktopSessionListView: View {
     private static let rowHeight: CGFloat = 44
     private static let padding: CGFloat = 8
@@ -46,9 +46,16 @@ private struct DesktopSessionRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.title)
-                    .foregroundStyle(Color(nsColor: .textColor))
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    if session.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(session.title)
+                        .foregroundStyle(Color(nsColor: .textColor))
+                        .lineLimit(1)
+                }
                 Text((session.folder.path as NSString).abbreviatingWithTildeInPath)
                     .font(.caption)
                     .foregroundStyle(.secondary)

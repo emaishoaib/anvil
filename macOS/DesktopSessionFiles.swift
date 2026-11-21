@@ -6,12 +6,12 @@ nonisolated enum DesktopSessionFiles {
     private static let sessions = FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Application Support/Claude/claude-code-sessions")
     private static let recordPrefix = "local_"
 
-    static func newestFirst() -> [DesktopSession] {
-        DesktopSessions.newestFirst(from: records())
+    static func inSidebarOrder() -> [DesktopSession] {
+        DesktopSessions.inSidebarOrder(from: records())
     }
 
     static func lastUsed() -> DesktopSession? {
-        DesktopSessions.lastUsed(of: newestFirst()) { sessionID in
+        DesktopSessions.lastUsed(of: inSidebarOrder()) { sessionID in
             ClaudeSessionFiles.transcript(of: sessionID).flatMap { try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate }
         }
     }

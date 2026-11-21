@@ -2,9 +2,9 @@ import ClaudeKit
 import Foundation
 import Observation
 
-/// AI mode's chat list: Claude desktop's Code sessions, newest first, narrowed by the search field to those whose title or folder contains it, and the one selected.
+/// AI mode's chat list: Claude desktop's Code sessions in the order its sidebar lists them, pinned ones first and then the newest, narrowed by the search field to those whose title or folder contains it, and the one selected.
 @Observable final class DesktopSessionList {
-    private(set) var sessions = DesktopSessionFiles.newestFirst()
+    private(set) var sessions = DesktopSessionFiles.inSidebarOrder()
     private(set) var selected = 0
 
     func sessions(matching query: String) -> [DesktopSession] {

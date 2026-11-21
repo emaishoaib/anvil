@@ -3,14 +3,14 @@ import Testing
 @testable import ClaudeKit
 
 struct DesktopSessionsTests {
-    private static func record(desktopID: String = "local_a02fd0ad", sessionID: String = "564a392c-6b37-4786-9d80-0a5bde99a545", title: String = "Screen not turning on", lastActivityAt: Int = 1_794_979_956_777, isArchived: Bool = false) -> Data {
+    private static func record(desktopID: String = "local_a02fd0ad", sessionID: String = "564a392c-6b37-4786-9d80-0a5bde99a545", title: String = "Screen not turning on", lastActivityAt: Int = 1_794_979_956_777, isArchived: Bool = false, isPinned: Bool = false) -> Data {
         Data("""
-        {"sessionId":"\(desktopID)","cliSessionId":"\(sessionID)","title":"\(title)","cwd":"/Users/me/docs","lastActivityAt":\(lastActivityAt),"isArchived":\(isArchived),"model":"claude-opus-5-5"}
+        {"sessionId":"\(desktopID)","cliSessionId":"\(sessionID)","title":"\(title)","cwd":"/Users/me/docs","lastActivityAt":\(lastActivityAt),"isArchived":\(isArchived),"isStarred":\(isPinned),"model":"claude-opus-5-5"}
         """.utf8)
     }
 
     @Test func aRecordIsReadIntoASession() {
-        let sessions = DesktopSessions.newestFirst(from: [Self.record()])
+        let sessions = DesktopSessions.inSidebarOrder(from: [Self.record()])
         #expect(sessions == [DesktopSession(
             desktopID: "local_a02fd0ad",
             sessionID: UUID(uuidString: "564a392c-6b37-4786-9d80-0a5bde99a545")!,
@@ -24,17 +24,32 @@ struct DesktopSessionsTests {
     @Test func sessionsAreListedNewestFirst() {
         let older = Self.record(title: "Older", lastActivityAt: 1_000)
         let newer = Self.record(title: "Newer", lastActivityAt: 2_000)
-        #expect(DesktopSessions.newestFirst(from: [older, newer]).map(\.title) == ["Newer", "Older"])
+        #expect(DesktopSessions.inSidebarOrder(from: [older, newer]).map(\.title) == ["Newer", "Older"])
+    }
+
+    @Test func pinnedSessionsComeFirstAndEachPartIsNewestFirst() {
+        let records = [
+            Self.record(title: "Newest", lastActivityAt: 4_000),
+            Self.record(title: "Older pinned", lastActivityAt: 1_000, isPinned: true),
+            Self.record(title: "Older", lastActivityAt: 2_000),
+            Self.record(title: "Newer pinned", lastActivityAt: 3_000, isPinned: true),
+        ]
+        #expect(DesktopSessions.inSidebarOrder(from: records).map(\.title) == ["Newer pinned", "Older pinned", "Newest", "Older"])
+    }
+
+    @Test func aRecordWithoutTheStarredFieldIsNotPinned() {
+        let unpinned = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","title":"Plain","cwd":"/","lastActivityAt":1}"#.utf8)
+        #expect(DesktopSessions.inSidebarOrder(from: [unpinned]).first?.isPinned == false)
     }
 
     @Test func archivedSessionsAreLeftOut() {
-        let sessions = DesktopSessions.newestFirst(from: [Self.record(title: "Kept"), Self.record(title: "Archived", isArchived: true)])
+        let sessions = DesktopSessions.inSidebarOrder(from: [Self.record(title: "Kept"), Self.record(title: "Archived", isArchived: true)])
         #expect(sessions.map(\.title) == ["Kept"])
     }
 
     @Test func aRecordWithoutAClaudeCodeSessionIsLeftOut() {
         let unreadable = Data(#"{"sessionId":"local_b","title":"No session","cwd":"/","lastActivityAt":1}"#.utf8)
-        #expect(DesktopSessions.newestFirst(from: [unreadable, Self.record(title: "Readable")]).map(\.title) == ["Readable"])
+        #expect(DesktopSessions.inSidebarOrder(from: [unreadable, Self.record(title: "Readable")]).map(\.title) == ["Readable"])
     }
 
     @Test func aSessionClaudeDesktopHasIsFound() {
@@ -50,20 +65,20 @@ struct DesktopSessionsTests {
     }
 
     @Test func theLastSessionIsTheOneWhoseTranscriptChangedLast() {
-        let older = DesktopSessions.newestFirst(from: [Self.record(desktopID: "local_older", sessionID: "11111111-1111-1111-1111-111111111111", lastActivityAt: 2_000)])
-        let newer = DesktopSessions.newestFirst(from: [Self.record(desktopID: "local_newer", sessionID: "22222222-2222-2222-2222-222222222222", lastActivityAt: 1_000)])
+        let older = DesktopSessions.inSidebarOrder(from: [Self.record(desktopID: "local_older", sessionID: "11111111-1111-1111-1111-111111111111", lastActivityAt: 2_000)])
+        let newer = DesktopSessions.inSidebarOrder(from: [Self.record(desktopID: "local_newer", sessionID: "22222222-2222-2222-2222-222222222222", lastActivityAt: 1_000)])
         let changes = [older[0].sessionID: Date(timeIntervalSince1970: 1), newer[0].sessionID: Date(timeIntervalSince1970: 2)]
         #expect(DesktopSessions.lastUsed(of: older + newer, changedAt: { changes[$0] })?.desktopID == "local_newer")
     }
 
     @Test func aSessionWithoutATranscriptIsNeverTheLastOne() {
-        let sessions = DesktopSessions.newestFirst(from: [Self.record()])
+        let sessions = DesktopSessions.inSidebarOrder(from: [Self.record()])
         #expect(DesktopSessions.lastUsed(of: sessions, changedAt: { _ in nil }) == nil)
     }
 
     @Test func aSessionWithoutATitleIsNamedAfterItsFolder() {
         let untitled = Data(#"{"sessionId":"local_c","cliSessionId":"564a392c-6b37-4786-9d80-0a5bde99a545","cwd":"/Users/me/anvil","lastActivityAt":1}"#.utf8)
-        #expect(DesktopSessions.newestFirst(from: [untitled]).map(\.title) == ["anvil"])
+        #expect(DesktopSessions.inSidebarOrder(from: [untitled]).map(\.title) == ["anvil"])
     }
 
     @Test func aRenamedRecordHasTheNewTitleSetByTheUser() throws {
@@ -73,7 +88,7 @@ struct DesktopSessionsTests {
         #expect(fields["titleSource"] as? String == "user")
         #expect(fields["model"] as? String == "claude-opus-5-5")
         #expect(fields["isArchived"] as? Bool == false)
-        #expect(DesktopSessions.newestFirst(from: [renamed]).map(\.title) == ["UI/UX fixes"])
+        #expect(DesktopSessions.inSidebarOrder(from: [renamed]).map(\.title) == ["UI/UX fixes"])
     }
 
     @Test func aRecordForAnotherSessionIsNotRenamed() {
@@ -81,6 +96,6 @@ struct DesktopSessionsTests {
     }
 
     @Test func aSessionWithAnEmptyTitleIsNamedAfterItsFolder() {
-        #expect(DesktopSessions.newestFirst(from: [Self.record(title: "")]).map(\.title) == ["docs"])
+        #expect(DesktopSessions.inSidebarOrder(from: [Self.record(title: "")]).map(\.title) == ["docs"])
     }
 }

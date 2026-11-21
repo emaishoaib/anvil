@@ -1,6 +1,6 @@
 import Foundation
 
-/// A Code session as Claude desktop records it: its own id, the Claude Code session it runs on, its title, or the name of its folder when it has none as Claude desktop shows it, the folder it works in, when it was last active, and whether it was archived. Claude desktop writes one record per session as a JSON file, with the last activity in milliseconds.
+/// A Code session as Claude desktop records it: its own id, the Claude Code session it runs on, its title, or the name of its folder when it has none as Claude desktop shows it, the folder it works in, when it was last active, whether it was pinned, which the record calls starred, and whether it was archived. Claude desktop writes one record per session as a JSON file, with the last activity in milliseconds.
 public struct DesktopSession: Decodable, Equatable, Sendable {
     public let desktopID: String
     public let sessionID: UUID
@@ -8,18 +8,20 @@ public struct DesktopSession: Decodable, Equatable, Sendable {
     public let folder: URL
     public let lastActivity: Date
     public let isArchived: Bool
+    public let isPinned: Bool
 
-    public init(desktopID: String, sessionID: UUID, title: String, folder: URL, lastActivity: Date, isArchived: Bool) {
+    public init(desktopID: String, sessionID: UUID, title: String, folder: URL, lastActivity: Date, isArchived: Bool, isPinned: Bool = false) {
         self.desktopID = desktopID
         self.sessionID = sessionID
         self.title = title
         self.folder = folder
         self.lastActivity = lastActivity
         self.isArchived = isArchived
+        self.isPinned = isPinned
     }
 
     private enum CodingKeys: String, CodingKey {
-        case sessionId, cliSessionId, title, cwd, lastActivityAt, isArchived
+        case sessionId, cliSessionId, title, cwd, lastActivityAt, isArchived, isStarred
     }
 
     public init(from decoder: Decoder) throws {
@@ -32,16 +34,20 @@ public struct DesktopSession: Decodable, Equatable, Sendable {
         title = savedTitle.isEmpty ? folder.lastPathComponent : savedTitle
         lastActivity = Date(timeIntervalSince1970: try container.decode(Double.self, forKey: .lastActivityAt) / 1000)
         isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
+        isPinned = try container.decodeIfPresent(Bool.self, forKey: .isStarred) ?? false
     }
 }
 
 /// Claude desktop's Code sessions, read from their records. Any record that cannot be read is left out, such as one written by a later version of Claude desktop in a different shape.
 public enum DesktopSessions {
-    /// The sessions to list, newest first, leaving out archived ones.
-    public static func newestFirst(from records: [Data]) -> [DesktopSession] {
+    /// The sessions to list in the order Claude desktop's sidebar lists them, pinned ones first and then the rest, each part newest first, leaving out archived ones. Groups made in the sidebar are not in the records, so they are not followed.
+    public static func inSidebarOrder(from records: [Data]) -> [DesktopSession] {
         decoded(records)
             .filter { !$0.isArchived }
-            .sorted { $0.lastActivity > $1.lastActivity }
+            .sorted { first, second in
+                guard first.isPinned == second.isPinned else { return first.isPinned }
+                return first.lastActivity > second.lastActivity
+            }
     }
 
     /// The session Claude desktop runs on the given Claude Code session, archived or not, if it has one.
