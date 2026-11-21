@@ -153,6 +153,13 @@ import Observation
         finishLeaving()
     }
 
+    /// Leaves a chat that Claude desktop has opened, which saved it there as it took it, so only Claude Code is let go here.
+    func leaveForClaudeDesktop() {
+        isSaved = true
+        session?.end()
+        finishLeaving()
+    }
+
     func discard() {
         guard let session else { return }
         Task { await session.discard() }

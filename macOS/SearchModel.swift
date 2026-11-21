@@ -500,6 +500,21 @@ import Observation
         }
     }
 
+    /// Opens the chat in Claude desktop and leaves it, once Claude has finished any answer it is giving, or straight away when Claude is idle. A chat with nothing sent yet has no session for Claude desktop to open.
+    func moveChatToClaudeDesktop() {
+        guard let chat = chatModel, let session = chat.session else { return NSSound.beep() }
+        Task {
+            await ClaudeDesktop.open(session.sessionID)
+            await Self.finishedAnswering(session)
+            guard chatModel === chat, chat.question == nil else { return }
+            chat.leaveForClaudeDesktop()
+        }
+    }
+
+    private static func finishedAnswering(_ chat: ClaudeChatSession) async {
+        for await isAnswering in Observations({ chat.isAnswering }) where !isAnswering { return }
+    }
+
     /// Waits until Claude has started answering and then finished, since a prompt sent after the chat's earlier turns are read has not started yet when this begins.
     private static func answered(_ chat: ClaudeChatSession) async {
         var hasStarted = false
