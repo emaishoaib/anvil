@@ -22,6 +22,7 @@ import Observation
     private(set) var review: UninstallReview?
     private(set) var desktopSessionList: DesktopSessionList?
     private(set) var screenshot: ScreenshotPage?
+    private var screenshotToSend: Data?
     private(set) var timesOpened = 0
     private(set) var isPinned = false
     let settings = SettingsBarModel()
@@ -50,8 +51,9 @@ import Observation
         }
     }
 
-    /// The field's hint for the current mode, or the chat's own hint in AI mode.
+    /// The field's hint for the current mode, the chat's own hint in AI mode, or a hint about the screenshot while picking a chat to send it to.
     var placeholder: String {
+        if mode == .desktopSessions, screenshotToSend != nil { return "Choose a chat for the screenshot, or press Tab for a new chat…" }
         guard mode == .askClaude, let chatModel else { return mode.placeholder }
         return chatModel.placeholder
     }
@@ -77,6 +79,7 @@ import Observation
         review = nil
         desktopSessionList = nil
         screenshot = nil
+        screenshotToSend = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -225,6 +228,11 @@ import Observation
             query = ""
         case .desktopSessions:
             desktopSessionList = nil
+            if let png = screenshotToSend {
+                screenshotToSend = nil
+                showScreenshot(png)
+                return true
+            }
             mode = .launcher
             query = ""
         case .screenshot:
@@ -453,7 +461,21 @@ import Observation
             guard DesktopScreenshot.save(screenshot.png) else { return NSSound.beep() }
             closeScreenshot()
             SearchBar.shared.hide()
+        case .sendToClaudeCode:
+            screenshotToSend = screenshot.png
+            self.screenshot = nil
+            guard let chatModel else { return showDesktopSessions() }
+            giveScreenshot(to: chatModel)
+            mode = .askClaude
+            query = ""
         }
+    }
+
+    /// Hands the screenshot waiting for a chat to the given one, where it goes with the next prompt sent.
+    private func giveScreenshot(to chat: ChatModel) {
+        guard let png = screenshotToSend else { return }
+        screenshotToSend = nil
+        chat.attach(png)
     }
 
     private func closeScreenshot() {
@@ -462,11 +484,15 @@ import Observation
         query = ""
     }
 
-    /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one. Its earlier turns show once the bar has finished sliding into AI mode.
+    /// Carries on the selected chat in AI mode, or brings its window forward when it is already showing in one, with any screenshot waiting for a chat attached to it. Its earlier turns show once the bar has finished sliding into AI mode.
     private func continueSelectedChat() {
         guard let session = desktopSessionList?.selectedSession(matching: query) else { return NSSound.beep() }
-        if let window = ChatWindows.shared.window(running: session.sessionID) { return SearchBar.shared.bringForward(window) }
+        if let window = ChatWindows.shared.window(running: session.sessionID) {
+            giveScreenshot(to: window.chat)
+            return SearchBar.shared.bringForward(window)
+        }
         let chat = carryOn(session)
+        giveScreenshot(to: chat)
         let swap = PanelAnimation.isReduced ? Duration.zero : .seconds(SearchBarView.swapSeconds)
         Task { await chat.loadHistory(showingAfter: swap) }
     }
@@ -593,8 +619,9 @@ import Observation
         return true
     }
 
+    /// Starts a new chat in AI mode, with any screenshot waiting for a chat attached to it.
     func startChat() {
-        newChat()
+        giveScreenshot(to: newChat())
         desktopSessionList = nil
         wantsExpanded = false
         mode = .askClaude

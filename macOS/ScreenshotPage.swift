@@ -1,19 +1,26 @@
 import Foundation
 import Observation
 
-/// What can be done with a screenshot just taken.
+/// What can be done with a screenshot just taken. Sending it to Claude Code is only offered while the AI tool is on.
 enum ScreenshotAction: CaseIterable {
     case saveToDesktop
+    case sendToClaudeCode
+
+    static var available: [ScreenshotAction] {
+        Tool.ai.isOn ? allCases : [.saveToDesktop]
+    }
 
     var title: String {
         switch self {
         case .saveToDesktop: "Save to Desktop"
+        case .sendToClaudeCode: "Send to Claude Code"
         }
     }
 
     var symbol: String {
         switch self {
         case .saveToDesktop: "menubar.dock.rectangle"
+        case .sendToClaudeCode: "point.3.connected.trianglepath.dotted"
         }
     }
 }
@@ -29,8 +36,8 @@ enum ScreenshotAction: CaseIterable {
 
     func actions(matching query: String) -> [ScreenshotAction] {
         let query = query.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else { return ScreenshotAction.allCases }
-        return ScreenshotAction.allCases.filter { $0.title.localizedCaseInsensitiveContains(query) }
+        guard !query.isEmpty else { return ScreenshotAction.available }
+        return ScreenshotAction.available.filter { $0.title.localizedCaseInsensitiveContains(query) }
     }
 
     func selectedAction(matching query: String) -> ScreenshotAction? {
