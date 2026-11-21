@@ -28,6 +28,8 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 **AI** -- opens on your Claude desktop Code sessions in the order Claude desktop lists them, pinned ones first and then the newest. Typing searches them and Return carries one on in the bar, or Tab starts a new chat with Claude Code about a folder you pick. Claude asks you before it runs a command or makes a change. A new chat can be saved into Claude desktop, and one left unsaved goes to the Trash when you leave it. A chat in the bar or in its own window can also move over to Claude desktop, which opens it there straight away and lets it go here once Claude has finished answering. From any app, the listening shortcut, Option Shift Space by default, listens until it is pressed again and sends what you said to a new session. Starting with "last session" sends it to the last session you used instead, and starting with "new session" says so outright. Where unnamed speech goes, both phrases, and where the chat shows once sent can all be changed in the AI settings. It can show in the bar, in the bar pinned, or in Claude desktop. Speech is turned into text on the Mac.
 
+**Screenshots** -- the screenshot shortcut lets you drag over part of the screen from any app, then the bar opens on the picture so you can save it to the Desktop or send it to Claude Code. Sending it lists your chats the way Claude desktop lists them, and picking one opens it in AI mode with the screenshot attached so you can add a caption before it goes, or you can start a new chat with it instead.
+
 **Uninstaller** -- removes an app along with the files it leaves across the Mac. You untick anything you want to keep and the rest goes to the Trash, so a mistake can be undone.
 
 **At a glance** -- the bar's footer shows whether Keep Awake is on and how full your Logitech and AirPods batteries are.
@@ -38,6 +40,7 @@ Instead of a separate app for each small job, Anvil has one search bar to reach 
 
 - **Accessibility** -- to see keys and mouse buttons and move other apps' windows
 - **Full Disk Access** -- for the Uninstaller to find every leftover
+- **Screen Recording** -- to show window thumbnails in the Switcher and to take screenshots
 - **Bluetooth** -- to read AirPods batteries
 - **Microphone** -- to hear what you say to Claude, only between two presses of the listening shortcut
 - **Speech recognition** -- macOS may ask for it alongside the microphone, even though speech is turned into text on the Mac
