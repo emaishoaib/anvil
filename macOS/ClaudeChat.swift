@@ -93,7 +93,7 @@ private struct TurnView: View {
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
             } else if !turn.answer.isEmpty {
-                AnswerView(blocks: AnswerMarkdown.blocks(from: turn.answer))
+                AnswerView(blocks: turn.readAnswer ?? AnswerMarkdown.blocks(from: turn.answer))
                     .textSelection(.enabled)
             }
             if turn.wasStopped {

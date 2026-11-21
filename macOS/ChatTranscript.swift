@@ -1,18 +1,18 @@
 import ClaudeKit
 
 /// The turns of a chat in order, changed as Claude Code reports on the newest one. Only the newest turn can still be answering, so every change lands on it. The chat's title is its first prompt's first line.
-struct ChatTranscript {
+nonisolated struct ChatTranscript {
     private static let titleLength = 80
 
     private(set) var turns: [ChatTurn] = []
 
     init() {}
 
-    /// The finished turns of a chat carried on from earlier, with each tool marked as having worked or failed.
+    /// The finished turns of a chat carried on from earlier, with each tool marked as having worked or failed, and each answer's markdown read.
     init(past: [PastTurn]) {
         turns = past.enumerated().map { index, turn in
             let tools = turn.tools.map { ChatTool(id: $0.id, summary: $0.summary, state: turn.failedToolIDs.contains($0.id) ? .failed : .finished) }
-            return ChatTurn(id: index, prompt: turn.prompt, tools: tools, answer: turn.answer, isFinished: true)
+            return ChatTurn(id: index, prompt: turn.prompt, tools: tools, answer: turn.answer, readAnswer: AnswerMarkdown.blocks(from: turn.answer), isFinished: true)
         }
     }
 
