@@ -153,11 +153,22 @@ import Observation
         finishLeaving()
     }
 
-    /// Leaves a chat that Claude desktop has opened, which saved it there as it took it, so only Claude Code is let go here.
-    func leaveForClaudeDesktop() {
-        isSaved = true
-        session?.end()
-        finishLeaving()
+    /// Whether the chat can carry on in Claude desktop, which needs a first prompt sent and no question waiting on an answer here.
+    var canMoveToClaudeDesktop: Bool {
+        state == .started || state == .answering
+    }
+
+    /// Opens the chat in Claude desktop and leaves it, once Claude has finished any answer it is giving, or straight away when Claude is idle. Claude desktop saves the chat as it takes it, so leaving only lets Claude Code go here.
+    func moveToClaudeDesktop() {
+        guard canMoveToClaudeDesktop, let session else { return NSSound.beep() }
+        Task {
+            await ClaudeDesktop.open(session.sessionID)
+            for await isAnswering in Observations({ session.isAnswering }) where !isAnswering { break }
+            guard question == nil else { return }
+            isSaved = true
+            session.end()
+            finishLeaving()
+        }
     }
 
     func discard() {

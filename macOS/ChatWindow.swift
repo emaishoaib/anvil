@@ -2,7 +2,7 @@ import AppKit
 import Carbon.HIToolbox
 import SwiftUI
 
-/// A chat shown in a window of its own, apart from the search bar, so the bar stays free for everything else. It opens where it is told to, takes the keyboard straight away, and answers the same keys a chat answers in the bar. Command W, or Escape when the chat has no other use for it, leaves the chat, the same as the close button.
+/// A chat shown in a window of its own, apart from the search bar, so the bar stays free for everything else. It opens where it is told to, takes the keyboard straight away, and answers the same keys a chat answers in the bar. Command W, or Escape when the chat has no other use for it, leaves the chat, the same as the close button, and Command D closes the window and carries the chat on in Claude desktop.
 final class ChatWindow {
     let chat: ChatModel
     private let panel: ChatPanel
@@ -43,6 +43,14 @@ final class ChatWindow {
         switch (keyCode, event.modifierFlags.intersection([.command, .shift, .option, .control])) {
         case (kVK_ANSI_W, .command), (kVK_Escape, []):
             chat.leave()
+            return true
+        case (kVK_ANSI_D, .command):
+            guard chat.canMoveToClaudeDesktop else {
+                NSSound.beep()
+                return true
+            }
+            close()
+            chat.moveToClaudeDesktop()
             return true
         default:
             return false

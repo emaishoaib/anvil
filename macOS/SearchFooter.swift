@@ -94,12 +94,18 @@ struct SearchFooter: View {
                     Text("Stop")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Escape, modifiers: []))
-                    if !isChatSaved { FooterDivider() }
+                    FooterDivider()
                 }
                 if mode == .askClaude, !isChatSaved, chatState == .started || chatState == .answering {
                     Text("Save")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_S, modifiers: .command))
+                    FooterDivider()
+                }
+                if mode == .askClaude, chatState == .started || chatState == .answering {
+                    Text("Open in Claude Desktop")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_ANSI_D, modifiers: .command))
                     if chatState == .started { FooterDivider() }
                 }
                 if mode == .askClaude, chatState == .askingToLeave {

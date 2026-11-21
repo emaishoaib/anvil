@@ -79,6 +79,14 @@ final class SearchBar {
         guard popOutChat() else { return model.togglePin() }
     }
 
+    /// Unpins and hides the bar and carries the chat in AI mode on in Claude desktop, beeping instead when the chat cannot move yet.
+    func moveChatToClaudeDesktop() {
+        guard let chat = model.chatModel, chat.canMoveToClaudeDesktop else { return NSSound.beep() }
+        if model.isPinned { model.togglePin() }
+        hide()
+        chat.moveToClaudeDesktop()
+    }
+
     /// Moves the chat in AI mode into a window of its own, where the bar was, and closes the bar, so it opens as the launcher next time. Whether there was a chat to move.
     private func popOutChat() -> Bool {
         let frame = chatWindowFrame
@@ -189,6 +197,10 @@ final class SearchBar {
         if Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_R, model.revealSelected() { return true }
         if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_E {
             toggleExpanded()
+            return true
+        }
+        if model.mode == .askClaude, Self.onlyCommand(in: modifiers), keyCode == kVK_ANSI_D {
+            moveChatToClaudeDesktop()
             return true
         }
         if let action = QuickLinkAction.forShortcut(Self.combo(keyCode, modifiers)) { return model.run(action) }
