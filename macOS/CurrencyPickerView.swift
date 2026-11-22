@@ -19,7 +19,6 @@ struct CurrencyPickerView: View {
                     ForEach(Array(currencies.enumerated()), id: \.element.code) { index, currency in
                         CurrencyPickerRow(currency: currency, isTicked: isSearching && picker.isChosen(currency), isSelected: index == picker.selected)
                             .frame(height: Self.rowHeight)
-                            .id(index)
                             .onTapGesture { picker.select(index) }
                     }
                 }
@@ -27,7 +26,9 @@ struct CurrencyPickerView: View {
             }
             .frame(height: Self.listHeight + Self.padding * 2)
             .overlay { if currencies.isEmpty { emptyMessage } }
-            .onChange(of: picker.selected) { proxy.scrollTo(picker.selected) }
+            .onChange(of: picker.selected) {
+                if let code = picker.selectedCurrency(matching: query)?.code { proxy.scrollTo(code) }
+            }
         }
     }
 
