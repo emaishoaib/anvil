@@ -1,15 +1,20 @@
 import LauncherKit
 import SwiftUI
 
-/// The query's money in the top currencies, shown under the answer and before the other results. Each row has the currency's flag, code and name with the amount at the end. The rows are only there to read, so moving through the results passes them by.
+/// The query's money in the chosen currencies, shown under the answer and before the other results. Each row has the currency's flag, code and name with the amount at the end. The rows are only there to read, so moving through the results passes them by, and the pencil across from the title opens the page for choosing the currencies.
 struct CurrencyTableView: View {
     private static let rowHeight: CGFloat = 32
 
     let table: CurrencyTable
+    let edit: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Currencies")
+            HStack {
+                SectionHeader(title: "Currencies")
+                Spacer()
+                EditButton(action: edit)
+            }
             ForEach(table.rows) { row in
                 CurrencyRow(row: row)
                     .frame(height: Self.rowHeight)
@@ -36,5 +41,21 @@ private struct CurrencyRow: View {
                 .foregroundStyle(Color(nsColor: .textColor))
         }
         .padding(.horizontal, 8)
+    }
+}
+
+private struct EditButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "pencil")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(6)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .help("Choose Currencies")
     }
 }

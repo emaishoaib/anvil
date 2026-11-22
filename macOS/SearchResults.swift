@@ -14,7 +14,7 @@ struct SearchResults: View {
                     ForEach(rows) { row in
                         switch row {
                         case .result(let item): resultItem(item)
-                        case .currencies(let table): CurrencyTableView(table: table)
+                        case .currencies(let table): CurrencyTableView(table: table, edit: model.showCurrencyPicker)
                         }
                     }
                 }
