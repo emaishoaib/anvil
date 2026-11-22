@@ -150,6 +150,10 @@ final class SearchBar {
         model.showKeySwapForm()
     }
 
+    func showCurrencyPicker() {
+        model.showCurrencyPicker()
+    }
+
     func showPhraseForm(_ phrase: SpokenPhrase) {
         model.showPhraseForm(phrase)
     }
