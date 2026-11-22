@@ -233,6 +233,7 @@ final class SearchBar {
             return true
         }
         if keyCode == kVK_Tab, !modifiers.contains(.shift), model.removeSelectedCurrency() { return true }
+        if Self.onlyOption(in: modifiers), keyCode == kVK_UpArrow || keyCode == kVK_DownArrow, model.moveSelectedCurrency(by: keyCode == kVK_UpArrow ? -1 : 1) { return true }
         if model.mode == .desktopSessions, keyCode == kVK_Tab, !modifiers.contains(.shift) {
             model.startChat()
             return true
@@ -251,6 +252,10 @@ final class SearchBar {
 
     private static func onlyCommand(in modifiers: NSEvent.ModifierFlags) -> Bool {
         modifiers.intersection([.command, .shift, .option, .control]) == .command
+    }
+
+    private static func onlyOption(in modifiers: NSEvent.ModifierFlags) -> Bool {
+        modifiers.intersection([.command, .shift, .option, .control]) == .option
     }
 
     private static func combo(_ keyCode: Int, _ modifiers: NSEvent.ModifierFlags) -> KeyCombo {

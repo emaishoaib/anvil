@@ -12,6 +12,7 @@ struct SearchFooter: View {
     var screenshotAction: String? = nil
     var currencyAction: String? = nil
     var canRemoveCurrency = false
+    var canMoveCurrency = false
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
@@ -153,6 +154,13 @@ struct SearchFooter: View {
                     Text("Mode")
                         .foregroundStyle(.secondary)
                     KeyCaps(combo: KeyCombo(keyCode: kVK_Tab, modifiers: .shift))
+                }
+                if canMoveCurrency {
+                    Text("Reorder")
+                        .foregroundStyle(.secondary)
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_UpArrow, modifiers: .option))
+                    KeyCaps(combo: KeyCombo(keyCode: kVK_DownArrow, modifiers: .option))
+                    if canRemoveCurrency { FooterDivider() }
                 }
                 if canRemoveCurrency {
                     Text("Remove Currency")

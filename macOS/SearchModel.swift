@@ -225,6 +225,13 @@ import Observation
         return true
     }
 
+    /// Moves the selected currency up or down the currency picker's chosen list, or beeps when it can't go further. Whether the picker is showing.
+    func moveSelectedCurrency(by offset: Int) -> Bool {
+        guard case .currencyPicker = mode else { return false }
+        if currencyPicker?.moveSelected(by: offset, matching: query) != true { NSSound.beep() }
+        return true
+    }
+
     func showKeySwapForm() {
         settings.finishEditing()
         keySwapDraft = KeySwapDraft()

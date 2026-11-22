@@ -2,7 +2,7 @@ import Foundation
 import LauncherKit
 import Observation
 
-/// The page for choosing the currency table's currencies. With nothing typed it lists the chosen ones in their order, and typing searches every currency that has a rate. A currency that isn't chosen can be added to the end of the list and one that is can be removed, and each change is saved straight away.
+/// The page for choosing the currency table's currencies. With nothing typed it lists the chosen ones in their order, and typing searches every currency that has a rate. A currency that isn't chosen can be added to the end of the list, one that is can be removed, and the chosen ones can be moved up and down the list. Each change is saved straight away.
 @MainActor @Observable final class CurrencyPicker {
     private(set) var chosen = ChosenCurrencies.codes
     private(set) var selected = 0
@@ -51,6 +51,26 @@ import Observation
         guard let currency = selectedCurrency(matching: query), isChosen(currency) else { return false }
         remove(currency, matching: query)
         return true
+    }
+
+    func canMoveSelected(matching query: String) -> Bool {
+        query.trimmingCharacters(in: .whitespaces).isEmpty && chosen.count > 1
+    }
+
+    /// Moves the selected currency one place up or down the chosen list, keeping it selected. Whether it moved, which it can't past either end or while searching.
+    func moveSelected(by offset: Int, matching query: String) -> Bool {
+        guard canMoveSelected(matching: query), chosen.indices.contains(selected + offset) else { return false }
+        move(from: selected, to: selected + offset)
+        return true
+    }
+
+    /// Moves a chosen currency to another place in the list, keeping the same currency selected.
+    func move(from source: Int, to destination: Int) {
+        guard source != destination, chosen.indices.contains(source), chosen.indices.contains(destination) else { return }
+        let selectedCode = chosen.indices.contains(selected) ? chosen[selected] : nil
+        chosen.insert(chosen.remove(at: source), at: destination)
+        ChosenCurrencies.codes = chosen
+        if let selectedCode, let index = chosen.firstIndex(of: selectedCode) { selected = index }
     }
 
     func remove(_ currency: Currency, matching query: String) {

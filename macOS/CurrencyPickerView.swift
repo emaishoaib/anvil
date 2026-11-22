@@ -1,7 +1,7 @@
 import LauncherKit
 import SwiftUI
 
-/// The rows of the currency picker: the chosen currencies with nothing typed, and the currencies found once something is. Each row has the currency's flag, code and name. A chosen currency in the list has a minus that removes it, and a found currency that is already chosen has a tick. Clicking a row selects it, and an empty list says why it is empty.
+/// The rows of the currency picker: the chosen currencies with nothing typed, and the currencies found once something is. Each row has the currency's flag, code and name. A chosen currency in the list has a minus that removes it and a handle that drags it to another place, with the rows it passes making room as it goes. A found currency that is already chosen has a tick. Clicking a row selects it, and an empty list says why it is empty.
 struct CurrencyPickerView: View {
     private static let rowHeight: CGFloat = 36
     private static let padding: CGFloat = 8
@@ -9,6 +9,7 @@ struct CurrencyPickerView: View {
 
     let picker: CurrencyPicker
     let query: String
+    @State private var drag: CurrencyDrag?
 
     var body: some View {
         let currencies = picker.currencies(matching: query)
@@ -17,9 +18,18 @@ struct CurrencyPickerView: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     SectionHeader(title: isSearching ? "Results" : "Chosen Currencies")
                     ForEach(Array(currencies.enumerated()), id: \.element.code) { index, currency in
-                        CurrencyPickerRow(currency: currency, isTicked: isSearching && picker.isChosen(currency), isSelected: index == picker.selected, remove: isSearching ? nil : { picker.remove(currency, matching: query) })
-                            .frame(height: Self.rowHeight)
-                            .onTapGesture { picker.select(index) }
+                        CurrencyPickerRow(
+                            currency: currency,
+                            isTicked: isSearching && picker.isChosen(currency),
+                            isSelected: index == picker.selected,
+                            remove: isSearching ? nil : { picker.remove(currency, matching: query) },
+                            reorder: isSearching ? nil : reorder(from: index, count: currencies.count)
+                        )
+                        .frame(height: Self.rowHeight)
+                        .offset(y: drag?.offset(of: index, rowHeight: Self.rowHeight) ?? 0)
+                        .zIndex(drag?.source == index ? 1 : 0)
+                        .animation(drag?.source == index ? nil : .snappy(duration: 0.2), value: drag?.destination(rowHeight: Self.rowHeight))
+                        .onTapGesture { picker.select(index) }
                     }
                 }
                 .padding(Self.padding)
@@ -30,6 +40,16 @@ struct CurrencyPickerView: View {
                 if let code = picker.selectedCurrency(matching: query)?.code { proxy.scrollTo(code) }
             }
         }
+    }
+
+    private func reorder(from index: Int, count: Int) -> RowDrag {
+        RowDrag(
+            changed: { drag = CurrencyDrag(source: index, translation: $0, count: count) },
+            ended: {
+                if let drag { picker.move(from: drag.source, to: drag.destination(rowHeight: Self.rowHeight)) }
+                drag = nil
+            }
+        )
     }
 
     private var isSearching: Bool {
@@ -47,6 +67,7 @@ private struct CurrencyPickerRow: View {
     let isTicked: Bool
     let isSelected: Bool
     let remove: (() -> Void)?
+    let reorder: RowDrag?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -63,6 +84,7 @@ private struct CurrencyPickerRow: View {
                     .foregroundStyle(.secondary)
             }
             if let remove { RemoveButton(action: remove) }
+            if let reorder { DragHandle(drag: reorder) }
         }
         .padding(.horizontal, 8)
         .frame(maxHeight: .infinity)
