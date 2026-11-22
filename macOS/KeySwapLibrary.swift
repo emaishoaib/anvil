@@ -5,7 +5,8 @@ import RulesKit
 @Observable final class KeySwapLibrary {
     static let shared = KeySwapLibrary()
 
-    private static let file = "key-swaps.json"
+    private static let section = "keySwaps"
+    private static let oldFile = "key-swaps.json"
     private static let settingsKey = "rules.keySwaps"
     private static let builtInKeyboard = #"{"Built-In":true,"PrimaryUsagePage":1,"PrimaryUsage":6}"#
 
@@ -39,11 +40,11 @@ import RulesKit
         let before = swaps
         do {
             loadProblem = nil
-            guard let saved = try SettingsStorage.load([KeySwap].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load([KeySwap].self, section: Self.section, oldFile: Self.oldFile, settingsKey: Self.settingsKey) else { return persist() }
             swaps = saved
             if swaps != before { apply() }
         } catch {
-            loadProblem = SettingsStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.section)
         }
     }
 
@@ -57,7 +58,7 @@ import RulesKit
 
     private func persist() {
         guard loadProblem == nil else { return }
-        SettingsStorage.save(swaps, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(swaps, section: Self.section, settingsKey: Self.settingsKey)
         apply()
     }
 }

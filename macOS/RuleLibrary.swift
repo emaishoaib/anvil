@@ -5,7 +5,8 @@ import RulesKit
 @Observable final class RuleLibrary {
     static let shared = RuleLibrary()
 
-    private static let file = "rules.json"
+    private static let section = "rules"
+    private static let oldFile = "rules.json"
     private static let settingsKey = "rules.rules"
 
     private(set) var rules = Rules()
@@ -30,17 +31,17 @@ import RulesKit
     func reload() {
         do {
             loadProblem = nil
-            guard let saved = try SettingsStorage.load([Rule].self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load([Rule].self, section: Self.section, oldFile: Self.oldFile, settingsKey: Self.settingsKey) else { return persist() }
             rules = Rules(saved)
             RuleKeys.shared.use(rules)
         } catch {
-            loadProblem = SettingsStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.section)
         }
     }
 
     private func persist() {
         RuleKeys.shared.use(rules)
         guard loadProblem == nil else { return }
-        SettingsStorage.save(rules.rules, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(rules.rules, section: Self.section, settingsKey: Self.settingsKey)
     }
 }

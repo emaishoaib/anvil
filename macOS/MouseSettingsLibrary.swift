@@ -4,7 +4,8 @@ import os
 @MainActor @Observable final class MouseSettingsLibrary {
     static let shared = MouseSettingsLibrary()
 
-    private static let file = "mouse.json"
+    private static let section = "mouse"
+    private static let oldFile = "mouse.json"
     private static let settingsKey = "mouse.settings"
     private nonisolated static let snapshot = OSAllocatedUnfairLock(initialState: MouseSettings.defaults)
 
@@ -31,17 +32,17 @@ import os
     func reload() {
         do {
             loadProblem = nil
-            guard let saved = try SettingsStorage.load(MouseSettings.self, file: Self.file, settingsKey: Self.settingsKey) else { return persist() }
+            guard let saved = try SettingsStorage.load(MouseSettings.self, section: Self.section, oldFile: Self.oldFile, settingsKey: Self.settingsKey) else { return persist() }
             lastSaved = saved
             settings = saved
         } catch {
-            loadProblem = SettingsStorage.problem(reading: Self.file)
+            loadProblem = SettingsStorage.problem(reading: Self.section)
         }
     }
 
     private func persist() {
         guard loadProblem == nil else { return }
         lastSaved = settings
-        SettingsStorage.save(settings, file: Self.file, settingsKey: Self.settingsKey)
+        SettingsStorage.save(settings, section: Self.section, settingsKey: Self.settingsKey)
     }
 }
