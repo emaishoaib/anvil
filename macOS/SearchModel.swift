@@ -144,7 +144,7 @@ import Observation
         if mode == .askClaude { return chatModel?.sendPrompt() ?? () }
         if mode == .desktopSessions { return continueSelectedChat() }
         if mode == .screenshot { return runSelectedScreenshotAction() }
-        if case .currencyPicker = mode { return currencyPicker?.toggleSelected(matching: query) ?? () }
+        if case .currencyPicker = mode { return currencyPicker?.addSelected(matching: query) == true ? () : NSSound.beep() }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -216,6 +216,13 @@ import Observation
         currencyPicker = CurrencyPicker()
         mode = .currencyPicker(fromSettings: mode == .settings, query: query)
         query = ""
+    }
+
+    /// Removes the selected currency on the currency picker, or beeps when it isn't one of the chosen ones. Whether the picker is showing.
+    func removeSelectedCurrency() -> Bool {
+        guard case .currencyPicker = mode else { return false }
+        if currencyPicker?.removeSelected(matching: query) != true { NSSound.beep() }
+        return true
     }
 
     func showKeySwapForm() {

@@ -2,7 +2,7 @@ import Foundation
 import LauncherKit
 import Observation
 
-/// The page for choosing the currency table's currencies. With nothing typed it lists the chosen ones in their order, and typing searches every currency that has a rate. Return on a currency adds it to the end of the list when it isn't chosen and removes it when it is, and each change is saved straight away.
+/// The page for choosing the currency table's currencies. With nothing typed it lists the chosen ones in their order, and typing searches every currency that has a rate. A currency that isn't chosen can be added to the end of the list and one that is can be removed, and each change is saved straight away.
 @MainActor @Observable final class CurrencyPicker {
     private(set) var chosen = ChosenCurrencies.codes
     private(set) var selected = 0
@@ -32,14 +32,26 @@ import Observation
         selected = min(max(selected + offset, 0), count - 1)
     }
 
-    func toggleSelected(matching query: String) {
-        guard let currency = selectedCurrency(matching: query) else { return }
-        if isChosen(currency) {
-            chosen.removeAll { $0 == currency.code }
-        } else {
-            chosen.append(currency.code)
-        }
+    func canAddSelected(matching query: String) -> Bool {
+        selectedCurrency(matching: query).map { !isChosen($0) } ?? false
+    }
+
+    func canRemoveSelected(matching query: String) -> Bool {
+        selectedCurrency(matching: query).map(isChosen) ?? false
+    }
+
+    func addSelected(matching query: String) -> Bool {
+        guard let currency = selectedCurrency(matching: query), !isChosen(currency) else { return false }
+        chosen.append(currency.code)
+        ChosenCurrencies.codes = chosen
+        return true
+    }
+
+    func removeSelected(matching query: String) -> Bool {
+        guard let currency = selectedCurrency(matching: query), isChosen(currency) else { return false }
+        chosen.removeAll { $0 == currency.code }
         ChosenCurrencies.codes = chosen
         moveSelection(by: 0, matching: query)
+        return true
     }
 }

@@ -232,6 +232,7 @@ final class SearchBar {
             model.perform(.anvil(action))
             return true
         }
+        if keyCode == kVK_Tab, !modifiers.contains(.shift), model.removeSelectedCurrency() { return true }
         if model.mode == .desktopSessions, keyCode == kVK_Tab, !modifiers.contains(.shift) {
             model.startChat()
             return true

@@ -129,7 +129,7 @@ struct SearchBarView: View {
         } else if model.mode == .screenshot {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, screenshotAction: model.screenshot?.selectedAction(matching: model.query)?.title)
         } else if case .currencyPicker = model.mode, let picker = model.currencyPicker {
-            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, currencyAction: picker.selectedCurrency(matching: model.query).map { picker.isChosen($0) ? "Remove Currency" : "Add Currency" })
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, currencyAction: picker.canAddSelected(matching: model.query) ? "Add Currency" : nil, canRemoveCurrency: picker.canRemoveSelected(matching: model.query))
         } else {
             SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
         }
