@@ -5,7 +5,7 @@ enum SearchMemory: String, CaseIterable {
     case never, tenSeconds, thirtySeconds, oneMinute, fiveMinutes, fifteenMinutes
 
     static let savedKey = "launcher.searchMemory"
-    private static let defaultChoice = SearchMemory.oneMinute
+    static let defaultChoice = SearchMemory.oneMinute
 
     static var current: SearchMemory {
         get { UserDefaults.standard.string(forKey: savedKey).flatMap(SearchMemory.init(rawValue:)) ?? defaultChoice }

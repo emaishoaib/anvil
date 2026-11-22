@@ -30,8 +30,12 @@ nonisolated final class WindowShortcuts: Sendable {
         Self.save(combo, for: command)
     }
 
+    static func savedText(for combo: KeyCombo?) -> String {
+        combo?.savedText ?? clearedText
+    }
+
     private static func save(_ combo: KeyCombo?, for command: WindowCommand) {
-        UserDefaults.standard.set(combo?.savedText ?? clearedText, forKey: command.savedKey)
+        UserDefaults.standard.set(savedText(for: combo), forKey: command.savedKey)
     }
 
     private static func loaded() -> [WindowCommand: KeyCombo] {

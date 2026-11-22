@@ -5,7 +5,7 @@ enum AfterSending: String, CaseIterable {
     case bar, chatWindow = "pinnedBar", claudeDesktop
 
     static let savedKey = "ai.afterSending"
-    private static let defaultChoice = AfterSending.bar
+    static let defaultChoice = AfterSending.bar
 
     static var current: AfterSending {
         get { UserDefaults.standard.string(forKey: savedKey).flatMap(AfterSending.init(rawValue:)) ?? defaultChoice }

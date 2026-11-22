@@ -1,40 +1,52 @@
+import ClaudeKit
 import Foundation
+import LauncherKit
 import WindowKit
 
-/// Which of Anvil's own preferences go in which section of the settings file, each under a plain name of its own in that section: the General settings with the tool switches and the currency table's currencies, the AI settings, and the Windows settings with every window shortcut and snap zone. Each section names the file it used to be, so that file can be brought in.
+/// Which of Anvil's own preferences go in which section of the settings file, each under a plain name of its own in that section: the General settings with the tool switches and the currency table's currencies, the AI settings, and the Windows settings with every window shortcut and snap zone. Each section names the file it used to be, so that file can be brought in. Every entry carries its default, saved the way the preference itself is, and the defaults are registered so a setting never changed still has a value to write.
 enum MirroredSettings {
     struct Section {
         let name: String
         let oldFile: String
-        let entries: [(name: String, key: String)]
+        let entries: [Entry]
+    }
+
+    struct Entry {
+        let name: String
+        let key: String
+        let defaultValue: Any
     }
 
     static let sections = [general, ai, windows]
 
+    static func registerDefaults() {
+        UserDefaults.standard.register(defaults: Dictionary(uniqueKeysWithValues: sections.flatMap(\.entries).map { ($0.key, $0.defaultValue) }))
+    }
+
     private static var general: Section {
         Section(name: "general", oldFile: "general.json", entries: [
-            ("searchBarShortcut", LauncherKeys.savedKey),
-            ("searchMemory", SearchMemory.savedKey),
-            ("currencies", ChosenCurrencies.savedKey),
-            ("workingAnimation", WorkingAnimation.savedKey),
-        ] + Tool.allCases.filter(\.canBeTurnedOff).map { ("use.\($0.rawValue)", $0.isOnKey) })
+            Entry(name: "searchBarShortcut", key: LauncherKeys.savedKey, defaultValue: LauncherKeys.defaultCombo.savedText),
+            Entry(name: "searchMemory", key: SearchMemory.savedKey, defaultValue: SearchMemory.defaultChoice.rawValue),
+            Entry(name: "currencies", key: ChosenCurrencies.savedKey, defaultValue: CurrencyChoices.startingCodes()),
+            Entry(name: "workingAnimation", key: WorkingAnimation.savedKey, defaultValue: WorkingAnimation.defaultChoice.rawValue),
+        ] + Tool.allCases.filter(\.canBeTurnedOff).map { Entry(name: "use.\($0.rawValue)", key: $0.isOnKey, defaultValue: $0.isOnByDefault) })
     }
 
     private static var ai: Section {
         Section(name: "ai", oldFile: "ai.json", entries: [
-            ("listenShortcut", AIKeys.savedKey),
-            ("afterSending", AfterSending.savedKey),
-            ("unnamedSpeech", UnnamedSpeech.savedKey),
-        ] + SpokenPhrase.allCases.map { ("\($0).phrase", $0.savedKey) })
+            Entry(name: "listenShortcut", key: AIKeys.savedKey, defaultValue: AIKeys.defaultCombo.savedText),
+            Entry(name: "afterSending", key: AfterSending.savedKey, defaultValue: AfterSending.defaultChoice.rawValue),
+            Entry(name: "unnamedSpeech", key: UnnamedSpeech.savedKey, defaultValue: UnnamedSpeech.defaultSession.rawValue),
+        ] + SpokenPhrase.allCases.map { Entry(name: "\($0).phrase", key: $0.savedKey, defaultValue: $0.defaultPhrase) })
     }
 
     private static var windows: Section {
         Section(name: "windows", oldFile: "windows.json", entries: [
-            ("snapsByDragging", SnappingSettings.snapsByDraggingKey),
-            ("restoresSizeWhenUnsnapped", SnappingSettings.restoresSizeWhenUnsnappedKey),
-            ("maximizesOnTitleBarDoubleClick", SnappingSettings.maximizesOnTitleBarDoubleClickKey),
-            ("gap", SnappingSettings.gapKey),
-        ] + SnapZone.allCases.map { ("zone.\($0.rawValue)", SnappingSettings.choiceKey(for: $0)) }
-            + WindowCommand.allCases.map { (String($0.savedKey.dropFirst("windows.".count)), $0.savedKey) })
+            Entry(name: "snapsByDragging", key: SnappingSettings.snapsByDraggingKey, defaultValue: SnappingSettings.snapsByDraggingByDefault),
+            Entry(name: "restoresSizeWhenUnsnapped", key: SnappingSettings.restoresSizeWhenUnsnappedKey, defaultValue: SnappingSettings.restoresSizeWhenUnsnappedByDefault),
+            Entry(name: "maximizesOnTitleBarDoubleClick", key: SnappingSettings.maximizesOnTitleBarDoubleClickKey, defaultValue: SnappingSettings.maximizesOnTitleBarDoubleClickByDefault),
+            Entry(name: "gap", key: SnappingSettings.gapKey, defaultValue: SnappingSettings.defaultGap),
+        ] + SnapZone.allCases.map { Entry(name: "zone.\($0.rawValue)", key: SnappingSettings.choiceKey(for: $0), defaultValue: $0.defaultChoice.rawValue) }
+            + WindowCommand.allCases.map { Entry(name: String($0.savedKey.dropFirst("windows.".count)), key: $0.savedKey, defaultValue: WindowShortcuts.savedText(for: $0.defaultCombo)) })
     }
 }

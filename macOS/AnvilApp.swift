@@ -16,7 +16,7 @@ struct AnvilApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        Tool.registerDefaults()
+        MirroredSettings.registerDefaults()
         MenuBarItem.shared.start()
         KeepAwake.shared.restore()
         AppCatalog.shared.start()

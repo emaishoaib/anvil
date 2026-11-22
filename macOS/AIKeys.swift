@@ -7,7 +7,7 @@ nonisolated final class AIKeys: KeyResponder {
     static let shared = AIKeys()
 
     static let savedKey = "ai.listenShortcut"
-    private static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: [.option, .shift])
+    static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: [.option, .shift])
     private static let listenAction = "Start or stop listening"
 
     private let combo = OSAllocatedUnfairLock(initialState: AIKeys.loaded())

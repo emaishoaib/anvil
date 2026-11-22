@@ -1,6 +1,6 @@
 import Foundation
 
-/// Keeps the General, AI and Windows sections of the settings file in step with the preferences Anvil reads those settings from, so they follow the settings folder to another Mac. A change to one of those preferences is written to its section, and whenever the folder or the file changes, the sections are read back into the preferences. A missing section is written from the preferences, and one that cannot be read is left alone and never written over until it is fixed. A change to any other preference writes nothing, so an edit to the file is not lost to unrelated changes before it is read. Without a settings folder there is nothing to keep in step.
+/// Keeps the General, AI and Windows sections of the settings file in step with the preferences Anvil reads those settings from, so they follow the settings folder to another Mac. A change to one of those preferences is written to its section, and whenever the folder or the file changes, the sections are read back into the preferences. A missing section is written from the preferences, a section missing some settings gets them with their current values, defaults included, and one that cannot be read is left alone and never written over until it is fixed. A change to any other preference writes nothing, so an edit to the file is not lost to unrelated changes before it is read. Without a settings folder there is nothing to keep in step.
 final class SettingsMirror {
     static let shared = SettingsMirror()
 
@@ -34,7 +34,11 @@ final class SettingsMirror {
                 UserDefaults.standard.set(value, forKey: entry.key)
                 changedKeys.insert(entry.key)
             }
-            written[section.name] = Self.encoded(section)
+            if section.entries.contains(where: { values[$0.name] == nil }) {
+                write(section, into: folder)
+            } else {
+                written[section.name] = Self.encoded(section)
+            }
         }
         applyChanges(to: changedKeys)
     }

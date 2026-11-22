@@ -6,7 +6,7 @@ nonisolated final class LauncherKeys: KeyResponder {
     static let shared = LauncherKeys()
 
     static let savedKey = "launcher.shortcut"
-    private static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: .option)
+    static let defaultCombo = KeyCombo(keyCode: kVK_Space, modifiers: .option)
     private static let openSearchBarAction = "Open the search bar"
 
     private let combo = OSAllocatedUnfairLock(initialState: LauncherKeys.loaded())

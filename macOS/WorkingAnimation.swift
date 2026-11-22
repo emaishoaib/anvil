@@ -5,7 +5,7 @@ enum WorkingAnimation: String, CaseIterable {
     case strike, glow
 
     static let savedKey = "general.workingAnimation"
-    private static let defaultChoice = WorkingAnimation.strike
+    static let defaultChoice = WorkingAnimation.strike
 
     static var current: WorkingAnimation {
         get { UserDefaults.standard.string(forKey: savedKey).flatMap(WorkingAnimation.init(rawValue:)) ?? defaultChoice }

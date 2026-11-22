@@ -22,10 +22,6 @@ nonisolated enum Tool: String, CaseIterable, Identifiable {
 
     var isOn: Bool { !canBeTurnedOff || UserDefaults.standard.bool(forKey: isOnKey) }
 
-    static func registerDefaults() {
-        UserDefaults.standard.register(defaults: Dictionary(uniqueKeysWithValues: allCases.map { ($0.isOnKey, $0.isOnByDefault) }))
-    }
-
     var name: String {
         switch self {
         case .switcher: "Switcher"
