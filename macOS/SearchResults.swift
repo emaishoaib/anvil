@@ -11,17 +11,24 @@ struct SearchResults: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(items, id: \.index) { item in
-                        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected, appDetail: appDetail(for: item.result), query: model.query) {
-                            model.open(item.result)
+                    ForEach(rows) { row in
+                        switch row {
+                        case .result(let item): resultItem(item)
+                        case .currencies(let table): CurrencyTableView(table: table)
                         }
                     }
                 }
                 .padding(Self.padding)
             }
             .frame(height: Self.listHeight + Self.padding * 2)
-            .overlay { if model.results.isEmpty, !model.isQueryEmpty { NoResults() } }
+            .overlay { if model.results.isEmpty, model.currencyTable == nil, !model.isQueryEmpty { NoResults() } }
             .onChange(of: model.selected) { proxy.scrollTo(model.selected) }
+        }
+    }
+
+    private func resultItem(_ item: ResultsItem) -> ResultItem {
+        ResultItem(result: item.result, header: item.header, isSelected: item.index == model.selected, appDetail: appDetail(for: item.result), query: model.query) {
+            model.open(item.result)
         }
     }
 
@@ -31,12 +38,36 @@ struct SearchResults: View {
         return AppSizes.shared.bytes(of: app.url)?.formatted(.byteCount(style: .file)) ?? "Measuring…"
     }
 
-    private var items: [(index: Int, result: SearchResult, header: String?)] {
+    private var rows: [ResultsRow] {
+        let rows = items.map(ResultsRow.result)
+        guard let table = model.currencyTable else { return rows }
+        let tablePosition = items.firstIndex { !$0.result.isAnswer } ?? items.count
+        return Array(rows[..<tablePosition]) + [.currencies(table)] + rows[tablePosition...]
+    }
+
+    private var items: [ResultsItem] {
         let firstAnswer = model.results.firstIndex { $0.isAnswer }
         let firstOther = model.results.firstIndex { !$0.isAnswer }
         return model.results.enumerated().map { index, result in
             let header: String? = if index == firstAnswer { "Calculator" } else if index == firstOther { model.resultsTitle } else { nil }
             return (index, result, header)
+        }
+    }
+}
+
+private typealias ResultsItem = (index: Int, result: SearchResult, header: String?)
+
+/// One row of the list: a result tracked by its place in the results, so the selection can scroll to it, or the currency table, which has an ID no result can have.
+private enum ResultsRow: Identifiable {
+    private static let currenciesID = -1
+
+    case result(ResultsItem)
+    case currencies(CurrencyTable)
+
+    var id: Int {
+        switch self {
+        case .result(let item): item.index
+        case .currencies: Self.currenciesID
         }
     }
 }

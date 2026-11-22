@@ -9,6 +9,7 @@ import Observation
         didSet { refresh() }
     }
     private(set) var results: [SearchResult] = []
+    private(set) var currencyTable: CurrencyTable?
     private(set) var selected = 0
     private(set) var entryPage = ""
     var field = SearchField.query
@@ -384,9 +385,11 @@ import Observation
     private func refresh() {
         wordLookup?.cancel()
         selected = 0
+        currencyTable = nil
         switch mode {
         case .launcher:
             results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, commands: availableCommands, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
+            currencyTable = CurrencyTable(for: query, rates: CurrencyRatesStore.shared.rates)
         case .uninstallApp:
             results = LauncherSearch.removableApps(matching: query, in: appsOtherThanAnvil)
         case .uninstallReview:
