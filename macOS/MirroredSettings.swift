@@ -1,7 +1,7 @@
 import Foundation
 import WindowKit
 
-/// Which of Anvil's own preferences go in which settings file, each under a plain name of its own in that file: the General settings with the tool switches, the AI settings, and the Windows settings with every window shortcut and snap zone.
+/// Which of Anvil's own preferences go in which settings file, each under a plain name of its own in that file: the General settings with the tool switches and the currency table's currencies, the AI settings, and the Windows settings with every window shortcut and snap zone.
 enum MirroredSettings {
     struct File {
         let name: String
@@ -14,6 +14,7 @@ enum MirroredSettings {
         File(name: "general.json", entries: [
             ("searchBarShortcut", LauncherKeys.savedKey),
             ("searchMemory", SearchMemory.savedKey),
+            ("currencies", ChosenCurrencies.savedKey),
             ("workingAnimation", WorkingAnimation.savedKey),
         ] + Tool.allCases.filter(\.canBeTurnedOff).map { ("use.\($0.rawValue)", $0.isOnKey) })
     }
