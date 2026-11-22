@@ -389,7 +389,7 @@ import Observation
         switch mode {
         case .launcher:
             results = LauncherSearch.results(for: query, in: AppCatalog.shared.apps, quickLinks: QuickLinkLibrary.shared.links, commands: availableCommands, launchCounts: launchCounts, rates: CurrencyRatesStore.shared.rates)
-            currencyTable = CurrencyTable(for: query, rates: CurrencyRatesStore.shared.rates)
+            currencyTable = CurrencyTable(for: query, codes: CurrencyChoices.startingCodes(), rates: CurrencyRatesStore.shared.rates)
         case .uninstallApp:
             results = LauncherSearch.removableApps(matching: query, in: appsOtherThanAnvil)
         case .uninstallReview:
