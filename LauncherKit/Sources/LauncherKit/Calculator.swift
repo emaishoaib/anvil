@@ -5,14 +5,11 @@ public enum Calculator {
     private static let largestSpelledOutNumber = 999.0
 
     public static func answer(for query: String, rates: CurrencyRates? = nil, locale: Locale = .current) -> Answer? {
-        var text = query.trimmingCharacters(in: .whitespaces)
-        if text.hasSuffix("=") { text.removeLast() }
-        guard let tokens = ExpressionToken.tokens(in: text) else { return nil }
-        var parser = ExpressionParser(tokens: tokens, rates: rates)
-        guard let parsed = parser.parse(), let finished = finished(parsed, by: parser, rates: rates, locale: locale), finished.amount.isFinite else { return nil }
+        guard let parsed = ParsedQuery(query, rates: rates), let finished = finished(parsed.result, by: parsed.parser, rates: rates, locale: locale), finished.amount.isFinite else { return nil }
         let result = Quantity(finished.amount == 0 ? 0 : finished.amount, in: finished.measure)
+        let parser = parsed.parser
         return Answer(
-            input: text.trimmingCharacters(in: .whitespaces),
+            input: parsed.text,
             inputLabel: parser.operators.isEmpty ? parser.sourceMeasure?.label(locale: locale) ?? "" : inputLabel(for: parser.operators),
             output: QuantityFormat.text(of: result, locale: locale),
             outputLabel: result.measure?.label(locale: locale) ?? outputLabel(for: result.amount, locale: locale),

@@ -11,6 +11,7 @@ struct ExpressionParser {
     private(set) var operators: Set<ExpressionToken> = []
     private(set) var sourceMeasure: Measure?
     private(set) var hasConversion = false
+    private(set) var unconverted: Quantity?
 
     init(tokens: [ExpressionToken], rates: CurrencyRates? = nil) {
         self.tokens = tokens
@@ -18,8 +19,10 @@ struct ExpressionParser {
     }
 
     mutating func parse() -> Quantity? {
-        guard let value = conversion(), position == tokens.count else { return nil }
-        return value
+        guard let value = expression() else { return nil }
+        unconverted = value
+        guard let converted = applyingConversions(to: value), position == tokens.count else { return nil }
+        return converted
     }
 
     private var next: ExpressionToken? {
@@ -27,7 +30,12 @@ struct ExpressionParser {
     }
 
     private mutating func conversion() -> Quantity? {
-        guard var value = expression() else { return nil }
+        guard let value = expression() else { return nil }
+        return applyingConversions(to: value)
+    }
+
+    private mutating func applyingConversions(to quantity: Quantity) -> Quantity? {
+        var value = quantity
         while value.measure != nil, let target = target() {
             guard let converted = value.converted(to: target, rates: rates) else { return nil }
             value = converted
