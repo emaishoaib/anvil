@@ -86,6 +86,9 @@ struct SearchBarView: View {
         } else if model.mode == .screenshot, let page = model.screenshot {
             Divider()
             ScreenshotView(page: page, query: model.query)
+        } else if case .currencyPicker = model.mode, let picker = model.currencyPicker {
+            Divider()
+            CurrencyPickerView(picker: picker, query: model.query)
         } else if model.mode == .askClaude, let chat = model.chatModel {
             ClaudeChat(chat: chat.session, state: chat.state, update: chat.update.state, isExpanded: model.isExpanded, cardChoice: chat.cardChoice, choose: chat.choose)
                 .overlay(alignment: .bottom) {
@@ -125,6 +128,8 @@ struct SearchBarView: View {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, settingAction: model.settings.selectedActionTitle, message: model.settings.message)
         } else if model.mode == .screenshot {
             SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, screenshotAction: model.screenshot?.selectedAction(matching: model.query)?.title)
+        } else if case .currencyPicker = model.mode, let picker = model.currencyPicker {
+            SearchFooter(mode: model.mode, selected: nil, toggleAnvilActions: model.toggleAnvilActions, currencyAction: picker.selectedCurrency(matching: model.query).map { picker.isChosen($0) ? "Remove Currency" : "Add Currency" })
         } else {
             SearchFooter(mode: model.mode, selected: model.selectedResult, toggleAnvilActions: model.toggleAnvilActions)
         }

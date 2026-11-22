@@ -11,6 +11,7 @@ enum SearchMode: Equatable {
     case ruleForm(RuleGroup, isNew: Bool, query: String)
     case keySwapForm(query: String)
     case phraseForm(SpokenPhrase, query: String)
+    case currencyPicker(fromSettings: Bool, query: String)
     case askClaude
     case desktopSessions
     case screenshot
@@ -25,6 +26,7 @@ enum SearchMode: Equatable {
         case .askClaude: "Ask Claude…"
         case .desktopSessions: "Search chats, or press Tab for a new chat…"
         case .screenshot: "Choose what to do with the screenshot…"
+        case .currencyPicker: "Search currencies to add…"
         case .wordEntry, .quickLinkForm, .ruleForm, .keySwapForm, .phraseForm: ""
         }
     }

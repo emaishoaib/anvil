@@ -10,6 +10,7 @@ struct SearchFooter: View {
     let toggleAnvilActions: () -> Void
     var settingAction: String? = nil
     var screenshotAction: String? = nil
+    var currencyAction: String? = nil
     var message: String? = nil
     var performAction: (() -> Void)? = nil
     var chatState = ChatState.notStarted
@@ -50,6 +51,10 @@ struct SearchFooter: View {
                 case .screenshot:
                     SymbolIcon(symbol: "camera.viewfinder", colour: .blue)
                     Text(Tool.screenshots.name)
+                        .foregroundStyle(.secondary)
+                case .currencyPicker:
+                    SymbolIcon(symbol: "dollarsign", colour: .green)
+                    Text("Currencies")
                         .foregroundStyle(.secondary)
                 case .askClaude:
                     if let closeChat {
@@ -184,6 +189,7 @@ struct SearchFooter: View {
     private var action: String? {
         if mode == .settings { return settingAction }
         if mode == .screenshot { return screenshotAction }
+        if case .currencyPicker = mode { return currencyAction }
         if mode == .desktopSessions { return "Continue Chat" }
         if mode == .askClaude {
             return switch chatState {

@@ -19,15 +19,11 @@ struct CurrencyTableView: View {
 }
 
 private struct CurrencyRow: View {
-    private static let regionalIndicatorOffset: UInt32 = 0x1F1E6 - 0x41
-    private static let regionCodeLength = 2
-
     let row: CurrencyTable.Row
 
     var body: some View {
         HStack(spacing: 10) {
-            Text(flag)
-                .font(.system(size: 17))
+            CurrencyFlag(code: row.code)
             Text(row.code)
                 .font(.system(size: 12, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.secondary)
@@ -40,10 +36,5 @@ private struct CurrencyRow: View {
                 .foregroundStyle(Color(nsColor: .textColor))
         }
         .padding(.horizontal, 8)
-    }
-
-    private var flag: String {
-        let scalars = row.code.prefix(Self.regionCodeLength).unicodeScalars.compactMap { Unicode.Scalar($0.value + Self.regionalIndicatorOffset) }
-        return String(String.UnicodeScalarView(scalars))
     }
 }

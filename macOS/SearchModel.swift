@@ -23,6 +23,7 @@ import Observation
     private(set) var review: UninstallReview?
     private(set) var desktopSessionList: DesktopSessionList?
     private(set) var screenshot: ScreenshotPage?
+    private(set) var currencyPicker: CurrencyPicker?
     private var screenshotToSend: Data?
     private(set) var timesOpened = 0
     private(set) var isPinned = false
@@ -81,6 +82,7 @@ import Observation
         desktopSessionList = nil
         screenshot = nil
         screenshotToSend = nil
+        currencyPicker = nil
         arguments = LinkArguments()
         draft = QuickLink()
         ruleDraft = RuleDraft()
@@ -111,6 +113,10 @@ import Observation
             screenshot?.moveSelection(by: offset, matching: query)
             return
         }
+        if case .currencyPicker = mode {
+            currencyPicker?.moveSelection(by: offset, matching: query)
+            return
+        }
         guard !results.isEmpty else { return }
         selected = min(max(selected + offset, 0), results.count - 1)
         showArguments()
@@ -138,6 +144,7 @@ import Observation
         if mode == .askClaude { return chatModel?.sendPrompt() ?? () }
         if mode == .desktopSessions { return continueSelectedChat() }
         if mode == .screenshot { return runSelectedScreenshotAction() }
+        if case .currencyPicker = mode { return currencyPicker?.toggleSelected(matching: query) ?? () }
         if mode == .settings {
             if let setting = settings.selectedSetting { open(setting) }
             return
@@ -199,6 +206,15 @@ import Observation
         settings.finishEditing()
         ruleDraft = draft
         mode = .ruleForm(group, isNew: isNew, query: query)
+        query = ""
+    }
+
+    /// Opens the currency picker over the launcher or the settings, whichever is showing, and going back returns there with the text as it was.
+    func showCurrencyPicker() {
+        settings.finishEditing()
+        actionPanel = nil
+        currencyPicker = CurrencyPicker()
+        mode = .currencyPicker(fromSettings: mode == .settings, query: query)
         query = ""
     }
 
@@ -267,6 +283,11 @@ import Observation
         case .ruleForm(_, _, let previousQuery), .keySwapForm(let previousQuery), .phraseForm(_, let previousQuery):
             settings.reload()
             mode = .settings
+            query = previousQuery
+        case .currencyPicker(let fromSettings, let previousQuery):
+            currencyPicker = nil
+            if fromSettings { settings.reload() }
+            mode = fromSettings ? .settings : .launcher
             query = previousQuery
         }
         return true
@@ -414,6 +435,9 @@ import Observation
         case .screenshot:
             results = []
             screenshot?.select(0)
+        case .currencyPicker:
+            results = []
+            currencyPicker?.select(0)
         }
         showArguments()
     }
