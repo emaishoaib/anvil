@@ -1,6 +1,6 @@
 import LauncherKit
 
-/// Builds the rows for values kept in the Mouse tool's settings file. Each carries the file's load problem as its warning, because no change is saved while the file cannot be read.
+/// Builds the rows for values kept in the Mouse tool's section of the settings. Each carries the section's load problem as its warning, because no change is saved while it cannot be read.
 enum MouseSettingRows {
     static func setting(_ title: String, id: String, subtitle: String? = nil, row: SettingRow) -> Setting {
         Setting(

@@ -23,7 +23,7 @@ import Observation
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
-        panel.message = "Choose the folder that holds Anvil's settings files"
+        panel.message = "Choose the folder that holds Anvil's settings file"
         guard panel.runModal() == .OK, let chosen = panel.url else { return }
         use(chosen)
     }
