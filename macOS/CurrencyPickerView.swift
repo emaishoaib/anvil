@@ -1,7 +1,7 @@
 import LauncherKit
 import SwiftUI
 
-/// The rows of the currency picker: the chosen currencies with nothing typed, and the currencies found once something is. Each row has the currency's flag, code and name, and a found currency that is already chosen has a tick. Clicking a row selects it, and an empty list says why it is empty.
+/// The rows of the currency picker: the chosen currencies with nothing typed, and the currencies found once something is. Each row has the currency's flag, code and name. A chosen currency in the list has a minus that removes it, and a found currency that is already chosen has a tick. Clicking a row selects it, and an empty list says why it is empty.
 struct CurrencyPickerView: View {
     private static let rowHeight: CGFloat = 36
     private static let padding: CGFloat = 8
@@ -17,7 +17,7 @@ struct CurrencyPickerView: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     SectionHeader(title: isSearching ? "Results" : "Chosen Currencies")
                     ForEach(Array(currencies.enumerated()), id: \.element.code) { index, currency in
-                        CurrencyPickerRow(currency: currency, isTicked: isSearching && picker.isChosen(currency), isSelected: index == picker.selected)
+                        CurrencyPickerRow(currency: currency, isTicked: isSearching && picker.isChosen(currency), isSelected: index == picker.selected, remove: isSearching ? nil : { picker.remove(currency, matching: query) })
                             .frame(height: Self.rowHeight)
                             .onTapGesture { picker.select(index) }
                     }
@@ -46,6 +46,7 @@ private struct CurrencyPickerRow: View {
     let currency: Currency
     let isTicked: Bool
     let isSelected: Bool
+    let remove: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -61,6 +62,7 @@ private struct CurrencyPickerRow: View {
                 Image(systemName: "checkmark")
                     .foregroundStyle(.secondary)
             }
+            if let remove { RemoveButton(action: remove) }
         }
         .padding(.horizontal, 8)
         .frame(maxHeight: .infinity)
@@ -68,5 +70,20 @@ private struct CurrencyPickerRow: View {
             if isSelected { RoundedRectangle(cornerRadius: SearchStyle.cornerRadius).fill(.primary.opacity(SearchStyle.selectionOpacity)) }
         }
         .contentShape(.rect)
+    }
+}
+
+private struct RemoveButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "minus.circle.fill")
+                .font(.system(size: 15))
+                .foregroundStyle(.white, .red)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .help("Remove Currency")
     }
 }

@@ -49,9 +49,13 @@ import Observation
 
     func removeSelected(matching query: String) -> Bool {
         guard let currency = selectedCurrency(matching: query), isChosen(currency) else { return false }
+        remove(currency, matching: query)
+        return true
+    }
+
+    func remove(_ currency: Currency, matching query: String) {
         chosen.removeAll { $0 == currency.code }
         ChosenCurrencies.codes = chosen
         moveSelection(by: 0, matching: query)
-        return true
     }
 }
