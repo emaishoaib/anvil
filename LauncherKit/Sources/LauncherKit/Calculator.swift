@@ -9,8 +9,8 @@ public enum Calculator {
         if text.hasSuffix("=") { text.removeLast() }
         guard let tokens = ExpressionToken.tokens(in: text) else { return nil }
         var parser = ExpressionParser(tokens: tokens)
-        guard let value = parser.parse(), !parser.operators.isEmpty, value.isFinite else { return nil }
-        let result = value == 0 ? 0 : value
+        guard let quantity = parser.parse(), quantity.measure == nil, !parser.operators.isEmpty, quantity.amount.isFinite else { return nil }
+        let result = quantity.amount == 0 ? 0 : quantity.amount
         let style = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(0...maximumFractionDigits)).locale(locale)
         return Answer(
             input: text.trimmingCharacters(in: .whitespaces),

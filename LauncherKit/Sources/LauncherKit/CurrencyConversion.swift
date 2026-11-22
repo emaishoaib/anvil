@@ -1,10 +1,7 @@
 import Foundation
 
 public enum CurrencyConversion {
-    private static let symbols = ["$": "USD", "€": "EUR", "£": "GBP", "¥": "JPY", "₹": "INR", "₩": "KRW", "₺": "TRY"]
-    private static let names = ["dollar": "USD", "dollars": "USD", "euro": "EUR", "euros": "EUR", "yen": "JPY", "rupee": "INR", "rupees": "INR"]
     private static let connectors: Set<String> = ["to", "in", "as", "into", "="]
-    private static let isoCodes = Set(Locale.Currency.isoCurrencies.map(\.identifier))
     private static let symbolPattern = "[$€£¥₹₩₺]"
 
     public static func answer(for query: String, rates: CurrencyRates, locale: Locale = .current) -> Answer? {
@@ -45,9 +42,7 @@ public enum CurrencyConversion {
     }
 
     private static func currency(_ word: String) -> String? {
-        if let code = symbols[word] ?? names[word] { return code }
-        let code = word.uppercased()
-        return word.count == 3 && isoCodes.contains(code) ? code : nil
+        CurrencyNames.code(for: word)
     }
 
     private static func words(in query: String) -> [String] {
