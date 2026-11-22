@@ -9,6 +9,8 @@ struct ExpressionParser {
     private let rates: CurrencyRates?
     private var position = 0
     private(set) var operators: Set<ExpressionToken> = []
+    private(set) var sourceMeasure: Measure?
+    private(set) var hasConversion = false
 
     init(tokens: [ExpressionToken], rates: CurrencyRates? = nil) {
         self.tokens = tokens
@@ -29,6 +31,7 @@ struct ExpressionParser {
         while value.measure != nil, let target = target() {
             guard let converted = value.converted(to: target, rates: rates) else { return nil }
             value = converted
+            hasConversion = true
         }
         return value
     }
@@ -91,7 +94,7 @@ struct ExpressionParser {
         switch next {
         case .number(let amount):
             position += 1
-            return Quantity(amount, in: measure())
+            return noted(amount, in: measure())
         case .word:
             return amountAfterCurrency()
         case .open:
@@ -111,7 +114,12 @@ struct ExpressionParser {
             return nil
         }
         position += 1
-        return Quantity(amount, in: currency)
+        return noted(amount, in: currency)
+    }
+
+    private mutating func noted(_ amount: Double, in measure: Measure?) -> Quantity {
+        if sourceMeasure == nil { sourceMeasure = measure }
+        return Quantity(amount, in: measure)
     }
 
     private mutating func measure() -> Measure? {

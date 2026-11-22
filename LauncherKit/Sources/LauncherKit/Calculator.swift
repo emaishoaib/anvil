@@ -1,24 +1,30 @@
 import Foundation
 
+/// Answers sums, unit conversions and currency conversions, and sums that mix all three. A plain number on its own is not an answer, and a unit or currency amount on its own goes to its default target. A sum is labelled by its operators, a lone conversion by what it converts from, and the answer by its unit or currency, or by its spelled-out number when it is small and whole.
 public enum Calculator {
-    private static let maximumFractionDigits = 10
     private static let largestSpelledOutNumber = 999.0
 
-    public static func answer(for query: String, locale: Locale = .current) -> Answer? {
+    public static func answer(for query: String, rates: CurrencyRates? = nil, locale: Locale = .current) -> Answer? {
         var text = query.trimmingCharacters(in: .whitespaces)
         if text.hasSuffix("=") { text.removeLast() }
         guard let tokens = ExpressionToken.tokens(in: text) else { return nil }
-        var parser = ExpressionParser(tokens: tokens)
-        guard let quantity = parser.parse(), quantity.measure == nil, !parser.operators.isEmpty, quantity.amount.isFinite else { return nil }
-        let result = quantity.amount == 0 ? 0 : quantity.amount
-        let style = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(0...maximumFractionDigits)).locale(locale)
+        var parser = ExpressionParser(tokens: tokens, rates: rates)
+        guard let parsed = parser.parse(), let finished = finished(parsed, by: parser, rates: rates, locale: locale), finished.amount.isFinite else { return nil }
+        let result = Quantity(finished.amount == 0 ? 0 : finished.amount, in: finished.measure)
         return Answer(
             input: text.trimmingCharacters(in: .whitespaces),
-            inputLabel: inputLabel(for: parser.operators),
-            output: result.formatted(style),
-            outputLabel: outputLabel(for: result, locale: locale),
-            copyText: result.formatted(style.grouping(.never))
+            inputLabel: parser.operators.isEmpty ? parser.sourceMeasure?.label(locale: locale) ?? "" : inputLabel(for: parser.operators),
+            output: QuantityFormat.text(of: result, locale: locale),
+            outputLabel: result.measure?.label(locale: locale) ?? outputLabel(for: result.amount, locale: locale),
+            copyText: QuantityFormat.copyText(of: result, locale: locale)
         )
+    }
+
+    private static func finished(_ quantity: Quantity, by parser: ExpressionParser, rates: CurrencyRates?, locale: Locale) -> Quantity? {
+        guard let measure = quantity.measure else { return parser.operators.isEmpty ? nil : quantity }
+        guard parser.operators.isEmpty, !parser.hasConversion else { return quantity }
+        guard let target = measure.defaultTarget(locale: locale) else { return nil }
+        return quantity.converted(to: target, rates: rates)
     }
 
     private static func inputLabel(for operators: Set<ExpressionToken>) -> String {

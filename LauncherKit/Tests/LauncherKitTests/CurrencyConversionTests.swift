@@ -7,7 +7,7 @@ struct CurrencyConversionTests {
     let rates = CurrencyRates(date: "2026-11-12", perDollar: ["USD": 1, "EUR": 0.9, "GBP": 0.8, "EGP": 50, "JPY": 150])
 
     func answer(_ query: String) -> Answer? {
-        CurrencyConversion.answer(for: query, rates: rates, locale: locale)
+        Calculator.answer(for: query, rates: rates, locale: locale)
     }
 
     func output(_ query: String) -> String? {
@@ -56,10 +56,20 @@ struct CurrencyConversionTests {
     }
 
     @Test func otherTextIsNotAConversion() {
-        #expect(answer("100 kg to g") == nil)
         #expect(answer("100 xyz to usd") == nil)
         #expect(answer("safari") == nil)
         #expect(answer("usd") == nil)
+    }
+
+    @Test func aConvertedAmountCanBeUsedInASum() {
+        let answer = answer("(150 GBP to EGP) - 8400")
+        #expect(output("(150 GBP to EGP) - 8400") == "EGP 975.00")
+        #expect(answer?.inputLabel == "Difference")
+        #expect(answer?.outputLabel == "Egyptian Pound")
+    }
+
+    @Test func aSumOfCurrenciesIsInTheFirstOne() {
+        #expect(output("£20 + $16") == "£32.80")
     }
 
     @Test func aCurrencyWithoutARateHasNoAnswer() {

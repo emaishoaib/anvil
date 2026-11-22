@@ -15,10 +15,8 @@ public enum LauncherSearch {
         locale: Locale = .current
     ) -> [SearchResult] {
         let answers = [
-            Calculator.answer(for: query, locale: locale),
+            Calculator.answer(for: query, rates: rates, locale: locale),
             DatePhrases.answer(for: query, now: now, calendar: calendar, locale: locale),
-            UnitConversion.answer(for: query, locale: locale),
-            rates.flatMap { CurrencyConversion.answer(for: query, rates: $0, locale: locale) },
         ].compactMap { $0 }
         let candidates = apps.map(SearchResult.app) + commands.map(SearchResult.command) + quickLinks.map(SearchResult.quickLink)
         let ranked = query.trimmingCharacters(in: .whitespaces).isEmpty

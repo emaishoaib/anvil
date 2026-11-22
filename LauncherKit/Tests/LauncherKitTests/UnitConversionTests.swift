@@ -6,7 +6,7 @@ struct UnitConversionTests {
     let locale = Locale(identifier: "en_US")
 
     func answer(_ query: String) -> Answer? {
-        UnitConversion.answer(for: query, locale: locale)
+        Calculator.answer(for: query, locale: locale)
     }
 
     func output(_ query: String) -> String? {
@@ -80,6 +80,16 @@ struct UnitConversionTests {
 
     @Test func theCopiedAnswerIsAPlainNumber() {
         #expect(answer("1kg to g")?.copyText == "1000")
+    }
+
+    @Test func aSumOfUnitsStaysInTheFirstUnit() {
+        #expect(output("5 km + 500 m") == "5.5 km")
+        #expect(answer("5 km + 500 m")?.inputLabel == "Sum")
+        #expect(answer("5 km + 500 m")?.outputLabel == "Kilometres")
+    }
+
+    @Test func aSumOfUnitsCanBeConvertedAtTheEnd() {
+        #expect(output("(3 hours to minutes) / 4") == "45 minutes")
     }
 
     @Test func unitsThatMeasureDifferentThingsDoNotConvert() {
