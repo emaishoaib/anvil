@@ -111,6 +111,10 @@ struct UnitConversionTests {
         #expect(output("3m ^ 2") == "9 m²")
     }
 
+    @Test func theSideOfAnAreaCanBeConvertedAndThenDivided() {
+        #expect(output("(3.3m2 ^ 0.5) to cm / 8") == "22.7073776557 cm")
+    }
+
     @Test func unitsThatMeasureDifferentThingsDoNotConvert() {
         #expect(answer("5 kg to m") == nil)
     }

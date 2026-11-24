@@ -78,6 +78,21 @@ struct ExpressionParserTests {
         #expect(parse("10 km/2") == unit(5, "km"))
     }
 
+    @Test func aSumCarriesOnFromAConvertedAmount() {
+        #expect(parse("5 km to m / 2") == unit(2500, "m"))
+        #expect(parse("150 GBP to EGP - 8400", rates: rates) == money(6600, "EGP"))
+        #expect(parse("1 km to m + 1 km to cm") == unit(200_000, "cm"))
+    }
+
+    @Test func aConversionAtTheEndStillChangesTheWholeSum() {
+        #expect(parse("5 km + 500 m to m") == unit(5500, "m"))
+    }
+
+    @Test func onlyArithmeticCarriesOnAfterAConversion() {
+        #expect(parse("3 m to cm ^ 2") == nil)
+        #expect(parse("5 km to m 2") == nil)
+    }
+
     @Test func twoLengthsMultiplyIntoAnAreaThatCanBeConverted() {
         #expect(isClose("150cm * 180cm to m2", to: unit(2.7, "m2")))
         #expect(isClose("150cm * 1.8m", to: unit(27_000, "sq cm")))

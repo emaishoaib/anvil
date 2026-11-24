@@ -1,9 +1,10 @@
 import Foundation
 
-/// Works out a sum whose numbers can carry units and currencies. A unit or currency follows its number, and a currency can come before it too, as in `$100`. A conversion such as `to EGP` changes everything before it, or everything inside its brackets, and the word before the target can be left out. Unit and currency names are matched longest first, up to three words, so `fl oz` and `degrees celsius` are read whole and `in` is only read as "convert into" when it is not straight after a number.
+/// Works out a sum whose numbers can carry units and currencies. A unit or currency follows its number, and a currency can come before it too, as in `$100`. A conversion such as `to EGP` changes everything before it, or everything inside its brackets, and the word before the target can be left out. A sum can carry on after a conversion, starting from the converted amount, so `5 km to m / 2` halves the metres. Unit and currency names are matched longest first, up to three words, so `fl oz` and `degrees celsius` are read whole and `in` is only read as "convert into" when it is not straight after a number.
 struct ExpressionParser {
     private static let connectors: Set<String> = ["to", "in", "as", "into", "="]
     private static let longestNameWords = 3
+    private static let operatorsAfterConversion: Set<ExpressionToken> = [.plus, .minus, .times, .divide]
 
     private let tokens: [ExpressionToken]
     private let rates: CurrencyRates?
@@ -19,10 +20,8 @@ struct ExpressionParser {
     }
 
     mutating func parse() -> Quantity? {
-        guard let value = expression() else { return nil }
-        unconverted = value
-        guard let converted = applyingConversions(to: value), position == tokens.count else { return nil }
-        return converted
+        guard let value = conversion(), position == tokens.count else { return nil }
+        return value
     }
 
     private var next: ExpressionToken? {
@@ -30,8 +29,14 @@ struct ExpressionParser {
     }
 
     private mutating func conversion() -> Quantity? {
-        guard let value = expression() else { return nil }
-        return applyingConversions(to: value)
+        var value = expression()
+        while let reached = value {
+            unconverted = reached
+            guard let converted = applyingConversions(to: reached) else { return nil }
+            guard let token = next, Self.operatorsAfterConversion.contains(token) else { return converted }
+            value = expression(startingWith: converted)
+        }
+        return nil
     }
 
     private mutating func applyingConversions(to quantity: Quantity) -> Quantity? {
@@ -54,8 +59,8 @@ struct ExpressionParser {
         return measure
     }
 
-    private mutating func expression() -> Quantity? {
-        guard var value = term() else { return nil }
+    private mutating func expression(startingWith first: Quantity? = nil) -> Quantity? {
+        guard var value = term(startingWith: first) else { return nil }
         while let token = next, token == .plus || token == .minus {
             position += 1
             guard let right = term(), let combined = value.combined(with: right, by: token, rates: rates) else { return nil }
@@ -65,8 +70,8 @@ struct ExpressionParser {
         return value
     }
 
-    private mutating func term() -> Quantity? {
-        guard var value = factor() else { return nil }
+    private mutating func term(startingWith first: Quantity? = nil) -> Quantity? {
+        guard var value = first ?? factor() else { return nil }
         while let token = next, token == .times || token == .divide {
             position += 1
             guard let right = factor(), let combined = value.combined(with: right, by: token, rates: rates) else { return nil }

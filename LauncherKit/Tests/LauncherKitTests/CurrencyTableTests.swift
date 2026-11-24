@@ -37,6 +37,10 @@ struct CurrencyTableTests {
         #expect(amount("(150 GBP to EGP) - 8400", in: "USD") == "$19.50")
     }
 
+    @Test func aSumThatCarriesOnAfterAConversionIsListedFromItsResult() {
+        #expect(table("150 GBP to EGP - 8400") == table("(150 GBP to EGP) - 8400"))
+    }
+
     @Test func theChosenCurrenciesAreListedInTheirOrder() {
         let table = CurrencyTable(for: "300 gbp", codes: ["EGP", "GBP", "USD"], rates: rates, locale: Locale(identifier: "en_US"))
         #expect(table?.rows.map(\.code) == ["EGP", "USD"])
