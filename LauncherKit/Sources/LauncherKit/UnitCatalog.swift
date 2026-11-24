@@ -85,6 +85,8 @@ enum UnitCatalog {
         "in": "sq in", "ft": "sq ft", "yd": "sq yd", "mi": "sq mi",
     ]
 
+    private static let lengthNamesBySquare = Dictionary(uniqueKeysWithValues: squareNamesByLength.map { ($1, $0) })
+
     private static let byName = Dictionary(entries.flatMap { entry in entry.names.map { ($0, entry) } }) { first, _ in first }
 
     static func entry(named name: String) -> UnitEntry? {
@@ -94,5 +96,10 @@ enum UnitCatalog {
     /// The area unit a length makes when it is multiplied by itself, such as square centimetres for centimetres. Anything that is not a length has no square.
     static func square(of length: UnitEntry) -> UnitEntry? {
         length.names.first.flatMap { squareNamesByLength[$0] }.flatMap(entry(named:))
+    }
+
+    /// The length whose square an area is, such as centimetres for square centimetres. Areas that are not the square of a length, such as acres, have none.
+    static func side(of area: UnitEntry) -> UnitEntry? {
+        area.names.first.flatMap { lengthNamesBySquare[$0] }.flatMap(entry(named:))
     }
 }

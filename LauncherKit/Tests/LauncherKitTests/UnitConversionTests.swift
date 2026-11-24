@@ -106,6 +106,11 @@ struct UnitConversionTests {
         #expect(answer("2kg * 3kg") == nil)
     }
 
+    @Test func powersOfLengthsAndAreasShowInTheirUnits() {
+        #expect(output("(3.3m2 ^ 0.5) to cm") == "181.6590212458 cm")
+        #expect(output("3m ^ 2") == "9 m²")
+    }
+
     @Test func unitsThatMeasureDifferentThingsDoNotConvert() {
         #expect(answer("5 kg to m") == nil)
     }

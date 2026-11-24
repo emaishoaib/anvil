@@ -65,9 +65,24 @@ struct QuantityTests {
         #expect(combine(Quantity(10), .divide, unit(2, "km")) == nil)
     }
 
-    @Test func powersOnlyWorkOnPlainNumbers() {
+    @Test func plainNumbersTakeAnyPower() {
         #expect(combine(Quantity(2), .power, Quantity(3)) == Quantity(8))
-        #expect(combine(unit(2, "m"), .power, Quantity(2)) == nil)
+    }
+
+    @Test func aLengthSquaredIsAnArea() {
+        #expect(combine(unit(3, "m"), .power, Quantity(2)) == unit(9, "sq m"))
+    }
+
+    @Test func theSquareRootOfAnAreaIsALength() {
+        #expect(combine(unit(9, "sq cm"), .power, Quantity(0.5)) == unit(3, "cm"))
+    }
+
+    @Test func otherPowersOfUnitsDoNotWork() {
+        #expect(combine(unit(2, "m"), .power, Quantity(3)) == nil)
+        #expect(combine(unit(2, "kg"), .power, Quantity(2)) == nil)
+        #expect(combine(unit(4, "acres"), .power, Quantity(0.5)) == nil)
+        #expect(combine(pounds(4), .power, Quantity(0.5)) == nil)
+        #expect(combine(Quantity(2), .power, unit(2, "m")) == nil)
     }
 
     @Test func oneCurrencyNeedsNoRates() {
