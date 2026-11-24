@@ -41,8 +41,20 @@ struct QuantityTests {
         #expect(combine(Quantity(3), .times, unit(2, "km")) == unit(6, "km"))
     }
 
-    @Test func twoMeasuredAmountsDoNotMultiply() {
-        #expect(combine(unit(2, "km"), .times, unit(3, "km")) == nil)
+    @Test func twoLengthsMultiplyIntoAnArea() {
+        #expect(combine(unit(150, "cm"), .times, unit(180, "cm")) == unit(27_000, "sq cm"))
+        #expect(combine(unit(2, "km"), .times, unit(3, "km")) == unit(6, "sq km"))
+    }
+
+    @Test func theRightLengthIsConvertedIntoTheLeftLengthsUnitBeforeMultiplying() {
+        #expect(combine(unit(3, "ft"), .times, unit(1, "yd")) == unit(9, "sq ft"))
+    }
+
+    @Test func otherMeasuredAmountsDoNotMultiply() {
+        #expect(combine(unit(2, "kg"), .times, unit(3, "kg")) == nil)
+        #expect(combine(unit(2, "m"), .times, unit(3, "kg")) == nil)
+        #expect(combine(unit(2, "sq m"), .times, unit(3, "m")) == nil)
+        #expect(combine(pounds(2), .times, pounds(3)) == nil)
     }
 
     @Test func dividingLikeAmountsGivesAPlainNumber() {

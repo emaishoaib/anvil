@@ -100,6 +100,12 @@ struct UnitConversionTests {
         #expect(output("(3 hours to minutes) / 4") == "45 minutes")
     }
 
+    @Test func twoLengthsMultipliedShowAsAnArea() {
+        #expect(output("150cm * 180cm to m2") == "2.7 m²")
+        #expect(answer("150cm * 180cm")?.outputLabel == "Square Centimetres")
+        #expect(answer("2kg * 3kg") == nil)
+    }
+
     @Test func unitsThatMeasureDifferentThingsDoNotConvert() {
         #expect(answer("5 kg to m") == nil)
     }

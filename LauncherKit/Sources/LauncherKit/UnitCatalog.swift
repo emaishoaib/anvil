@@ -80,9 +80,19 @@ enum UnitCatalog {
         UnitEntry(["kj", "kilojoules"], UnitEnergy.kilojoules, "kJ", "Kilojoules", to: "kcal"),
     ]
 
+    private static let squareNamesByLength = [
+        "mm": "sq mm", "cm": "sq cm", "m": "sq m", "km": "sq km",
+        "in": "sq in", "ft": "sq ft", "yd": "sq yd", "mi": "sq mi",
+    ]
+
     private static let byName = Dictionary(entries.flatMap { entry in entry.names.map { ($0, entry) } }) { first, _ in first }
 
     static func entry(named name: String) -> UnitEntry? {
         byName[name]
+    }
+
+    /// The area unit a length makes when it is multiplied by itself, such as square centimetres for centimetres. Anything that is not a length has no square.
+    static func square(of length: UnitEntry) -> UnitEntry? {
+        length.names.first.flatMap { squareNamesByLength[$0] }.flatMap(entry(named:))
     }
 }

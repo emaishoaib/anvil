@@ -1,6 +1,6 @@
 import Foundation
 
-/// A number that can carry a unit or a currency, so a sum can mix plain numbers, units and money. A plain number takes on the measure of whatever it meets, and two amounts of the same kind are worked out in the left one's measure. Amounts of different kinds never combine, and changing between currencies needs the day's rates.
+/// A number that can carry a unit or a currency, so a sum can mix plain numbers, units and money. A plain number takes on the measure of whatever it meets, and two amounts of the same kind are worked out in the left one's measure. Two lengths multiply into the square of the left one's unit, so centimetres times metres gives square centimetres. Other amounts of different kinds never combine, and changing between currencies needs the day's rates.
 struct Quantity: Equatable {
     let amount: Double
     let measure: Measure?
@@ -32,8 +32,8 @@ struct Quantity: Equatable {
             let amount = operation == .plus ? left.amount + right.amount : left.amount - right.amount
             return Quantity(amount, in: left.measure)
         case .times:
-            guard measure == nil || other.measure == nil else { return nil }
-            return Quantity(amount * other.amount, in: measure ?? other.measure)
+            guard let measure, other.measure != nil else { return Quantity(amount * other.amount, in: measure ?? other.measure) }
+            return area(of: measure, times: other, rates: rates)
         case .divide:
             guard other.measure != nil else { return Quantity(amount / other.amount, in: measure) }
             guard let measure, let divisor = other.converted(to: measure, rates: rates) else { return nil }
@@ -44,6 +44,11 @@ struct Quantity: Equatable {
         default:
             return nil
         }
+    }
+
+    private func area(of measure: Measure, times other: Quantity, rates: CurrencyRates?) -> Quantity? {
+        guard case .unit(let length) = measure, let square = UnitCatalog.square(of: length), let right = other.converted(to: measure, rates: rates) else { return nil }
+        return Quantity(amount * right.amount, in: .unit(square))
     }
 
     private func matched(with other: Quantity, rates: CurrencyRates?) -> (Quantity, Quantity)? {

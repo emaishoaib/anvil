@@ -78,6 +78,11 @@ struct ExpressionParserTests {
         #expect(parse("10 km/2") == unit(5, "km"))
     }
 
+    @Test func twoLengthsMultiplyIntoAnAreaThatCanBeConverted() {
+        #expect(isClose("150cm * 180cm to m2", to: unit(2.7, "m2")))
+        #expect(isClose("150cm * 1.8m", to: unit(27_000, "sq cm")))
+    }
+
     @Test func theLetterXStillMultiplies() {
         #expect(parse("3x4") == Quantity(12))
         #expect(parse("£20 x 3", rates: rates) == money(60, "GBP"))
