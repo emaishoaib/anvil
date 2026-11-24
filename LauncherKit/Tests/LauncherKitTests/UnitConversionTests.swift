@@ -72,6 +72,14 @@ struct UnitConversionTests {
         #expect(output("1 square miles in sq km") == "2.5899881103 km²")
     }
 
+    @Test func smallerSquareUnitsConvert() {
+        #expect(output("1 m2 to cm2") == "10,000 cm²")
+        #expect(output("1 sq cm to sq mm") == "100 mm²")
+        #expect(output("1 square yards to square inches") == "1,296 in²")
+        #expect(output("1 in2") == "6.4516 cm²")
+        #expect(output("1 sq yd") == "0.83612736 m²")
+    }
+
     @Test func eachUnitHasADefaultTarget() {
         #expect(output("1 mile") == "1.609344 km")
         #expect(output("2 hours") == "120 minutes")

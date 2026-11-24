@@ -65,9 +65,13 @@ enum UnitCatalog {
         UnitEntry(["gb", "gigabyte", "gigabytes"], UnitInformationStorage.gigabytes, "GB", "Gigabytes", to: "mb"),
         UnitEntry(["tb", "terabyte", "terabytes"], UnitInformationStorage.terabytes, "TB", "Terabytes", to: "gb"),
 
+        UnitEntry(["sq mm", "mm2", "square millimeters", "square millimetres"], UnitArea.squareMillimeters, "mm²", "Square Millimetres", to: "sq in"),
+        UnitEntry(["sq cm", "cm2", "square centimeters", "square centimetres"], UnitArea.squareCentimeters, "cm²", "Square Centimetres", to: "sq in"),
         UnitEntry(["sq m", "m2", "square meters", "square metres"], UnitArea.squareMeters, "m²", "Square Metres", to: "sq ft"),
         UnitEntry(["sq km", "km2", "square kilometers", "square kilometres"], UnitArea.squareKilometers, "km²", "Square Kilometres", to: "sq mi"),
+        UnitEntry(["sq in", "in2", "square inches"], UnitArea.squareInches, "in²", "Square Inches", to: "sq cm"),
         UnitEntry(["sq ft", "ft2", "square feet"], UnitArea.squareFeet, "ft²", "Square Feet", to: "sq m"),
+        UnitEntry(["sq yd", "yd2", "square yards"], UnitArea.squareYards, "yd²", "Square Yards", to: "sq m"),
         UnitEntry(["sq mi", "mi2", "square miles"], UnitArea.squareMiles, "mi²", "Square Miles", to: "sq km"),
         UnitEntry(["acre", "acres"], UnitArea.acres, "ac", "Acres", to: "ha"),
         UnitEntry(["ha", "hectare", "hectares"], UnitArea.hectares, "ha", "Hectares", to: "acres"),
